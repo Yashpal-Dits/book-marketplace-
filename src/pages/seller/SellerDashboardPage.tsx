@@ -1,0 +1,1 @@
+export const SellerDashboardPage = () => <div className="rounded-3xl bg-white p-8 shadow-sm"><h1 className="font-serif text-4xl text-stone-950">Seller Dashboard</h1><p className="mt-3 text-stone-600">Day 1 route is ready. Seller listings and orders are scheduled for Day 3.</p></div>

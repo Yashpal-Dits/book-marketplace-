@@ -1,0 +1,1 @@
+export const SellerOrdersPage = () => <div className="rounded-3xl bg-white p-8 shadow-sm"><h1 className="font-serif text-4xl text-stone-950">Seller Orders</h1><p className="mt-3 text-stone-600">Seller order processing is loading.....</p></div>

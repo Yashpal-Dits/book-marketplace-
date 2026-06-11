@@ -1,0 +1,1 @@
+export const SellerListingsPage = () => <div className="rounded-3xl bg-white p-8 shadow-sm"><h1 className="font-serif text-4xl text-stone-950">Seller Listings</h1><p className="mt-3 text-stone-600">Listing management is loading....</p></div>

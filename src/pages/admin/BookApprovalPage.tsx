@@ -1,0 +1,1 @@
+export const BookApprovalPage = () => <div className="rounded-3xl bg-white p-8 shadow-sm"><h1 className="font-serif text-4xl text-stone-950">Book Approval</h1><p className="mt-3 text-stone-600">Book approval actions are coming soon.</p></div>

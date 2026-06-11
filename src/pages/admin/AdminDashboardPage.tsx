@@ -1,0 +1,1 @@
+export const AdminDashboardPage = () => <div className="rounded-3xl bg-white p-8 shadow-sm"><h1 className="font-serif text-4xl text-stone-950">Admin Dashboard</h1><p className="mt-3 text-stone-600">Admin summary and approvals are comming soon.</p></div>

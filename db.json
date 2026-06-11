@@ -1,0 +1,220 @@
+{
+  "users": [
+    {
+      "id": "user-admin-1",
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin@bookbazaar.com",
+      "password": "admin123",
+      "role": "ADMIN",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "user-customer-1",
+      "firstName": "Aarav",
+      "lastName": "Sharma",
+      "email": "customer@bookbazaar.com",
+      "password": "customer123",
+      "role": "CUSTOMER",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "user-seller-1",
+      "firstName": "Rohan",
+      "lastName": "Mehta",
+      "email": "sellerA@bookbazaar.com",
+      "password": "seller123",
+      "role": "SELLER",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "user-seller-2",
+      "firstName": "Neha",
+      "lastName": "Kapoor",
+      "email": "sellerB@bookbazaar.com",
+      "password": "seller123",
+      "role": "SELLER",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "user-seller-3",
+      "firstName": "Pending",
+      "lastName": "Seller",
+      "email": "pending@bookbazaar.com",
+      "password": "seller123",
+      "role": "SELLER",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    }
+  ],
+  "customers": [
+    {
+      "id": "customer-1",
+      "userId": "user-customer-1",
+      "firstName": "Aarav",
+      "lastName": "Sharma",
+      "email": "customer@bookbazaar.com",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    }
+  ],
+  "sellers": [
+    {
+      "id": "seller-1",
+      "userId": "user-seller-1",
+      "businessName": "Paper Nest Books",
+      "contactPerson": "Rohan Mehta",
+      "email": "sellerA@bookbazaar.com",
+      "mobileNumber": "9876543210",
+      "status": "APPROVED",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "seller-2",
+      "userId": "user-seller-2",
+      "businessName": "Chapter House",
+      "contactPerson": "Neha Kapoor",
+      "email": "sellerB@bookbazaar.com",
+      "mobileNumber": "9123456780",
+      "status": "APPROVED",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "seller-3",
+      "userId": "user-seller-3",
+      "businessName": "Waiting Shelf",
+      "contactPerson": "Pending Seller",
+      "email": "pending@bookbazaar.com",
+      "mobileNumber": "9000000000",
+      "status": "PENDING",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    }
+  ],
+  "books": [
+    {
+      "id": "book-1",
+      "isbn": "9781847941831",
+      "title": "Atomic Habits",
+      "author": "James Clear",
+      "publisher": "Random House",
+      "description": "A practical guide to building good habits and breaking bad ones through tiny changes.",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781847941831-L.jpg",
+      "category": "Self Help",
+      "status": "APPROVED",
+      "createdBySellerId": "seller-1",
+      "createdAt": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "id": "book-2",
+      "isbn": "9780143452129",
+      "title": "The Psychology of Money",
+      "author": "Morgan Housel",
+      "publisher": "Harriman House",
+      "description": "Timeless lessons on wealth, greed and happiness.",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780143452129-L.jpg",
+      "category": "Finance",
+      "status": "APPROVED",
+      "createdBySellerId": "seller-2",
+      "createdAt": "2026-06-02T00:00:00.000Z"
+    },
+    {
+      "id": "book-3",
+      "isbn": "9789390166268",
+      "title": "The 10X Rule",
+      "author": "Grant Cardone",
+      "publisher": "Wiley",
+      "description": "A motivational business book about setting massive goals and taking massive action.",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9789390166268-L.jpg",
+      "category": "Business",
+      "status": "APPROVED",
+      "createdBySellerId": "seller-1",
+      "createdAt": "2026-06-03T00:00:00.000Z"
+    },
+    {
+      "id": "book-4",
+      "isbn": "9780747532743",
+      "title": "Harry Potter and the Philosopher's Stone",
+      "author": "J. K. Rowling",
+      "publisher": "Bloomsbury",
+      "description": "The first book in the Harry Potter series.",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780747532743-L.jpg",
+      "category": "Fiction",
+      "status": "APPROVED",
+      "createdBySellerId": "seller-2",
+      "createdAt": "2026-06-04T00:00:00.000Z"
+    },
+    {
+      "id": "book-5",
+      "isbn": "9780000000005",
+      "title": "Pending Marketplace Book",
+      "author": "New Author",
+      "publisher": "New Publisher",
+      "description": "This book is waiting for admin approval and must not be visible to customers.",
+      "coverImage": "",
+      "category": "Education",
+      "status": "PENDING",
+      "createdBySellerId": "seller-3",
+      "createdAt": "2026-06-08T00:00:00.000Z"
+    }
+  ],
+  "listings": [
+    {
+      "id": "listing-1",
+      "bookId": "book-1",
+      "sellerId": "seller-1",
+      "price": 399,
+      "stock": 10,
+      "isActive": true,
+      "createdAt": "2026-06-05T00:00:00.000Z",
+      "updatedAt": "2026-06-05T00:00:00.000Z"
+    },
+    {
+      "id": "listing-2",
+      "bookId": "book-1",
+      "sellerId": "seller-2",
+      "price": 380,
+      "stock": 5,
+      "isActive": true,
+      "createdAt": "2026-06-05T00:00:00.000Z",
+      "updatedAt": "2026-06-05T00:00:00.000Z"
+    },
+    {
+      "id": "listing-3",
+      "bookId": "book-2",
+      "sellerId": "seller-1",
+      "price": 299,
+      "stock": 12,
+      "isActive": true,
+      "createdAt": "2026-06-06T00:00:00.000Z",
+      "updatedAt": "2026-06-06T00:00:00.000Z"
+    },
+    {
+      "id": "listing-4",
+      "bookId": "book-3",
+      "sellerId": "seller-2",
+      "price": 450,
+      "stock": 0,
+      "isActive": true,
+      "createdAt": "2026-06-06T00:00:00.000Z",
+      "updatedAt": "2026-06-06T00:00:00.000Z"
+    },
+    {
+      "id": "listing-5",
+      "bookId": "book-4",
+      "sellerId": "seller-2",
+      "price": 525,
+      "stock": 7,
+      "isActive": true,
+      "createdAt": "2026-06-07T00:00:00.000Z",
+      "updatedAt": "2026-06-07T00:00:00.000Z"
+    }
+  ],
+  "carts": [
+    {
+      "id": "cart-1",
+      "customerId": "customer-1",
+      "createdAt": "2026-06-11T00:00:00.000Z"
+    }
+  ],
+  "cartItems": [],
+  "orders": [],
+  "orderItems": []
+}
