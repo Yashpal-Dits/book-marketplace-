@@ -1,10 +1,10 @@
 import { useFormik } from 'formik'
+import { useNavigate } from 'react-router-dom'
 import { FiChevronDown, FiSearch } from 'react-icons/fi'
 import { BookCover } from '@/components/common/BookCover'
 import { useApprovedBooks } from '@/hooks/useBooks'
 import { useBookFilterStore } from '@/store/bookFilter.store'
 import { heroSearchSchema } from '@/schemas/newsletter.schema'
-import { EXPLORE_BOOKS_SECTION_ID, scrollToSection } from '@/utils/scrollToSection'
 
 interface HeroSearchValues {
   search: string
@@ -12,6 +12,7 @@ interface HeroSearchValues {
 }
 
 export const HeroSection = () => {
+  const navigate = useNavigate()
   const { data: books = [] } = useApprovedBooks()
   const { setSearch, setCategory } = useBookFilterStore()
 
@@ -26,7 +27,7 @@ export const HeroSection = () => {
     onSubmit: (values) => {
       setSearch(values.search.trim())
       setCategory(values.category)
-      scrollToSection(EXPLORE_BOOKS_SECTION_ID)
+      navigate('/books')
     },
   })
 

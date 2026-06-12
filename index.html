@@ -4,10 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>book-marketplace</title>
+    <meta
+      name="description"
+      content="Bseller — a multi-seller book marketplace. Compare sellers, find the best price and order your next great read."
+    />
+    <title>Bseller — Multi-Seller Book Marketplace</title>
+
+    <!--
+      Performance: book covers come from covers.openlibrary.org and data from
+      the API origin. Preconnecting removes DNS/TCP/TLS latency from the
+      critical request chain (covers ≈ 100-300ms saved per origin).
+    -->
+    <link rel="preconnect" href="https://covers.openlibrary.org" crossorigin />
+    <link rel="dns-prefetch" href="https://covers.openlibrary.org" />
+    <link rel="preconnect" href="http://localhost:4000" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0a8ca0e1a74b7d1',t:'MTc4MTI2NjYxMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

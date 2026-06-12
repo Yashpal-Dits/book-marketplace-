@@ -1,9 +1,9 @@
+import { useNavigate } from 'react-router-dom'
 import { FiArrowUpRight } from 'react-icons/fi'
 import { BookCover } from '@/components/common/BookCover'
 import { Loader } from '@/components/common/Loader'
 import { useApprovedBooks } from '@/hooks/useBooks'
 import { useBookFilterStore } from '@/store/bookFilter.store'
-import { EXPLORE_BOOKS_SECTION_ID, scrollToSection } from '@/utils/scrollToSection'
 import { cn } from '@/utils/cn'
 import type { IBook, ICategorySummary } from '@/interfaces/book.interface'
 
@@ -32,6 +32,7 @@ const buildSummaries = (books: IBook[]): ICategorySummary[] => {
 }
 
 export const CategoriesSection = () => {
+  const navigate = useNavigate()
   const { data: books = [], isLoading } = useApprovedBooks()
   const setCategory = useBookFilterStore((s) => s.setCategory)
 
@@ -40,7 +41,7 @@ export const CategoriesSection = () => {
 
   const handleSelect = (category: string) => {
     setCategory(category)
-    scrollToSection(EXPLORE_BOOKS_SECTION_ID)
+    navigate('/books')
   }
 
   return (

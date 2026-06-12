@@ -4,8 +4,8 @@ import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '@/api/auth.api'
 import { AuthShell } from '@/components/common/AuthShell'
-import { Button } from '@/components/common/Button'
 import { FormInput } from '@/components/common/FormInput'
+import { PasswordInput } from '@/components/common/PasswordInput'
 import { sellerRegisterSchema } from '@/schemas/auth.schema'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -37,51 +37,45 @@ export const SellerRegisterPage = () => {
 
   return (
     <AuthShell mode="seller">
-     
-
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[#0b1235] sm:text-4xl">
+        <h1 className="text-2xl font-bold tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
           Register Your Bookstore
         </h1>
-        <p className="mt-3 text-sm text-stone-500">
+        <p className="mt-2 text-sm text-stone-500 sm:mt-3">
           Seller status will be pending until admin approval.
         </p>
       </div>
 
-      <form onSubmit={formik.handleSubmit} className="mt-8 space-y-4">
+      <form onSubmit={formik.handleSubmit} noValidate className="mt-7 space-y-4 sm:mt-8">
         <FormInput
-          label="Business Name  * (Required)"
+          label="Business Name * (Required)"
           name="businessName"
+          autoComplete="organization"
           maxLength={80}
           value={formik.values.businessName}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          error={
-            formik.touched.businessName
-              ? formik.errors.businessName
-              : undefined
-          }
+          error={formik.touched.businessName ? formik.errors.businessName : undefined}
         />
 
         <FormInput
-          label="Contact Person  * (Required)"
+          label="Contact Person * (Required)"
           name="contactPerson"
+          autoComplete="name"
           maxLength={60}
           value={formik.values.contactPerson}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          error={
-            formik.touched.contactPerson
-              ? formik.errors.contactPerson
-              : undefined
-          }
+          error={formik.touched.contactPerson ? formik.errors.contactPerson : undefined}
         />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormInput
-            label="Email  * (Required)"
+            label="Email * (Required)"
             name="email"
-            maxLength={100}
+            type="email"
+            autoComplete="email"
+            maxLength={50}
             value={formik.values.email}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -89,47 +83,41 @@ export const SellerRegisterPage = () => {
           />
 
           <FormInput
-            label="Mobile Number  * (Required)"
+            label="Mobile Number * (Required)"
             name="mobileNumber"
+            inputMode="numeric"
+            autoComplete="tel"
             maxLength={10}
             value={formik.values.mobileNumber}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={
-              formik.touched.mobileNumber
-                ? formik.errors.mobileNumber
-                : undefined
-            }
+            error={formik.touched.mobileNumber ? formik.errors.mobileNumber : undefined}
           />
         </div>
 
-        <FormInput
-          label="Password  * (Required)"
+        <PasswordInput
+          label="Password * (Required)"
           name="password"
-          type="password"
-          maxLength={64}
+          autoComplete="new-password"
+          maxLength={50}
           value={formik.values.password}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          error={
-            formik.touched.password ? formik.errors.password : undefined
-          }
+          error={formik.touched.password ? formik.errors.password : undefined}
         />
 
-        <Button
+        <button
           type="submit"
           disabled={mutation.isPending}
-          className="h-12 w-full rounded-lg bg-[#202124] hover:bg-black"
+          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {mutation.isPending
-            ? 'Submitting...'
-            : 'Submit seller registration'}
-        </Button>
+          {mutation.isPending ? 'Submitting...' : 'Submit seller registration'}
+        </button>
       </form>
 
-      <p className="mt-8 text-center text-xs text-stone-500">
+      <p className="mt-6 text-center text-xs text-stone-500 sm:mt-8">
         Want to buy books?{' '}
-        <Link to="/register" className="font-medium text-amber-900">
+        <Link to="/register" className="font-semibold text-[#f0532d] hover:underline">
           Customer register
         </Link>
       </p>

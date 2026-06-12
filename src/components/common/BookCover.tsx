@@ -31,6 +31,8 @@ export const BookCover = ({ src, title, className }: BookCoverProps) => {
       src={src}
       alt={`${title} cover`}
       loading="lazy"
+      decoding="async"
+      fetchPriority="low"
       onError={() => setHasError(true)}
       className={cn('object-cover', className)}
     />

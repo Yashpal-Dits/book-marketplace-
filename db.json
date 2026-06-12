@@ -44,6 +44,15 @@
       "password": "seller123",
       "role": "SELLER",
       "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "user-1781268088954-joql3i",
+      "firstName": "Victor ",
+      "lastName": "mills",
+      "email": "victor@gmail.com",
+      "password": "@Victor123",
+      "role": "CUSTOMER",
+      "createdAt": "2026-06-12T12:41:28.954Z"
     }
   ],
   "customers": [
@@ -54,6 +63,14 @@
       "lastName": "Sharma",
       "email": "customer@bookbazaar.com",
       "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "customer-1781268088954-4g63of",
+      "userId": "user-1781268088954-joql3i",
+      "firstName": "Victor ",
+      "lastName": "mills",
+      "email": "victor@gmail.com",
+      "createdAt": "2026-06-12T12:41:28.954Z"
     }
   ],
   "sellers": [
@@ -818,9 +835,64 @@
       "id": "cart-1",
       "customerId": "customer-1",
       "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "cart-1781268088976-sfu082",
+      "customerId": "customer-1781268088954-4g63of",
+      "createdAt": "2026-06-12T12:41:28.954Z"
     }
   ],
-  "cartItems": [],
+  "cartItems": [
+    {
+      "id": "cart-item-1781264582285-qvxjk9",
+      "cartId": "cart-1",
+      "listingId": "listing-5",
+      "quantity": 2,
+      "createdAt": "2026-06-12T11:43:02.285Z"
+    },
+    {
+      "id": "cart-item-1781268575160-da01qp",
+      "cartId": "cart-1781268088976-sfu082",
+      "listingId": "listing-5",
+      "quantity": 1,
+      "createdAt": "2026-06-12T12:49:35.160Z"
+    },
+    {
+      "id": "cart-item-1781268710406-k7psdx",
+      "cartId": "cart-1781268088976-sfu082",
+      "listingId": "listing-3",
+      "quantity": 1,
+      "createdAt": "2026-06-12T12:51:50.406Z"
+    },
+    {
+      "id": "cart-item-1781268714124-4xar35",
+      "cartId": "cart-1781268088976-sfu082",
+      "listingId": "listing-2",
+      "quantity": 1,
+      "createdAt": "2026-06-12T12:51:54.124Z"
+    },
+    {
+      "id": "cart-item-1781268721640-jv2gkl",
+      "cartId": "cart-1781268088976-sfu082",
+      "listingId": "listing-28",
+      "quantity": 2,
+      "createdAt": "2026-06-12T12:52:01.640Z"
+    },
+    {
+      "id": "cart-item-1781268725569-f03qkq",
+      "cartId": "cart-1781268088976-sfu082",
+      "listingId": "listing-27",
+      "quantity": 1,
+      "createdAt": "2026-06-12T12:52:05.569Z"
+    },
+    {
+      "id": "cart-item-1781268729874-6c3ja5",
+      "cartId": "cart-1781268088976-sfu082",
+      "listingId": "listing-26",
+      "quantity": 1,
+      "createdAt": "2026-06-12T12:52:09.874Z"
+    }
+  ],
   "orders": [],
   "orderItems": [],
   "deal": {

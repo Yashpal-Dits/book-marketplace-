@@ -25,7 +25,10 @@ const sortMap: Record<BookSort, { sort: string; order: 'asc' | 'desc' }> = {
 }
 
 export const booksApi = {
-
+  /**
+   * Paginated + searchable + sortable books list.
+   * Only APPROVED books are ever returned to customers (Business Rule 7).
+   */
   async getBooks({
     page = 1,
     limit = 8,
@@ -80,14 +83,20 @@ export const booksApi = {
   /** "Deals of the week" config + the books referenced by it. */
   async getDealOfTheWeek(): Promise<{ deal: IDeal; books: IBook[] }> {
     const { data: deal } = await axiosInstance.get<IDeal>('/deal')
-    const books = await Promise.all(
-      deal.bookIds.map((id) =>
-        axiosInstance.get<IBook>(`/books/${id}`).then((r) => r.data).catch(() => null),
-      ),
-    )
+
+    // Single batched request (?id=a&id=b…) instead of N+1 per-book requests —
+    // keeps the network dependency chain short.
+    const params = new URLSearchParams()
+    deal.bookIds.forEach((id) => params.append('id', id))
+    const { data: books } = await axiosInstance.get<IBook[]>(`/books?${params.toString()}`)
+
+    // Preserve the curated order from deal.bookIds; approved books only.
+    const order = new Map(deal.bookIds.map((id, index) => [id, index]))
     return {
       deal,
-      books: books.filter((b): b is IBook => b !== null && b.status === BookStatus.APPROVED),
+      books: books
+        .filter((b) => b.status === BookStatus.APPROVED)
+        .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)),
     }
   },
 
@@ -98,6 +107,10 @@ export const booksApi = {
     return data
   },
 
+  /**
+   * Listings for a book joined with their seller, cheapest first.
+   * Only listings from APPROVED sellers are shown (Rule 6).
+   */
   async getListingsWithSellers(bookId: string): Promise<IListingWithSeller[]> {
     const { data: listings } = await axiosInstance.get<IListing[]>('/listings', {
       params: { bookId, isActive: true, _sort: 'price', _order: 'asc' },

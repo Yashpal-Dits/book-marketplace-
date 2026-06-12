@@ -4,7 +4,6 @@ import { BookCard } from '@/components/books/BookCard'
 import { BookCover } from '@/components/common/BookCover'
 import { Loader } from '@/components/common/Loader'
 import { useBestSellers } from '@/hooks/useBooks'
-import { EXPLORE_BOOKS_SECTION_ID, scrollToSection } from '@/utils/scrollToSection'
 
 export const BestSellersSection = () => {
   const { data: books = [], isLoading } = useBestSellers(6)
@@ -20,13 +19,12 @@ export const BestSellersSection = () => {
           <p className="max-w-xs text-sm leading-6 text-stone-500 md:text-right">
             These are the books everyone's reading, loving, and recommending right now.
           </p>
-          <button
-            type="button"
-            onClick={() => scrollToSection(EXPLORE_BOOKS_SECTION_ID)}
+          <Link
+            to="/books"
             className="inline-flex h-9 items-center rounded-full bg-[#f0532d] px-5 text-xs font-semibold text-white transition hover:bg-[#d8431f]"
           >
             See More
-          </button>
+          </Link>
         </div>
       </div>
 

@@ -162,7 +162,6 @@ export const CartPage = () => {
             >
               Proceed to Checkout <FiArrowRight />
             </button>
-            <p className="mt-3 text-center text-[11px] text-white/50">No payment needed — this marketplace simulates orders.</p>
           </aside>
         </div>
       )}

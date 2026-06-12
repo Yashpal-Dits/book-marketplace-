@@ -3,8 +3,9 @@ import { BookOfTheMonthSection } from '@/components/home/BookOfTheMonthSection'
 import { CategoriesSection } from '@/components/home/CategoriesSection'
 import { DealsOfWeekSection } from '@/components/home/DealsOfWeekSection'
 import { BestSellersSection } from '@/components/home/BestSellersSection'
-import { ExploreBooksSection } from '@/components/home/ExploreBookSection'
-import { NewsletterSection } from '@/components/home/NewsletterSection'
+import { AuthorsSection } from '@/components/home/AuthorsSection'
+import { FeaturesSection } from '@/components/home/FeaturesSection'
+import { DiscountBannerSection } from '@/components/home/DiscountBannerSection'
 
 export const HomePage = () => (
   <>
@@ -13,7 +14,8 @@ export const HomePage = () => (
     <CategoriesSection />
     <DealsOfWeekSection />
     <BestSellersSection />
-    <ExploreBooksSection />
-    <NewsletterSection />
+    <AuthorsSection />
+    <FeaturesSection />
+    <DiscountBannerSection />
   </>
 )
