@@ -1,3 +1,6 @@
 export * from './axiosInstance'
 export * from './auth.api'
 export * from './books.api'
+export * from './cart.api'
+export * from './newsletter.api'
+export * from './orders.api'

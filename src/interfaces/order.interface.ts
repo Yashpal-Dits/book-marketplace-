@@ -32,3 +32,9 @@ export interface IOrderItem {
   status: OrderStatus
   createdAt: string
 }
+
+export interface IOrderDetailed extends IOrder {
+  items: IOrderItem[]
+}
+
+

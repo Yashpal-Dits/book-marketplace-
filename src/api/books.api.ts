@@ -1,9 +1,11 @@
 import { axiosInstance } from './axiosInstance'
 import { BookSort } from '@/enums/sort.enum'
 import { BookStatus } from '@/enums/book-status.enum'
+import { SellerStatus } from '@/enums/seller-status.enum'
 import type { IBook, IDeal } from '@/interfaces/book.interface'
-import type { IListing } from '@/interfaces/listing.interface'
+import type { IListing, IListingWithSeller } from '@/interfaces/listing.interface'
 import type { PaginatedResult } from '@/interfaces/pagination.interface'
+import type { ISeller } from '@/interfaces/seller.interface'
 
 export interface GetBooksParams {
   page?: number
@@ -23,7 +25,7 @@ const sortMap: Record<BookSort, { sort: string; order: 'asc' | 'desc' }> = {
 }
 
 export const booksApi = {
-  
+
   async getBooks({
     page = 1,
     limit = 8,
@@ -94,5 +96,23 @@ export const booksApi = {
       params: { bookId, isActive: true },
     })
     return data
+  },
+
+  async getListingsWithSellers(bookId: string): Promise<IListingWithSeller[]> {
+    const { data: listings } = await axiosInstance.get<IListing[]>('/listings', {
+      params: { bookId, isActive: true, _sort: 'price', _order: 'asc' },
+    })
+
+    const joined = await Promise.all(
+      listings.map(async (listing) => {
+        try {
+          const { data: seller } = await axiosInstance.get<ISeller>(`/sellers/${listing.sellerId}`)
+          return seller.status === SellerStatus.APPROVED ? { ...listing, seller } : null
+        } catch {
+          return null
+        }
+      }),
+    )
+    return joined.filter((item): item is IListingWithSeller => item !== null)
   },
 }

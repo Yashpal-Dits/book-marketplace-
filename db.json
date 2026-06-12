@@ -44,25 +44,6 @@
       "password": "seller123",
       "role": "SELLER",
       "createdAt": "2026-06-11T00:00:00.000Z"
-    },
-    {
-      "id": "user-1781244971513-k8sgtj",
-      "firstName": "Williams",
-      "lastName": "",
-      "email": "wish@gmail.com",
-      "password": "@Seller123",
-      "role": "SELLER",
-      "createdAt": "2026-06-12T06:16:11.512Z"
-    },
-    {
-      "id": "1781245698310",
-      "firstName": "customer",
-      "lastName": "",
-      "username": "customer",
-      "email": "customer@gmail.com",
-      "password": "customer@123",
-      "role": "customer",
-      "image": "https://i.pravatar.cc/150?img=12"
     }
   ],
   "customers": [
@@ -105,16 +86,6 @@
       "mobileNumber": "9000000000",
       "status": "PENDING",
       "createdAt": "2026-06-11T00:00:00.000Z"
-    },
-    {
-      "id": "seller-1781244971513-t9115z",
-      "userId": "user-1781244971513-k8sgtj",
-      "businessName": "Make a Wish ",
-      "contactPerson": "Williams",
-      "email": "wish@gmail.com",
-      "mobileNumber": "9845436272",
-      "status": "PENDING",
-      "createdAt": "2026-06-12T06:16:11.512Z"
     }
   ],
   "books": [
@@ -142,7 +113,7 @@
       "author": "Morgan Housel",
       "publisher": "Harriman House",
       "description": "Timeless lessons on wealth, greed and happiness.",
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780143452129-L.jpg",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9789390166268-L.jpg",
       "category": "Finance",
       "status": "APPROVED",
       "createdBySellerId": "seller-2",
@@ -159,7 +130,7 @@
       "author": "Grant Cardone",
       "publisher": "Wiley",
       "description": "A motivational business book about setting massive goals and taking massive action.",
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9789390166268-L.jpg",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780470627600-L.jpg",
       "category": "Business",
       "status": "APPROVED",
       "createdBySellerId": "seller-1",
@@ -499,7 +470,7 @@
       "author": "Peter Thiel",
       "publisher": "Virgin Books",
       "description": "Notes on startups, or how to build the future.",
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780753555190-L.jpg",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780804139298-L.jpg",
       "category": "Business",
       "status": "APPROVED",
       "rating": 4.4,
