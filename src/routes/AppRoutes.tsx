@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { CustomerLayout } from '@/layouts/CustomerLayout'
+import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { ProtectedRoute } from '@/components/common/ProtectedRoute'
 import { Loader } from '@/components/common/Loader'
 import { Role } from '@/enums/role.enum'
@@ -24,6 +25,27 @@ const BookDetailsPage = lazy(() =>
 )
 const CartPage = lazy(() => import('@/pages/customer/CartPage').then((m) => ({ default: m.CartPage })))
 const OrdersPage = lazy(() => import('@/pages/customer/OrdersPage').then((m) => ({ default: m.OrdersPage })))
+const SellerDashboardPage = lazy(() =>
+  import('@/pages/seller/SellerDashboardPage').then((m) => ({ default: m.SellerDashboardPage })),
+)
+const SellerListingsPage = lazy(() =>
+  import('@/pages/seller/SellerListingsPage').then((m) => ({ default: m.SellerListingsPage })),
+)
+const SellerOrdersPage = lazy(() =>
+  import('@/pages/seller/SellerOrdersPage').then((m) => ({ default: m.SellerOrdersPage })),
+)
+const SellerPendingApprovalPage = lazy(() =>
+  import('@/pages/seller/SellerPendingApprovalPage').then((m) => ({ default: m.SellerPendingApprovalPage })),
+)
+const AdminDashboardPage = lazy(() =>
+  import('@/pages/admin/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage })),
+)
+const SellerApprovalPage = lazy(() =>
+  import('@/pages/admin/SellerApprovalPage').then((m) => ({ default: m.SellerApprovalPage })),
+)
+const BookApprovalPage = lazy(() =>
+  import('@/pages/admin/BookApprovalPage').then((m) => ({ default: m.BookApprovalPage })),
+)
 
 export const AppRoutes = () => {
   return (
@@ -52,11 +74,83 @@ export const AppRoutes = () => {
           <Route path="unauthorized" element={<UnauthorizedPage />} />
         </Route>
 
-        {/* Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="seller-register" element={<SellerRegisterPage />} />
+        </Route>
+
+        <Route
+          path="seller/pending-approval"
+          element={
+            <ProtectedRoute allowedRoles={[Role.SELLER]}>
+              <SellerPendingApprovalPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={[Role.SELLER, Role.ADMIN]}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="seller">
+            <Route index element={<Navigate to="/seller/dashboard" replace />} />
+            <Route
+              path="dashboard"
+              element={
+                <ProtectedRoute allowedRoles={[Role.SELLER]} requireApprovedSeller>
+                  <SellerDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="listings"
+              element={
+                <ProtectedRoute allowedRoles={[Role.SELLER]} requireApprovedSeller>
+                  <SellerListingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="orders"
+              element={
+                <ProtectedRoute allowedRoles={[Role.SELLER]} requireApprovedSeller>
+                  <SellerOrdersPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+
+          <Route path="admin">
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route
+              path="dashboard"
+              element={
+                <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                  <AdminDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="sellers"
+              element={
+                <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                  <SellerApprovalPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="books"
+              element={
+                <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                  <BookApprovalPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

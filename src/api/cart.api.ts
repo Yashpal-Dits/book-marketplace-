@@ -1,17 +1,17 @@
 import { axiosInstance } from "./axiosInstance";
 import { generateId } from "@/utils/generateId";
 import type {
-    ICart, ICartItem,
-    ICartItemDetailed,
-    IBook, IListing,
-    ISeller
+  ICart, ICartItem,
+  ICartItemDetailed,
+  IBook, IListing,
+  ISeller
 } from "../interfaces/index"
 
 
 export interface AddToCartPayload {
-    customerId : string
-    listingId : string
-    quantity : number
+  customerId: string
+  listingId: string
+  quantity: number
 }
 
 const getOrCreateCart = async (customerId: string): Promise<ICart> => {
@@ -50,7 +50,7 @@ export const cartApi = {
           ])
           return { ...item, listing, book, seller }
         } catch {
-          return null // listing/book removed meanwhile — drop the orphan row
+          return null 
         }
       }),
     )

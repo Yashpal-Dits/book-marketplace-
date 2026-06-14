@@ -15,20 +15,49 @@ export interface GetBooksParams {
   category?: string
 }
 
-/** Maps the UI sort option to json-server `_sort` / `_order` params. */
-const sortMap: Record<BookSort, { sort: string; order: 'asc' | 'desc' }> = {
-  [BookSort.NEWEST]: { sort: 'createdAt', order: 'desc' },
-  [BookSort.TITLE_ASC]: { sort: 'title', order: 'asc' },
-  [BookSort.TITLE_DESC]: { sort: 'title', order: 'desc' },
-  [BookSort.PRICE_LOW_TO_HIGH]: { sort: 'minPrice', order: 'asc' },
-  [BookSort.PRICE_HIGH_TO_LOW]: { sort: 'minPrice', order: 'desc' },
+/** Customer catalog rule: a book can appear to customers only after it is approved
+ * AND at least one approved seller has created an active listing for it.
+ * This prevents admin-approved master books from appearing before sellers actually sell them.
+ */
+const getCustomerVisibleBookIds = async (): Promise<Set<string>> => {
+  const [{ data: listings }, { data: sellers }] = await Promise.all([
+    axiosInstance.get<IListing[]>('/listings', { params: { isActive: true } }),
+    axiosInstance.get<ISeller[]>('/sellers', { params: { status: SellerStatus.APPROVED } }),
+  ])
+
+  const approvedSellerIds = new Set(sellers.map((seller) => seller.id))
+  return new Set(
+    listings
+      .filter((listing) => approvedSellerIds.has(listing.sellerId))
+      .map((listing) => listing.bookId),
+  )
+}
+
+const sortCustomerBooks = (books: IBook[], sort = BookSort.NEWEST): IBook[] => {
+  const sorted = [...books]
+  sorted.sort((a, b) => {
+    switch (sort) {
+      case BookSort.TITLE_ASC:
+        return a.title.localeCompare(b.title)
+      case BookSort.TITLE_DESC:
+        return b.title.localeCompare(a.title)
+      case BookSort.PRICE_LOW_TO_HIGH:
+        return (a.minPrice ?? Number.MAX_SAFE_INTEGER) - (b.minPrice ?? Number.MAX_SAFE_INTEGER)
+      case BookSort.PRICE_HIGH_TO_LOW:
+        return (b.minPrice ?? 0) - (a.minPrice ?? 0)
+      default:
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    }
+  })
+  return sorted
+}
+
+const paginate = <T>(rows: T[], page = 1, limit = 8): PaginatedResult<T> => {
+  const start = (page - 1) * limit
+  return { data: rows.slice(start, start + limit), total: rows.length, page, limit }
 }
 
 export const booksApi = {
-  /**
-   * Paginated + searchable + sortable books list.
-   * Only APPROVED books are ever returned to customers (Business Rule 7).
-   */
   async getBooks({
     page = 1,
     limit = 8,
@@ -36,22 +65,21 @@ export const booksApi = {
     sort = BookSort.NEWEST,
     category,
   }: GetBooksParams = {}): Promise<PaginatedResult<IBook>> {
-    const { sort: _sort, order: _order } = sortMap[sort] ?? sortMap[BookSort.NEWEST]
-
-    const params: Record<string, string | number> = {
-      status: BookStatus.APPROVED,
-      _page: page,
-      _limit: limit,
-      _sort: _sort,
-      _order: _order,
-    }
+    const params: Record<string, string | number> = { status: BookStatus.APPROVED }
     if (search.trim()) params.q = search.trim()
     if (category) params.category = category
 
-    const response = await axiosInstance.get<IBook[]>('/books', { params })
-    const total = Number(response.headers['x-total-count'] ?? response.data.length)
+    const [{ data: books }, visibleBookIds] = await Promise.all([
+      axiosInstance.get<IBook[]>('/books', { params }),
+      getCustomerVisibleBookIds(),
+    ])
 
-    return { data: response.data, total, page, limit }
+    const customerVisibleBooks = sortCustomerBooks(
+      books.filter((book) => visibleBookIds.has(book.id)),
+      sort,
+    )
+
+    return paginate(customerVisibleBooks, page, limit)
   },
 
   async getBookById(id: string): Promise<IBook> {
@@ -59,25 +87,28 @@ export const booksApi = {
     return data
   },
 
-  /** All approved books (used to build category summaries client-side). */
+  /** Approved + actively listed books (used to build customer category summaries). */
   async getApprovedBooks(): Promise<IBook[]> {
-    const { data } = await axiosInstance.get<IBook[]>('/books', {
-      params: { status: BookStatus.APPROVED },
-    })
-    return data
+    const [{ data }, visibleBookIds] = await Promise.all([
+      axiosInstance.get<IBook[]>('/books', { params: { status: BookStatus.APPROVED } }),
+      getCustomerVisibleBookIds(),
+    ])
+    return data.filter((book) => visibleBookIds.has(book.id))
   },
 
-  /** Top rated approved books — "Best sellers of the month". */
+  /** Top rated approved + actively listed books — "Best sellers of the month". */
   async getBestSellers(limit = 8): Promise<IBook[]> {
-    const { data } = await axiosInstance.get<IBook[]>('/books', {
-      params: {
-        status: BookStatus.APPROVED,
-        _sort: 'rating',
-        _order: 'desc',
-        _limit: limit,
-      },
-    })
-    return data
+    const [{ data }, visibleBookIds] = await Promise.all([
+      axiosInstance.get<IBook[]>('/books', {
+        params: {
+          status: BookStatus.APPROVED,
+          _sort: 'rating',
+          _order: 'desc',
+        },
+      }),
+      getCustomerVisibleBookIds(),
+    ])
+    return data.filter((book) => visibleBookIds.has(book.id)).slice(0, limit)
   },
 
   /** "Deals of the week" config + the books referenced by it. */
@@ -90,12 +121,14 @@ export const booksApi = {
     deal.bookIds.forEach((id) => params.append('id', id))
     const { data: books } = await axiosInstance.get<IBook[]>(`/books?${params.toString()}`)
 
-    // Preserve the curated order from deal.bookIds; approved books only.
+    const visibleBookIds = await getCustomerVisibleBookIds()
+
+    // Preserve the curated order from deal.bookIds; approved + actively listed books only.
     const order = new Map(deal.bookIds.map((id, index) => [id, index]))
     return {
       deal,
       books: books
-        .filter((b) => b.status === BookStatus.APPROVED)
+        .filter((b) => b.status === BookStatus.APPROVED && visibleBookIds.has(b.id))
         .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)),
     }
   },

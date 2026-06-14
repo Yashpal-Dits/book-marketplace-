@@ -7,5 +7,7 @@ export const routePaths = {
   cart: '/cart',
   orders: '/orders',
   sellerDashboard: '/seller/dashboard',
+  sellerListings: '/seller/listings',
+  sellerOrders: '/seller/orders',
   adminDashboard: '/admin/dashboard',
 }

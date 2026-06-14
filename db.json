@@ -53,6 +53,15 @@
       "password": "@Victor123",
       "role": "CUSTOMER",
       "createdAt": "2026-06-12T12:41:28.954Z"
+    },
+    {
+      "id": "user-1781425242852-lgrksm",
+      "firstName": "Yash",
+      "lastName": "",
+      "email": "yash@work.com",
+      "password": "Yash@123",
+      "role": "SELLER",
+      "createdAt": "2026-06-14T08:20:42.851Z"
     }
   ],
   "customers": [
@@ -103,6 +112,16 @@
       "mobileNumber": "9000000000",
       "status": "PENDING",
       "createdAt": "2026-06-11T00:00:00.000Z"
+    },
+    {
+      "id": "seller-1781425242852-0mi0mq",
+      "userId": "user-1781425242852-lgrksm",
+      "businessName": "E-books",
+      "contactPerson": "Yash",
+      "email": "yash@work.com",
+      "mobileNumber": "9876543210",
+      "status": "APPROVED",
+      "createdAt": "2026-06-14T08:20:42.851Z"
     }
   ],
   "books": [
@@ -183,7 +202,7 @@
       "description": "This book is waiting for admin approval and must not be visible to customers.",
       "coverImage": "",
       "category": "Education",
-      "status": "PENDING",
+      "status": "REJECTED",
       "createdBySellerId": "seller-3",
       "createdAt": "2026-06-08T00:00:00.000Z",
       "rating": 0,
@@ -274,7 +293,7 @@
       "createdAt": "2026-05-05T00:00:00.000Z",
       "minPrice": 599,
       "mrp": 860,
-      "totalStock": 20
+      "totalStock": 69
     },
     {
       "id": "book-11",
@@ -496,6 +515,23 @@
       "minPrice": 599,
       "mrp": 860,
       "totalStock": 51
+    },
+    {
+      "id": "book-1781425953168-327qps",
+      "isbn": "9781906230302",
+      "title": "Ramayana",
+      "author": "Valmiki",
+      "publisher": "Yash",
+      "description": "The Ramayana is one of ancient India's two foundational epics, originally composed in Sanskrit by the sage Valmiki. Spanning 24,000 verses, it chronicles the life of Rama—the virtuous prince of Ayodhya and an incarnation of the god Vishnu—as he navigates exile, battles the demon king Ravana, and champions righteousness",
+      "coverImage": "https://covers.openlibrary.org/b/id/12483359-L.jpg",
+      "category": "Nonfiction",
+      "status": "APPROVED",
+      "createdBySellerId": "seller-1781425242852-0mi0mq",
+      "createdAt": "2026-06-14T08:32:33.168Z",
+      "rating": 0,
+      "minPrice": 899,
+      "mrp": 1199,
+      "totalStock": 50
     }
   ],
   "listings": [
@@ -828,6 +864,28 @@
       "isActive": true,
       "createdAt": "2026-06-08T00:00:00.000Z",
       "updatedAt": "2026-06-08T00:00:00.000Z"
+    },
+    {
+      "id": "listing-1781425366822-bf89v5",
+      "sellerId": "seller-1781425242852-0mi0mq",
+      "bookId": "book-10",
+      "price": 669,
+      "mrp": 999,
+      "stock": 49,
+      "isActive": true,
+      "createdAt": "2026-06-14T08:22:46.822Z",
+      "updatedAt": "2026-06-14T08:22:46.822Z"
+    },
+    {
+      "id": "listing-1781426740637-82d4n2",
+      "sellerId": "seller-1781425242852-0mi0mq",
+      "bookId": "book-1781425953168-327qps",
+      "price": 899,
+      "mrp": 1199,
+      "stock": 50,
+      "isActive": true,
+      "createdAt": "2026-06-14T08:45:40.637Z",
+      "updatedAt": "2026-06-14T08:45:40.637Z"
     }
   ],
   "carts": [
@@ -893,8 +951,96 @@
       "createdAt": "2026-06-12T12:52:09.874Z"
     }
   ],
-  "orders": [],
-  "orderItems": [],
+  "orders": [
+    {
+      "id": "order-1",
+      "customerId": "customer-1",
+      "shippingAddress": {
+        "fullName": "Aarav Sharma",
+        "mobileNumber": "9876501234",
+        "addressLine": "221 MG Road",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560001"
+      },
+      "totalAmount": 760,
+      "status": "CREATED",
+      "createdAt": "2026-06-12T10:00:00.000Z"
+    },
+    {
+      "id": "order-2",
+      "customerId": "customer-1781268088954-4g63of",
+      "shippingAddress": {
+        "fullName": "Victor Mills",
+        "mobileNumber": "9876509999",
+        "addressLine": "14 Park Street",
+        "city": "Kolkata",
+        "state": "West Bengal",
+        "pincode": "700016"
+      },
+      "totalAmount": 1197,
+      "status": "ACCEPTED",
+      "createdAt": "2026-06-13T09:30:00.000Z"
+    }
+  ],
+  "orderItems": [
+    {
+      "id": "order-item-1",
+      "orderId": "order-1",
+      "listingId": "listing-2",
+      "bookId": "book-1",
+      "sellerId": "seller-2",
+      "bookTitle": "Atomic Habits",
+      "sellerName": "Chapter House",
+      "priceAtPurchase": 380,
+      "quantity": 2,
+      "subtotal": 760,
+      "status": "CREATED",
+      "createdAt": "2026-06-12T10:00:00.000Z"
+    },
+    {
+      "id": "order-item-2",
+      "orderId": "order-2",
+      "listingId": "listing-1",
+      "bookId": "book-1",
+      "sellerId": "seller-1",
+      "bookTitle": "Atomic Habits",
+      "sellerName": "Paper Nest Books",
+      "priceAtPurchase": 399,
+      "quantity": 1,
+      "subtotal": 399,
+      "status": "DELIVERED",
+      "createdAt": "2026-06-13T09:30:00.000Z"
+    },
+    {
+      "id": "order-item-3",
+      "orderId": "order-2",
+      "listingId": "listing-3",
+      "bookId": "book-2",
+      "sellerId": "seller-1",
+      "bookTitle": "The Psychology of Money",
+      "sellerName": "Paper Nest Books",
+      "priceAtPurchase": 299,
+      "quantity": 1,
+      "subtotal": 299,
+      "status": "DELIVERED",
+      "createdAt": "2026-06-13T09:30:00.000Z"
+    },
+    {
+      "id": "order-item-4",
+      "orderId": "order-2",
+      "listingId": "listing-6",
+      "bookId": "book-4",
+      "sellerId": "seller-2",
+      "bookTitle": "Harry Potter and the Philosopher's Stone",
+      "sellerName": "Chapter House",
+      "priceAtPurchase": 499,
+      "quantity": 1,
+      "subtotal": 499,
+      "status": "ACCEPTED",
+      "createdAt": "2026-06-13T09:35:00.000Z"
+    }
+  ],
   "deal": {
     "title": "Deals of the Week",
     "description": "An unforgettable read that's dominating the bestseller lists and changing how we see love, loss, and everything in between.",

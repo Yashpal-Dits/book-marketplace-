@@ -69,7 +69,7 @@ export const DealsOfWeekSection = () => {
               type="button"
               aria-label="Scroll deals left"
               onClick={() => scrollBy(-1)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-400 text-stone-700 transition hover:border-[#f0532d] hover:text-[#f0532d]"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full  border border-stone-400 text-stone-700 transition hover:border-[#f0532d] hover:text-[#f0532d]"
             >
               <FiArrowLeft />
             </button>
@@ -77,7 +77,7 @@ export const DealsOfWeekSection = () => {
               type="button"
               aria-label="Scroll deals right"
               onClick={() => scrollBy(1)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#f0532d] text-white transition hover:bg-[#d8431f]"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full  border border-stone-400 text-stone-700 transition hover:border-[#f0532d] hover:text-[#f0532d]"
             >
               <FiArrowRight />
             </button>
