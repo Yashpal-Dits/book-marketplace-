@@ -11,6 +11,21 @@ interface HeroSearchValues {
   category: string
 }
 
+// Clean positioning configurations
+const leftPositions = [
+  { top: '8%', left: '8%', rotate: '-rotate-6' },
+  { top: '30%', left: '52%', rotate: 'rotate-6' },
+  { top: '52%', left: '8%', rotate: '-rotate-3' },
+  { top: '74%', left: '52%', rotate: 'rotate-12' },
+]
+
+const rightPositions = [
+  { top: '10%', right: '10%', rotate: 'rotate-6' },
+  { top: '31%', right: '50%', rotate: '-rotate-6' },
+  { top: '52%', right: '10%', rotate: 'rotate-3' },
+  { top: '73%', right: '50%', rotate: '-rotate-12' },
+]
+
 export const HeroSection = () => {
   const navigate = useNavigate()
   const { data: books = [] } = useApprovedBooks()
@@ -18,6 +33,7 @@ export const HeroSection = () => {
 
   const categories = [...new Set(books.map((b) => b.category).filter(Boolean))] as string[]
   const floatingCovers = books.filter((b) => b.coverImage).slice(0, 8)
+  
   const left = floatingCovers.slice(0, 4)
   const right = floatingCovers.slice(4, 8)
 
@@ -39,30 +55,36 @@ export const HeroSection = () => {
       <span className="absolute bottom-24 left-[28%] text-sm text-orange-400">✦</span>
       <span className="absolute bottom-32 right-[30%] text-xl text-amber-300">✦</span>
 
-      {/* floating covers — left */}
+      {/* floating covers — left (Config array approach) */}
       <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-56 lg:block" aria-hidden>
-        {left.map((book, i) => (
-          <div
-            key={book.id}
-            className="absolute w-24 rotate-[-6deg] overflow-hidden rounded-md shadow-2xl"
-            style={{ top: `${8 + i * 22}%`, left: `${i % 2 === 0 ? 8 : 52}%`, transform: `rotate(${i % 2 === 0 ? -7 : 5}deg)` }}
-          >
-            <BookCover src={book.coverImage} title={book.title} className="aspect-[3/4.3] w-full" />
-          </div>
-        ))}
+        {left.map((book, i) => {
+          const config = leftPositions[i] || leftPositions[0]
+          return (
+            <div
+              key={book.id}
+              className={`absolute w-24 overflow-hidden rounded-md shadow-2xl ${config.rotate}`}
+              style={{ top: config.top, left: config.left }}
+            >
+              <BookCover src={book.coverImage} title={book.title} className="aspect-[3/4.3] w-full" />
+            </div>
+          )
+        })}
       </div>
 
-      {/* floating covers — right */}
+      {/* floating covers — right (Config array approach) */}
       <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-56 lg:block" aria-hidden>
-        {right.map((book, i) => (
-          <div
-            key={book.id}
-            className="absolute w-24 overflow-hidden rounded-md shadow-2xl"
-            style={{ top: `${10 + i * 21}%`, right: `${i % 2 === 0 ? 10 : 50}%`, transform: `rotate(${i % 2 === 0 ? 6 : -5}deg)` }}
-          >
-            <BookCover src={book.coverImage} title={book.title} className="aspect-[3/4.3] w-full" />
-          </div>
-        ))}
+        {right.map((book, i) => {
+          const config = rightPositions[i] || rightPositions[0]
+          return (
+            <div
+              key={book.id}
+              className={`absolute w-24 overflow-hidden rounded-md shadow-2xl ${config.rotate}`}
+              style={{ top: config.top, right: config.right }}
+            >
+              <BookCover src={book.coverImage} title={book.title} className="aspect-[3/4.3] w-full" />
+            </div>
+          )
+        })}
       </div>
 
       <div className="relative mx-auto max-w-3xl px-4 text-center">
