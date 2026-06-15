@@ -1,17 +1,6 @@
 import { create } from 'zustand'
+import type { BookFilterState } from '@/interfaces'
 import { BookSort } from '@/enums/sort.enum'
-
-interface BookFilterState {
-  search: string
-  sort: BookSort
-  category: string
-  page: number
-  setSearch: (search: string) => void
-  setSort: (sort: BookSort) => void
-  setCategory: (category: string) => void
-  setPage: (page: number) => void
-  resetFilters: () => void
-}
 
 const initialState = {
   search: '',

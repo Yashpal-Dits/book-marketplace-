@@ -9,9 +9,10 @@ import { FormInput } from '@/components/common/FormInput'
 import { Loader } from '@/components/common/Loader'
 import { useCart, useRemoveCartItem, useUpdateCartQuantity } from '@/hooks/useCart'
 import { usePlaceOrder } from '@/hooks/useOrders'
+import { useCustomerProfile } from '@/hooks/useProfile'
 import { checkoutSchema } from '@/schemas/checkout.schema'
 import { formatCurrency } from '@/utils/formatCurrency'
-import type { IShippingAddress } from '@/interfaces/order.interface'
+import type { IShippingAddress } from '@/interfaces'
 
 const initialAddress: IShippingAddress = {
   fullName: '',
@@ -28,10 +29,28 @@ export const CartPage = () => {
   const updateQuantity = useUpdateCartQuantity()
   const removeItem = useRemoveCartItem()
   const placeOrder = usePlaceOrder()
+  const { data: customerProfile } = useCustomerProfile()
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const [addressMode, setAddressMode] = useState<'saved' | 'new'>('new')
+  const [cartFeedback, setCartFeedback] = useState('')
 
   const total = items.reduce((sum, item) => sum + item.listing.price * item.quantity, 0)
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
+  const savedAddress: IShippingAddress | null =
+    customerProfile?.mobileNumber &&
+    customerProfile.addressLine &&
+    customerProfile.city &&
+    customerProfile.state &&
+    customerProfile.pincode
+      ? {
+          fullName: `${customerProfile.firstName} ${customerProfile.lastName}`.trim(),
+          mobileNumber: customerProfile.mobileNumber,
+          addressLine: customerProfile.addressLine,
+          city: customerProfile.city,
+          state: customerProfile.state,
+          pincode: customerProfile.pincode,
+        }
+      : null
 
   const formik = useFormik<IShippingAddress>({
     initialValues: initialAddress,
@@ -42,6 +61,33 @@ export const CartPage = () => {
       }),
   })
 
+  const handleOpenCheckout = () => {
+    setIsCheckoutOpen(true)
+    if (savedAddress) {
+      setAddressMode('saved')
+      formik.setValues(savedAddress)
+    } else {
+      setAddressMode('new')
+      formik.setValues(initialAddress)
+    }
+  }
+
+  const handleUseSavedAddress = () => {
+    if (!savedAddress) return
+    setAddressMode('saved')
+    formik.setValues(savedAddress)
+  }
+
+  const handleUseNewAddress = () => {
+    setAddressMode('new')
+    formik.setValues(initialAddress)
+  }
+
+  const showCartFeedback = (message: string) => {
+    setCartFeedback(message)
+    window.setTimeout(() => setCartFeedback(''), 1400)
+  }
+
   if (isLoading) return <Loader />
 
   return (
@@ -49,9 +95,16 @@ export const CartPage = () => {
       <h1 className="font-display text-3xl font-extrabold uppercase text-[#16243d] sm:text-4xl">
         Your <span className="text-[#f0532d]">Cart</span>
       </h1>
-      <p className="mt-1 text-sm text-stone-500">
-        {items.length === 0 ? 'Your cart is empty.' : `${totalQuantity} item${totalQuantity === 1 ? '' : 's'} from your selected sellers.`}
-      </p>
+      <div className="mt-1 flex flex-wrap items-center gap-3">
+        <p className="text-sm text-stone-500">
+          {items.length === 0 ? 'Your cart is empty.' : `${totalQuantity} item${totalQuantity === 1 ? '' : 's'} from your selected sellers.`}
+        </p>
+        {cartFeedback ? (
+          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800" aria-live="polite">
+            {cartFeedback}
+          </span>
+        ) : null}
+      </div>
 
       {items.length === 0 ? (
         <div className="mt-10">
@@ -102,7 +155,12 @@ export const CartPage = () => {
                       type="button"
                       aria-label="Decrease quantity"
                       disabled={item.quantity <= 1 || updateQuantity.isPending}
-                      onClick={() => updateQuantity.mutate({ itemId: item.id, quantity: item.quantity - 1 })}
+                      onClick={() =>
+                        updateQuantity.mutate(
+                          { itemId: item.id, quantity: item.quantity - 1 },
+                          { onSuccess: () => showCartFeedback('Quantity updated ✓') },
+                        )
+                      }
                       className="inline-flex h-9 w-9 items-center justify-center rounded-l-full text-stone-700 transition hover:bg-stone-100 disabled:opacity-40"
                     >
                       <FiMinus className="text-sm" />
@@ -112,7 +170,12 @@ export const CartPage = () => {
                       type="button"
                       aria-label="Increase quantity"
                       disabled={item.quantity >= item.listing.stock || updateQuantity.isPending}
-                      onClick={() => updateQuantity.mutate({ itemId: item.id, quantity: item.quantity + 1 })}
+                      onClick={() =>
+                        updateQuantity.mutate(
+                          { itemId: item.id, quantity: item.quantity + 1 },
+                          { onSuccess: () => showCartFeedback('Quantity updated ✓') },
+                        )
+                      }
                       className="inline-flex h-9 w-9 items-center justify-center rounded-r-full text-stone-700 transition hover:bg-stone-100 disabled:opacity-40"
                     >
                       <FiPlus className="text-sm" />
@@ -127,7 +190,7 @@ export const CartPage = () => {
                   <button
                     type="button"
                     aria-label={`Remove ${item.book.title}`}
-                    onClick={() => removeItem.mutate(item.id)}
+                    onClick={() => removeItem.mutate(item.id, { onSuccess: () => showCartFeedback('Item removed ✓') })}
                     disabled={removeItem.isPending}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-400 transition hover:bg-red-50 hover:text-red-600"
                   >
@@ -157,7 +220,7 @@ export const CartPage = () => {
             </dl>
             <button
               type="button"
-              onClick={() => setIsCheckoutOpen(true)}
+              onClick={handleOpenCheckout}
               className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f0532d] text-sm font-semibold transition hover:bg-[#d8431f]"
             >
               Proceed to Checkout <FiArrowRight />
@@ -183,6 +246,44 @@ export const CartPage = () => {
             </div>
 
             <form onSubmit={formik.handleSubmit} noValidate className="mt-5 space-y-4">
+              {savedAddress ? (
+                <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
+                  <p className="text-sm font-bold text-[#16243d]">Choose delivery address</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={handleUseSavedAddress}
+                      className={`rounded-2xl border p-3 text-left text-sm transition ${
+                        addressMode === 'saved'
+                          ? 'border-[#f0532d] bg-orange-50 text-[#16243d]'
+                          : 'border-stone-200 bg-white text-stone-600 hover:border-[#f0532d]'
+                      }`}
+                    >
+                      <span className="font-semibold">Use saved address</span>
+                      <span className="mt-1 block text-xs leading-5 text-stone-500">
+                        {savedAddress.addressLine}, {savedAddress.city}, {savedAddress.state} — {savedAddress.pincode}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleUseNewAddress}
+                      className={`rounded-2xl border p-3 text-left text-sm transition ${
+                        addressMode === 'new'
+                          ? 'border-[#f0532d] bg-orange-50 text-[#16243d]'
+                          : 'border-stone-200 bg-white text-stone-600 hover:border-[#f0532d]'
+                      }`}
+                    >
+                      <span className="font-semibold">Use another address</span>
+                      <span className="mt-1 block text-xs leading-5 text-stone-500">Enter a different delivery address for this order.</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                  No saved address found. Add one here for this order, or save it later from your profile page.
+                </div>
+              )}
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormInput
                   label="Full Name"

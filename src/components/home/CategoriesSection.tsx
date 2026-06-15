@@ -5,7 +5,7 @@ import { Loader } from '@/components/common/Loader'
 import { useApprovedBooks } from '@/hooks/useBooks'
 import { useBookFilterStore } from '@/store/bookFilter.store'
 import { cn } from '@/utils/cn'
-import type { IBook, ICategorySummary } from '@/interfaces/book.interface'
+import type { IBook, ICategorySummary } from '@/interfaces'
 
 const CATEGORY_STYLES: Record<string, string> = {
   Fiction: 'bg-[#3e7d52] text-white',

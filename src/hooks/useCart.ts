@@ -4,6 +4,7 @@ import { cartApi } from '@/api/cart.api'
 import { useAuthStore } from '@/store/auth.store'
 import { Role } from '@/enums/role.enum'
 import { queryKeys } from '@/utils/queryKeys'
+import type { ICartItemDetailed } from '@/interfaces'
 
 /** Customer profile id, or undefined when not logged in as a customer. */
 export const useCustomerId = () => {
@@ -30,7 +31,6 @@ export const useAddToCart = () => {
       return cartApi.addToCart({ customerId, listingId, quantity })
     },
     onSuccess: () => {
-      toast.success('Added to cart')
       queryClient.invalidateQueries({ queryKey: queryKeys.cart(customerId ?? '') })
     },
     onError: (error: Error) => toast.error(error.message),
@@ -40,25 +40,46 @@ export const useAddToCart = () => {
 export const useUpdateCartQuantity = () => {
   const queryClient = useQueryClient()
   const customerId = useCustomerId()
+  const cartKey = queryKeys.cart(customerId ?? '')
 
   return useMutation({
     mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) =>
       cartApi.updateQuantity(itemId, quantity),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.cart(customerId ?? '') }),
-    onError: (error: Error) => toast.error(error.message),
+    onMutate: async ({ itemId, quantity }) => {
+      await queryClient.cancelQueries({ queryKey: cartKey })
+      const previousItems = queryClient.getQueryData<ICartItemDetailed[]>(cartKey)
+      queryClient.setQueryData<ICartItemDetailed[]>(cartKey, (oldItems = []) =>
+        oldItems.map((item) => (item.id === itemId ? { ...item, quantity } : item)),
+      )
+      return { previousItems }
+    },
+    onError: (error: Error, _variables, context) => {
+      queryClient.setQueryData(cartKey, context?.previousItems)
+      toast.error(error.message)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: cartKey }),
   })
 }
 
 export const useRemoveCartItem = () => {
   const queryClient = useQueryClient()
   const customerId = useCustomerId()
+  const cartKey = queryKeys.cart(customerId ?? '')
 
   return useMutation({
     mutationFn: (itemId: string) => cartApi.removeItem(itemId),
-    onSuccess: () => {
-      toast.success('Removed from cart')
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart(customerId ?? '') })
+    onMutate: async (itemId) => {
+      await queryClient.cancelQueries({ queryKey: cartKey })
+      const previousItems = queryClient.getQueryData<ICartItemDetailed[]>(cartKey)
+      queryClient.setQueryData<ICartItemDetailed[]>(cartKey, (oldItems = []) =>
+        oldItems.filter((item) => item.id !== itemId),
+      )
+      return { previousItems }
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error, _itemId, context) => {
+      queryClient.setQueryData(cartKey, context?.previousItems)
+      toast.error(error.message)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: cartKey }),
   })
 }

@@ -2,14 +2,7 @@ import { RatingStars } from '@/components/common/RatingStars'
 import { Loader } from '@/components/common/Loader'
 import { useApprovedBooks } from '@/hooks/useBooks'
 import type { IBook } from '@/interfaces/book.interface'
-
-interface AuthorSummary {
-  name: string
-  booksCount: number
-  rating: number
-  initials: string
-  colorClass: string
-}
+import type { HomeAuthorSummary } from '@/interfaces/home.interface'
 
 const AVATAR_COLORS = [
   'bg-[#3e7d52] text-emerald-50',
@@ -29,7 +22,7 @@ const getInitials = (name: string) =>
     .toUpperCase()
 
 /** Groups approved books by author → top authors with count + avg rating. */
-const buildAuthors = (books: IBook[]): AuthorSummary[] => {
+const buildAuthors = (books: IBook[]): HomeAuthorSummary[] => {
   const map = new Map<string, IBook[]>()
   books.forEach((book) => map.set(book.author, [...(map.get(book.author) ?? []), book]))
 

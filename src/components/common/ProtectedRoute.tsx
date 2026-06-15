@@ -1,16 +1,19 @@
-import type { PropsWithChildren } from 'react'
+import type { CommonProtectedRouteProps } from '@/interfaces'
 import { Navigate, useLocation } from 'react-router-dom'
 import { Role } from '@/enums/role.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
 import { useAuthStore } from '@/store/auth.store'
 
-interface ProtectedRouteProps extends PropsWithChildren {
-  allowedRoles?: Role[]
-  requireApprovedSeller?: boolean
+const getRoleHomePath = (role: Role, sellerStatus?: string) => {
+  if (role === Role.ADMIN) return '/admin/dashboard'
+  if (role === Role.SELLER) {
+    return sellerStatus === SellerStatus.APPROVED ? '/seller/dashboard' : '/seller/pending-approval'
+  }
+  return '/'
 }
 
-export const ProtectedRoute = ({ children, allowedRoles, requireApprovedSeller = false }: ProtectedRouteProps) => {
-  const { user, isAuthenticated, sellerStatus } = useAuthStore()
+export const ProtectedRoute = ({ children, allowedRoles, requireApprovedSeller = false }: CommonProtectedRouteProps) => {
+  const { user, isAuthenticated, sellerStatus, impersonatedSellerId } = useAuthStore()
   const location = useLocation()
 
   if (!isAuthenticated || !user) {
@@ -18,7 +21,11 @@ export const ProtectedRoute = ({ children, allowedRoles, requireApprovedSeller =
   }
 
   if (allowedRoles?.length && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/unauthorized" replace />
+    return <Navigate to={getRoleHomePath(user.role, sellerStatus)} replace />
+  }
+
+  if (requireApprovedSeller && user.role === Role.ADMIN) {
+    return impersonatedSellerId ? children : <Navigate to="/admin/sellers" replace />
   }
 
   if (requireApprovedSeller && sellerStatus !== SellerStatus.APPROVED) {

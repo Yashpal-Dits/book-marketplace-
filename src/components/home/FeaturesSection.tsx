@@ -1,13 +1,7 @@
-import type { IconType } from 'react-icons'
+import type { HomeFeature } from '@/interfaces'
 import { FiBookOpen, FiTag, FiTruck } from 'react-icons/fi'
 
-interface Feature {
-  icon: IconType
-  title: string
-  description: string
-}
-
-const FEATURES: Feature[] = [
+const FEATURES: HomeFeature[] = [
   {
     icon: FiTruck,
     title: 'Free Standard Delivery',

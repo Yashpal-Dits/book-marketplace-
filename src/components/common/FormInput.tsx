@@ -1,12 +1,7 @@
-import type { InputHTMLAttributes } from 'react'
+import type { CommonFormInputProps } from '@/interfaces'
 import { cn } from '@/utils/cn'
 
-interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string
-  error?: string
-}
-
-export const FormInput = ({ label, error, className, ...props }: FormInputProps) => (
+export const FormInput = ({ label, error, className, ...props }: CommonFormInputProps) => (
   <label className="block text-left">
     <span className="mb-1.5 block text-sm font-medium text-stone-700">{label}</span>
     <input

@@ -9,48 +9,7 @@ import type { IListing } from '@/interfaces/listing.interface'
 import type { IOrder } from '@/interfaces/order.interface'
 import type { PaginatedResult } from '@/interfaces/pagination.interface'
 import type { ISeller } from '@/interfaces/seller.interface'
-
-export interface AdminSellerParams {
-  page?: number
-  limit?: number
-  search?: string
-  sort?: AdminSellerSort
-  status?: SellerStatus | ''
-}
-
-export interface AdminBookParams {
-  page?: number
-  limit?: number
-  search?: string
-  sort?: AdminBookSort
-  status?: BookStatus | ''
-}
-
-export interface AdminBookDetailed extends IBook {
-  seller?: ISeller
-}
-
-export interface AdminDashboardSummary {
-  totalSellers: number
-  pendingSellers: number
-  approvedSellers: number
-  rejectedSellers: number
-  totalCustomers: number
-  totalBooks: number
-  pendingBooks: number
-  approvedBooks: number
-  rejectedBooks: number
-  totalOrders: number
-  deliveredOrders: number
-  cancelledOrders: number
-  marketplaceRevenue: number
-  totalListings: number
-  activeListings: number
-  outOfStockListings: number
-  recentSellers: ISeller[]
-  recentBooks: AdminBookDetailed[]
-  recentOrders: IOrder[]
-}
+import type { AdminBookDetailed, AdminBookParams, AdminDashboardSummary, AdminSellerParams } from '@/interfaces/admin-api.interface'
 
 const sellerSortMap: Record<AdminSellerSort, { sort: string; order: 'asc' | 'desc' }> = {
   [AdminSellerSort.NEWEST]: { sort: 'createdAt', order: 'desc' },

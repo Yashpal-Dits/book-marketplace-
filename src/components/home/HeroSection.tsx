@@ -5,11 +5,7 @@ import { BookCover } from '@/components/common/BookCover'
 import { useApprovedBooks } from '@/hooks/useBooks'
 import { useBookFilterStore } from '@/store/bookFilter.store'
 import { heroSearchSchema } from '@/schemas/newsletter.schema'
-
-interface HeroSearchValues {
-  search: string
-  category: string
-}
+import type { HomeHeroSearchValues } from '@/interfaces'
 
 // Clean positioning configurations
 const leftPositions = [
@@ -37,7 +33,7 @@ export const HeroSection = () => {
   const left = floatingCovers.slice(0, 4)
   const right = floatingCovers.slice(4, 8)
 
-  const formik = useFormik<HeroSearchValues>({
+  const formik = useFormik<HomeHeroSearchValues>({
     initialValues: { search: '', category: '' },
     validationSchema: heroSearchSchema,
     onSubmit: (values) => {

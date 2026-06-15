@@ -1,15 +1,10 @@
 import { useState } from 'react'
 import { FiBookOpen } from 'react-icons/fi'
 import { cn } from '@/utils/cn'
-
-interface BookCoverProps {
-  src?: string
-  title: string
-  className?: string
-}
+import type { CommonBookCoverProps } from '@/interfaces'
 
 /** Book cover image with a graceful placeholder when the image is missing or fails. */
-export const BookCover = ({ src, title, className }: BookCoverProps) => {
+export const BookCover = ({ src, title, className }: CommonBookCoverProps) => {
   const [hasError, setHasError] = useState(false)
 
   if (!src || hasError) {

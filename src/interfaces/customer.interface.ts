@@ -1,8 +1,26 @@
 export interface ICustomer {
-    id : string
-    userId : string
-    firstName : string
-    lastName : string
-    email: string
-    createdAt: string
+  id: string
+  userId: string
+  firstName: string
+  lastName: string
+  email: string
+  mobileNumber?: string
+  addressLine?: string
+  city?: string
+  state?: string
+  pincode?: string
+  profileImage?: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface UpdateCustomerProfilePayload {
+  firstName: string
+  lastName: string
+  mobileNumber: string
+  addressLine: string
+  city: string
+  state: string
+  pincode: string
+  profileImage?: string
 }

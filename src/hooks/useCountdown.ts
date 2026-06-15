@@ -1,12 +1,5 @@
 import { useEffect, useState } from 'react'
-
-export interface Countdown {
-  days: number
-  hours: number
-  minutes: number
-  seconds: number
-  isExpired: boolean
-}
+import type { Countdown } from '@/interfaces'
 
 const calculate = (target: string): Countdown => {
   const diff = new Date(target).getTime() - Date.now()

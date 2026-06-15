@@ -1,8 +1,9 @@
-import type { AdminBookParams, AdminSellerParams } from '@/api/admin.api'
-import type { GetBooksParams } from '@/api/books.api'
-import type { SellerListParams, SellerOrdersParams } from '@/api/seller.api'
+import type { AdminBookParams, AdminSellerParams } from '@/interfaces/admin-api.interface'
+import type { GetBooksParams } from '@/interfaces/books-api.interface'
+import type { SellerListParams, SellerOrdersParams } from "../interfaces/seller-api.interface"
 
-export const queryKeys = {
+export const queryKeys = 
+{
   books: (params: GetBooksParams) => ['books', params] as const,
 
   approvedBooks: ['books', 'approved'] as const,
@@ -16,6 +17,12 @@ export const queryKeys = {
   bookListings: (bookId: string) => ['listings', bookId] as const,
 
   cart: (customerId: string) => ['cart', customerId] as const,
+
+  customerProfile: (customerId: string) => ['customer', 'profile', customerId] as const,
+
+  sellerProfile: (sellerId: string) => ['seller', 'profile', sellerId] as const,
+
+  adminProfile: (userId: string) => ['admin', 'profile', userId] as const,
   
   orders: (customerId: string) => ['orders', customerId] as const,
 

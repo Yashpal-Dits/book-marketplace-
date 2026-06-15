@@ -1,12 +1,6 @@
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { cn } from '@/utils/cn'
-
-interface PaginationProps {
-  page: number
-  totalPages: number
-  onPageChange: (page: number) => void
-  className?: string
-}
+import type { CommonPaginationProps } from '@/interfaces'
 
 /** Builds e.g. [1, '…', 4, 5, 6, '…', 12] so long ranges stay compact. */
 const getPageItems = (page: number, totalPages: number): Array<number | '…'> => {
@@ -23,7 +17,7 @@ const getPageItems = (page: number, totalPages: number): Array<number | '…'> =
   return items
 }
 
-export const Pagination = ({ page, totalPages, onPageChange, className }: PaginationProps) => {
+export const Pagination = ({ page, totalPages, onPageChange, className }: CommonPaginationProps) => {
   if (totalPages <= 1) return null
 
   return (

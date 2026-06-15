@@ -27,6 +27,7 @@ export const BookDetailsPage = () => {
 
   const [chosenListingId, setChosenListingId] = useState<string | null>(null)
   const [rawQuantity, setRawQuantity] = useState(1)
+  const [isAdded, setIsAdded] = useState(false)
 
   // Derived state (no effects): default to the cheapest in-stock listing,
   // and clamp quantity against the selected seller's available stock.
@@ -66,7 +67,15 @@ export const BookDetailsPage = () => {
       navigate('/login', { state: { from: { pathname: `/books/${book.id}` } } })
       return
     }
-    addToCart.mutate({ listingId: selectedListing.id, quantity })
+    addToCart.mutate(
+      { listingId: selectedListing.id, quantity },
+      {
+        onSuccess: () => {
+          setIsAdded(true)
+          window.setTimeout(() => setIsAdded(false), 1400)
+        },
+      },
+    )
   }
 
   return (
@@ -225,7 +234,7 @@ export const BookDetailsPage = () => {
                 className="inline-flex h-12 items-center gap-2 rounded-full bg-[#f0532d] px-8 text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <FiShoppingCart />
-                {addToCart.isPending ? 'Adding…' : 'Add to Cart'}
+                {addToCart.isPending ? 'Adding…' : isAdded ? 'Added ✓' : 'Add to Cart'}
               </button>
 
               {selectedListing ? (

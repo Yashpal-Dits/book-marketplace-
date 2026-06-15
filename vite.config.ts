@@ -10,10 +10,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    watch: {
+      ignored: ['**/db.json'],
+    },
+  },
   build: {
-    // Split stable third-party code into its own long-term-cacheable chunks.
-    // This shrinks the route bundles and shortens the critical request chain
-    // for repeat visits (vendor chunks rarely change between deploys).
+    
     rollupOptions: {
       output: {
         manualChunks(id: string) {

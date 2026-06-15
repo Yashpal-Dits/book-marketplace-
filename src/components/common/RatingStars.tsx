@@ -1,12 +1,8 @@
 import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
 import { cn } from '@/utils/cn'
+import type { CommonRatingStarsProps } from '@/interfaces'
 
-interface RatingStarsProps {
-  rating?: number
-  className?: string
-}
-
-export const RatingStars = ({ rating = 0, className }: RatingStarsProps) => (
+export const RatingStars = ({ rating = 0, className }: CommonRatingStarsProps) => (
   <div className={cn('flex items-center gap-0.5 text-[13px] text-[#f0532d]', className)} aria-label={`Rated ${rating} out of 5`}>
     {Array.from({ length: 5 }, (_, i) => {
       const starValue = i + 1

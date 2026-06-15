@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import { ordersApi } from '@/api/orders.api'
 import { useCustomerId } from './useCart'
 import { queryKeys } from '@/utils/queryKeys'
-import type { IShippingAddress } from '@/interfaces/order.interface'
+import type { IShippingAddress } from '@/interfaces'
 
 export const useOrders = () => {
   const customerId = useCustomerId()
@@ -25,6 +25,7 @@ export const usePlaceOrder = () => {
     },
     onSuccess: () => {
       toast.success('Order placed successfully!')
+      queryClient.setQueryData(queryKeys.cart(customerId ?? ''), [])
       queryClient.invalidateQueries({ queryKey: queryKeys.cart(customerId ?? '') })
       queryClient.invalidateQueries({ queryKey: queryKeys.orders(customerId ?? '') })
       queryClient.invalidateQueries({ queryKey: ['books'] }) // stock changed

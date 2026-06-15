@@ -6,13 +6,7 @@ import type {
   IBook, IListing,
   ISeller
 } from "../interfaces/index"
-
-
-export interface AddToCartPayload {
-  customerId: string
-  listingId: string
-  quantity: number
-}
+import type { AddToCartPayload } from '@/interfaces'
 
 const getOrCreateCart = async (customerId: string): Promise<ICart> => {
   const { data: carts } = await axiosInstance.get<ICart[]>('/carts', { params: { customerId } })

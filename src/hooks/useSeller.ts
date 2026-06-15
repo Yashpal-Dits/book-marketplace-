@@ -5,7 +5,8 @@ import { OrderStatus } from '@/enums/order-status.enum'
 import { useAuthStore } from '@/store/auth.store'
 import { queryKeys } from '@/utils/queryKeys'
 
-export const useSellerId = () => useAuthStore((state) => state.profileId)
+export const useSellerId = () =>
+  useAuthStore((state) => state.impersonatedSellerId ?? state.profileId)
 
 export const useSellerDashboard = () => {
   const sellerId = useSellerId()

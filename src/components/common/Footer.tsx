@@ -1,18 +1,9 @@
 import { Link } from 'react-router-dom'
 import { FaBookOpen, FaCcAmex, FaCcApplePay, FaCcMastercard, FaCcPaypal, FaCcVisa } from 'react-icons/fa'
 import { FiFacebook, FiInstagram, FiTwitter, FiYoutube } from 'react-icons/fi'
+import type { CommonFooterColumn } from '@/interfaces'
 
-interface FooterLink {
-  label: string
-  to?: string
-}
-
-interface FooterColumn {
-  heading: string
-  links: FooterLink[]
-}
-
-const FOOTER_COLUMNS: FooterColumn[] = [
+const FOOTER_COLUMNS: CommonFooterColumn[] = [
   {
     heading: 'Need Help?',
     links: [

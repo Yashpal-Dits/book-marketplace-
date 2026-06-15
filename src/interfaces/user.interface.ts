@@ -7,7 +7,17 @@ export interface IUser {
   email: string
   password: string
   role: Role
+  mobileNumber?: string
+  profileImage?: string
   createdAt: string
+  updatedAt?: string
 }
 
 export type SafeUser = Omit<IUser, 'password'>
+
+export interface UpdateAdminProfilePayload {
+  firstName: string
+  lastName: string
+  mobileNumber?: string
+  profileImage?: string
+}

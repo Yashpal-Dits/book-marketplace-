@@ -1,11 +1,7 @@
-import type { PropsWithChildren } from 'react'
+import type { CommonAuthShellProps } from '@/interfaces'
 import { Link } from 'react-router-dom'
 import { FaBookOpen } from 'react-icons/fa'
 import bookstoreAuthBg from '@/assets/bookstore-auth-bg.svg'
-
-interface AuthShellProps extends PropsWithChildren {
-  mode: 'login' | 'register' | 'seller'
-}
 
 const content = {
   login: {
@@ -25,7 +21,7 @@ const content = {
   },
 }
 
-export const AuthShell = ({ children, mode }: AuthShellProps) => {
+export const AuthShell = ({ children, mode }: CommonAuthShellProps) => {
   const copy = content[mode]
 
   return (

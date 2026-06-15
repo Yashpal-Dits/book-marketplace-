@@ -1,11 +1,6 @@
 import { axiosInstance } from './axiosInstance'
 import { generateId } from '@/utils/generateId'
-
-export interface ISubscriber {
-  id: string
-  email: string
-  createdAt: string
-}
+import type { ISubscriber } from '@/interfaces'
 
 export const newsletterApi = {
   async subscribe(email: string): Promise<ISubscriber> {

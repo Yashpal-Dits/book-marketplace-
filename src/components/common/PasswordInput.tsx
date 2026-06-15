@@ -1,14 +1,10 @@
-import { useState, type InputHTMLAttributes } from 'react'
+import { useState } from 'react'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
 import { cn } from '@/utils/cn'
-
-interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string
-  error?: string
-}
+import type { CommonPasswordInputProps } from '@/interfaces'
 
 /** Password field with a working show/hide toggle, styled like FormInput. */
-export const PasswordInput = ({ label, error, className, ...props }: PasswordInputProps) => {
+export const PasswordInput = ({ label, error, className, ...props }: CommonPasswordInputProps) => {
   const [isVisible, setIsVisible] = useState(false)
 
   return (

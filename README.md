@@ -161,6 +161,7 @@ Bash
 
 npm run lint
 Business Rules
+
 Rule	Implementation
 A book should exist only once	Duplicate ISBN is blocked when seller requests a new book.
 Multiple sellers may sell the same book	Each seller creates a separate listing for the same book.
@@ -550,7 +551,10 @@ As an admin, I want to approve sellers so that only verified sellers can sell.
 As an admin, I want to reject sellers so that invalid sellers cannot access seller features.
 As an admin, I want to approve books so that only valid books are visible in the marketplace.
 As an admin, I want to reject books so that invalid catalog records are not used.
+
+
 Assumptions
+
 Real payment gateway integration is out of scope.
 Real courier integration is out of scope.
 Refunds, invoices, GST, email, and SMS are out of scope.
@@ -579,8 +583,10 @@ Seller cancels after shipment	Blocked
 Pending seller accessing seller dashboard	Blocked
 Rejected seller accessing seller features	Blocked
 Test Cases
+
+
 Functional Test Cases
-No.	Test Case	Expected Result
+
 1	Customer registers with valid details	Customer account and cart are created.
 2	Customer logs in with valid credentials	Customer is logged in.
 3	Customer browses books	Only approved and actively listed books are shown.
@@ -596,8 +602,11 @@ No.	Test Case	Expected Result
 13	Seller updates stock	Listing stock updates correctly.
 14	Seller updates order status	Order moves through valid status flow.
 15	Admin dashboard loads	Marketplace statistics are displayed.
+
+
 Negative Test Cases
-No.	Test Case	Expected Result
+
+
 1	Register with duplicate email	Error message is shown.
 2	Login with invalid credentials	Login fails with error toast.
 3	Seller submits duplicate ISBN	Error message is shown.
@@ -608,6 +617,10 @@ No.	Test Case	Expected Result
 8	Customer places order with empty cart	Error message is shown.
 9	Seller creates listing for pending book	Request is blocked.
 10	Rejected seller opens seller dashboard	Access is blocked.
+
+
+
+
 Future Improvements
 Add real backend with authentication and authorization.
 Add JWT/session-based security.

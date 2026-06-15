@@ -7,7 +7,7 @@ import { RatingStars } from '@/components/common/RatingStars'
 import { useCountdown } from '@/hooks/useCountdown'
 import { useDealOfTheWeek } from '@/hooks/useBooks'
 import { formatCurrency } from '@/utils/formatCurrency'
-import type { IDeal } from '@/interfaces/book.interface'
+import type { IDeal } from '@/interfaces'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 

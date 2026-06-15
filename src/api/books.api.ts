@@ -6,14 +6,7 @@ import type { IBook, IDeal } from '@/interfaces/book.interface'
 import type { IListing, IListingWithSeller } from '@/interfaces/listing.interface'
 import type { PaginatedResult } from '@/interfaces/pagination.interface'
 import type { ISeller } from '@/interfaces/seller.interface'
-
-export interface GetBooksParams {
-  page?: number
-  limit?: number
-  search?: string
-  sort?: BookSort
-  category?: string
-}
+import type { GetBooksParams } from '@/interfaces/books-api.interface'
 
 /** Customer catalog rule: a book can appear to customers only after it is approved
  * AND at least one approved seller has created an active listing for it.

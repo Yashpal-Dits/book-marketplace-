@@ -25,6 +25,7 @@ const BookDetailsPage = lazy(() =>
 )
 const CartPage = lazy(() => import('@/pages/customer/CartPage').then((m) => ({ default: m.CartPage })))
 const OrdersPage = lazy(() => import('@/pages/customer/OrdersPage').then((m) => ({ default: m.OrdersPage })))
+const ProfilePage = lazy(() => import('@/pages/customer/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 const SellerDashboardPage = lazy(() =>
   import('@/pages/seller/SellerDashboardPage').then((m) => ({ default: m.SellerDashboardPage })),
 )
@@ -33,6 +34,9 @@ const SellerListingsPage = lazy(() =>
 )
 const SellerOrdersPage = lazy(() =>
   import('@/pages/seller/SellerOrdersPage').then((m) => ({ default: m.SellerOrdersPage })),
+)
+const SellerProfilePage = lazy(() =>
+  import('@/pages/seller/SellerProfilePage').then((m) => ({ default: m.SellerProfilePage })),
 )
 const SellerPendingApprovalPage = lazy(() =>
   import('@/pages/seller/SellerPendingApprovalPage').then((m) => ({ default: m.SellerPendingApprovalPage })),
@@ -45,6 +49,9 @@ const SellerApprovalPage = lazy(() =>
 )
 const BookApprovalPage = lazy(() =>
   import('@/pages/admin/BookApprovalPage').then((m) => ({ default: m.BookApprovalPage })),
+)
+const AdminProfilePage = lazy(() =>
+  import('@/pages/admin/AdminProfilePage').then((m) => ({ default: m.AdminProfilePage })),
 )
 
 export const AppRoutes = () => {
@@ -68,6 +75,31 @@ export const AppRoutes = () => {
             element={
               <ProtectedRoute allowedRoles={[Role.CUSTOMER]}>
                 <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="profile" element={<Navigate to="/customer/profile" replace />} />
+          <Route
+            path="customer/profile"
+            element={
+              <ProtectedRoute allowedRoles={[Role.CUSTOMER]}>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="seller/profile"
+            element={
+              <ProtectedRoute allowedRoles={[Role.SELLER]}>
+                <SellerProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/profile"
+            element={
+              <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                <AdminProfilePage />
               </ProtectedRoute>
             }
           />
@@ -101,7 +133,7 @@ export const AppRoutes = () => {
             <Route
               path="dashboard"
               element={
-                <ProtectedRoute allowedRoles={[Role.SELLER]} requireApprovedSeller>
+                <ProtectedRoute allowedRoles={[Role.SELLER, Role.ADMIN]} requireApprovedSeller>
                   <SellerDashboardPage />
                 </ProtectedRoute>
               }
@@ -109,7 +141,7 @@ export const AppRoutes = () => {
             <Route
               path="listings"
               element={
-                <ProtectedRoute allowedRoles={[Role.SELLER]} requireApprovedSeller>
+                <ProtectedRoute allowedRoles={[Role.SELLER, Role.ADMIN]} requireApprovedSeller>
                   <SellerListingsPage />
                 </ProtectedRoute>
               }
@@ -117,11 +149,12 @@ export const AppRoutes = () => {
             <Route
               path="orders"
               element={
-                <ProtectedRoute allowedRoles={[Role.SELLER]} requireApprovedSeller>
+                <ProtectedRoute allowedRoles={[Role.SELLER, Role.ADMIN]} requireApprovedSeller>
                   <SellerOrdersPage />
                 </ProtectedRoute>
               }
             />
+
           </Route>
 
           <Route path="admin">
@@ -150,6 +183,7 @@ export const AppRoutes = () => {
                 </ProtectedRoute>
               }
             />
+
           </Route>
         </Route>
 

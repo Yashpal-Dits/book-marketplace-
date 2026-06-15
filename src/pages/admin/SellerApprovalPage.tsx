@@ -1,4 +1,5 @@
-import { FiCheck, FiSearch, FiX } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
+import { FiCheck, FiEye, FiSearch, FiX } from 'react-icons/fi'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -9,22 +10,36 @@ import { SellerStatus } from '@/enums/seller-status.enum'
 import { useAdminSellers, useUpdateSellerStatus } from '@/hooks/useAdmin'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useAdminSellerFilterStore } from '@/store/adminFilter.store'
+import { useAuthStore } from '@/store/auth.store'
 import { formatDate } from '@/utils/formatDate'
 
 const PAGE_SIZE = 8
 
 const statusClass: Record<SellerStatus, string> = {
-  [SellerStatus.PENDING]: 'bg-amber-100 text-amber-800',
-  [SellerStatus.APPROVED]: 'bg-emerald-100 text-emerald-800',
-  [SellerStatus.REJECTED]: 'bg-red-100 text-red-700',
+  [SellerStatus.PENDING]: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+  [SellerStatus.APPROVED]: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+  [SellerStatus.REJECTED]: 'bg-red-100 text-red-700 ring-1 ring-red-200',
+}
+
+const statusLabel: Record<SellerStatus, string> = {
+  [SellerStatus.PENDING]: 'Pending',
+  [SellerStatus.APPROVED]: 'Approved',
+  [SellerStatus.REJECTED]: 'Rejected',
 }
 
 export const SellerApprovalPage = () => {
+  const navigate = useNavigate()
+  const startSellerImpersonation = useAuthStore((state) => state.startSellerImpersonation)
   const { search, sort, status, page, setSearch, setSort, setStatus, setPage } = useAdminSellerFilterStore()
   const debouncedSearch = useDebounce(search, 350)
   const { data, isLoading, isError } = useAdminSellers({ page, limit: PAGE_SIZE, search: debouncedSearch, sort, status })
   const updateStatus = useUpdateSellerStatus()
   const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE)
+
+  const handleAccessDashboard = (seller: { id: string; businessName: string }) => {
+    startSellerImpersonation(seller)
+    navigate('/seller/dashboard')
+  }
 
   return (
     <div className="space-y-6">
@@ -80,7 +95,7 @@ export const SellerApprovalPage = () => {
             <EmptyState title="No sellers found" description="Try changing the search or filter." />
           ) : (
             <div className="overflow-hidden rounded-2xl border border-stone-200">
-              <div className="hidden grid-cols-[1.4fr_1.2fr_1fr_130px_220px] gap-4 bg-stone-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-stone-500 lg:grid">
+              <div className="hidden grid-cols-[1.2fr_1fr_0.8fr_120px_300px] gap-4 bg-stone-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-stone-500 lg:grid">
                 <span>Business</span>
                 <span>Contact</span>
                 <span>Created</span>
@@ -89,7 +104,7 @@ export const SellerApprovalPage = () => {
               </div>
               <div className="divide-y divide-stone-100">
                 {data.data.map((seller) => (
-                  <article key={seller.id} className="grid gap-4 px-4 py-4 lg:grid-cols-[1.4fr_1.2fr_1fr_130px_220px] lg:items-center">
+                  <article key={seller.id} className="grid gap-4 px-4 py-4 lg:grid-cols-[1.2fr_1fr_0.8fr_120px_300px] lg:items-center">
                     <div className="min-w-0">
                       <p className="line-clamp-1 text-sm font-bold text-[#16243d]">{seller.businessName}</p>
                       <p className="mt-1 text-xs text-stone-500">{seller.email}</p>
@@ -99,25 +114,68 @@ export const SellerApprovalPage = () => {
                       <p className="mt-1 text-xs text-stone-500">{seller.mobileNumber}</p>
                     </div>
                     <p className="text-sm text-stone-500">{formatDate(seller.createdAt)}</p>
-                    <Badge className={statusClass[seller.status]}>{seller.status}</Badge>
-                    <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
-                      <Button
-                        type="button"
-                        className="gap-2 bg-emerald-700 hover:bg-emerald-800"
-                        disabled={seller.status === SellerStatus.APPROVED || updateStatus.isPending}
-                        onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.APPROVED })}
-                      >
-                        <FiCheck /> Approve
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="danger"
-                        className="gap-2"
-                        disabled={seller.status === SellerStatus.REJECTED || updateStatus.isPending}
-                        onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.REJECTED })}
-                      >
-                        <FiX /> Reject
-                      </Button>
+                    <div className="flex items-center gap-2 lg:block">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-stone-400 lg:hidden">Status</span>
+                      <Badge className={`${statusClass[seller.status]} w-fit whitespace-nowrap px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs`}>
+                        {statusLabel[seller.status]}
+                      </Badge>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-end">
+                      {seller.status === SellerStatus.APPROVED ? (
+                        <>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="h-9 gap-2 px-3 text-xs"
+                            title="Impersonate this seller and open seller dashboard"
+                            onClick={() => handleAccessDashboard(seller)}
+                          >
+                            <FiEye /> Impersonate
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="danger"
+                            className="h-9 gap-2 px-3 text-xs"
+                            disabled={updateStatus.isPending}
+                            onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.REJECTED })}
+                          >
+                            <FiX /> Reject
+                          </Button>
+                        </>
+                      ) : null}
+
+                      {seller.status === SellerStatus.PENDING ? (
+                        <>
+                          <Button
+                            type="button"
+                            className="h-9 gap-2 bg-emerald-700 px-3 text-xs hover:bg-emerald-800"
+                            disabled={updateStatus.isPending}
+                            onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.APPROVED })}
+                          >
+                            <FiCheck /> Approve
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="danger"
+                            className="h-9 gap-2 px-3 text-xs"
+                            disabled={updateStatus.isPending}
+                            onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.REJECTED })}
+                          >
+                            <FiX /> Reject
+                          </Button>
+                        </>
+                      ) : null}
+
+                      {seller.status === SellerStatus.REJECTED ? (
+                        <Button
+                          type="button"
+                          className="h-9 gap-2 bg-emerald-700 px-3 text-xs hover:bg-emerald-800 sm:col-span-2"
+                          disabled={updateStatus.isPending}
+                          onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.APPROVED })}
+                        >
+                          <FiCheck /> Approve Again
+                        </Button>
+                      ) : null}
                     </div>
                   </article>
                 ))}

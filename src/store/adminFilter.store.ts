@@ -1,29 +1,8 @@
 import { create } from 'zustand'
 import { AdminBookSort, AdminSellerSort } from '@/enums/admin-sort.enum'
+import type { AdminBookFilterState, AdminSellerFilterState } from '@/interfaces'
 import { BookStatus } from '@/enums/book-status.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
-
-interface AdminSellerFilterState {
-  search: string
-  sort: AdminSellerSort
-  status: SellerStatus | ''
-  page: number
-  setSearch: (search: string) => void
-  setSort: (sort: AdminSellerSort) => void
-  setStatus: (status: SellerStatus | '') => void
-  setPage: (page: number) => void
-}
-
-interface AdminBookFilterState {
-  search: string
-  sort: AdminBookSort
-  status: BookStatus | ''
-  page: number
-  setSearch: (search: string) => void
-  setSort: (sort: AdminBookSort) => void
-  setStatus: (status: BookStatus | '') => void
-  setPage: (page: number) => void
-}
 
 export const useAdminSellerFilterStore = create<AdminSellerFilterState>((set) => ({
   search: '',

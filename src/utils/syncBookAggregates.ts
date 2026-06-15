@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/api/axiosInstance'
-import type { IListing } from '@/interfaces/listing.interface'
+import type { IListing } from '@/interfaces'
 
 export const syncBookAggregates = async (bookId: string): Promise<void> => {
   const { data: listings } = await axiosInstance.get<IListing[]>('/listings', {

@@ -25,19 +25,16 @@ export const LoginPage = () => {
       const from = (location.state as { from?: { pathname: string } } | null)
         ?.from?.pathname
 
-      if (from) return navigate(from, { replace: true })
-
-      if (session.role === Role.ADMIN) return navigate('/admin/dashboard')
-
-      if (session.role === Role.SELLER) {
-        return navigate(
-          session.sellerStatus === SellerStatus.APPROVED
-            ? '/seller/dashboard'
-            : '/seller/pending-approval',
-        )
+      if (session.role === Role.ADMIN) {
+        return navigate(from?.startsWith('/admin') ? from : '/admin/dashboard', { replace: true })
       }
 
-      return navigate('/')
+      if (session.role === Role.SELLER) {
+        const sellerHome = session.sellerStatus === SellerStatus.APPROVED ? '/seller/dashboard' : '/seller/pending-approval'
+        return navigate(from?.startsWith('/seller') ? from : sellerHome, { replace: true })
+      }
+
+      return navigate(from && !from.startsWith('/admin') && !from.startsWith('/seller') ? from : '/', { replace: true })
     },
     onError: (error) => toast.error(error.message),
   })

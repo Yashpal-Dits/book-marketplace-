@@ -1,11 +1,6 @@
-import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
+import type { CommonButtonProps, ButtonVariant } from '@/interfaces'
+import type { PropsWithChildren } from 'react'
 import { cn } from '@/utils/cn'
-
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant
-}
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: 'bg-amber-800 text-white hover:bg-amber-900 shadow-sm',
@@ -14,7 +9,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   danger: 'bg-red-600 text-white hover:bg-red-700',
 }
 
-export const Button = ({ children, className, variant = 'primary', ...props }: PropsWithChildren<ButtonProps>) => (
+export const Button = ({ children, className, variant = 'primary', ...props }: PropsWithChildren<CommonButtonProps>) => (
   <button
     className={cn(
       'inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60',

@@ -9,75 +9,18 @@ import type { IListing } from '@/interfaces/listing.interface'
 import type { IOrder, IOrderItem } from '@/interfaces/order.interface'
 import type { PaginatedResult } from '@/interfaces/pagination.interface'
 import type { ISeller } from '@/interfaces/seller.interface'
+import type {
+  SellerDashboardSummary,
+  SellerListParams,
+  SellerListingDetailed,
+  SellerOrderItemDetailed,
+  SellerOrdersParams,
+  CreateBookRequestPayload,
+  CreateListingPayload,
+  UpdateListingPayload,
+} from '@/interfaces/seller-api.interface'
 import { generateId } from '@/utils/generateId'
 import { syncBookAggregates } from '@/utils/syncBookAggregates'
-
-export interface SellerListingDetailed extends IListing {
-  book: IBook
-}
-
-export interface SellerOrderItemDetailed extends IOrderItem {
-  order: IOrder
-  customer?: ICustomer
-}
-
-export interface SellerDashboardSummary {
-  totalListings: number
-  activeListings: number
-  totalStock: number
-  lowStockCount: number
-  pendingBooks: number
-  totalOrders: number
-  createdOrders: number
-  revenue: number
-  recentOrders: SellerOrderItemDetailed[]
-  lowStockListings: SellerListingDetailed[]
-}
-
-export interface SellerListParams {
-  sellerId: string
-  page?: number
-  limit?: number
-  search?: string
-  sort?: SellerListingSort
-}
-
-export interface SellerOrdersParams {
-  sellerId: string
-  page?: number
-  limit?: number
-  search?: string
-  sort?: SellerOrderSort
-  status?: OrderStatus | ''
-}
-
-export interface CreateListingPayload {
-  sellerId: string
-  bookId: string
-  price: number
-  mrp: number
-  stock: number
-}
-
-export interface UpdateListingPayload {
-  sellerId: string
-  listingId: string
-  price: number
-  mrp: number
-  stock: number
-  isActive: boolean
-}
-
-export interface CreateBookRequestPayload {
-  sellerId: string
-  isbn: string
-  title: string
-  author: string
-  publisher: string
-  description: string
-  coverImage?: string
-  category: string
-}
 
 const paginate = <T>(rows: T[], page = 1, limit = 8): PaginatedResult<T> => {
   const start = (page - 1) * limit

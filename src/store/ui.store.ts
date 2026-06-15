@@ -1,13 +1,9 @@
 import { create } from 'zustand'
-
-interface UiState {
-  isMobileMenuOpen: boolean
-  toggleMobileMenu: () => void
-  closeMobileMenu: () => void
-}
+import type { UiState } from '@/interfaces'
 
 export const useUiStore = create<UiState>((set) => ({
-  isMobileMenuOpen: false,
-  toggleMobileMenu: () => set((state) => ({ isMobileMenuOpen: !state.isMobileMenuOpen })),
-  closeMobileMenu: () => set({ isMobileMenuOpen: false }),
+  isSidebarOpen: false,
+  openSidebar: () => set({ isSidebarOpen: true }),
+  closeSidebar: () => set({ isSidebarOpen: false }),
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
 }))

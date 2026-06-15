@@ -4,12 +4,8 @@ import { OrderStatus } from '@/enums/order-status.enum'
 import { generateId } from '@/utils/generateId'
 import { syncBookAggregates } from '@/utils/syncBookAggregates'
 import type { IListing } from '@/interfaces/listing.interface'
-import type { IOrder, IOrderDetailed, IOrderItem, IShippingAddress } from '@/interfaces/order.interface'
-
-export interface PlaceOrderPayload {
-  customerId: string
-  shippingAddress: IShippingAddress
-}
+import type { IOrder, IOrderDetailed, IOrderItem } from '@/interfaces/order.interface'
+import type { PlaceOrderPayload } from '@/interfaces/orders-api.interface'
 
 export const ordersApi = {
 
@@ -70,8 +66,9 @@ export const ordersApi = {
       await syncBookAggregates(item.book.id)
     }
 
-    // Step 5 — clear the cart
-    await cartApi.clearCart(customerId)
+    // Step 5 — clear exactly the purchased cart items.
+    // Deleting the captured item ids is more reliable than re-reading the cart after order writes.
+    await Promise.all(cartItems.map((item) => axiosInstance.delete(`/cartItems/${item.id}`)))
 
     return order
   },

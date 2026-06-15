@@ -6,8 +6,11 @@ export const routePaths = {
   books: '/books',
   cart: '/cart',
   orders: '/orders',
+  customerProfile: '/customer/profile',
   sellerDashboard: '/seller/dashboard',
   sellerListings: '/seller/listings',
   sellerOrders: '/seller/orders',
+  sellerProfile: '/seller/profile',
   adminDashboard: '/admin/dashboard',
+  adminProfile: '/admin/profile',
 }

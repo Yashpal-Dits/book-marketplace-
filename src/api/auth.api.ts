@@ -1,16 +1,16 @@
 import { axiosInstance } from './axiosInstance'
 import { Role } from '@/enums/role.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
-import type { ICustomer } from '@/interfaces/customer.interface'
-import type { ISeller } from '@/interfaces/seller.interface'
-import type { IUser, SafeUser } from '@/interfaces/user.interface'
+import type { ICustomer } from '@/interfaces'
+import type { ISeller } from '@/interfaces'
+import type { IUser, SafeUser } from '@/interfaces'
 import { generateId } from '@/utils/generateId'
 import type {
   AuthSession,
   CustomerRegisterPayload,
   LoginPayload,
   SellerRegisterPayload
-} from '@/interfaces/auth.interface'
+} from '@/interfaces'
 
 
 const toSafeUser = (user: IUser): SafeUser => {
