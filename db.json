@@ -1046,7 +1046,7 @@
         "pincode": "149004"
       },
       "totalAmount": 2033,
-      "status": "ACCEPTED",
+      "status": "SHIPPED",
       "createdAt": "2026-06-15T06:10:34.602Z"
     }
   ],
@@ -1146,7 +1146,7 @@
       "priceAtPurchase": 249,
       "quantity": 1,
       "subtotal": 249,
-      "status": "CREATED",
+      "status": "CANCELLED",
       "createdAt": "2026-06-15T06:03:27.582Z"
     },
     {
@@ -1174,7 +1174,7 @@
       "priceAtPurchase": 249,
       "quantity": 1,
       "subtotal": 249,
-      "status": "ACCEPTED",
+      "status": "SHIPPED",
       "createdAt": "2026-06-15T06:10:34.602Z"
     },
     {
@@ -1188,7 +1188,7 @@
       "priceAtPurchase": 499,
       "quantity": 1,
       "subtotal": 499,
-      "status": "ACCEPTED",
+      "status": "SHIPPED",
       "createdAt": "2026-06-15T06:10:34.602Z"
     },
     {
@@ -1219,5 +1219,11 @@
       "book-18"
     ]
   },
-  "subscribers": []
+  "subscribers": [
+    {
+      "id": "subscriber-1781524598874-av4yst",
+      "email": "customer@bookbazaar.com",
+      "createdAt": "2026-06-15T11:56:38.874Z"
+    }
+  ]
 }

@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { adminApi, type AdminBookParams, type AdminSellerParams } from '@/api/admin.api'
+import  type {AdminBookParams,AdminSellerParams } from '@/interfaces/admin-api.interface'
+import { adminApi } from '@/api'
 import { BookStatus } from '@/enums/book-status.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
 import { queryKeys } from '@/utils/queryKeys'

@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { booksApi, type GetBooksParams } from '@/api/books.api'
+import { booksApi}  from '../api'
+import type {GetBooksParams } from '@/interfaces/books-api.interface'
 import { queryKeys } from '@/utils/queryKeys'
 
 

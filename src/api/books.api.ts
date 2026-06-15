@@ -8,10 +8,7 @@ import type { PaginatedResult } from '@/interfaces/pagination.interface'
 import type { ISeller } from '@/interfaces/seller.interface'
 import type { GetBooksParams } from '@/interfaces/books-api.interface'
 
-/** Customer catalog rule: a book can appear to customers only after it is approved
- * AND at least one approved seller has created an active listing for it.
- * This prevents admin-approved master books from appearing before sellers actually sell them.
- */
+
 const getCustomerVisibleBookIds = async (): Promise<Set<string>> => {
   const [{ data: listings }, { data: sellers }] = await Promise.all([
     axiosInstance.get<IListing[]>('/listings', { params: { isActive: true } }),

@@ -373,14 +373,13 @@ Validation:
 Email must be unique.
 Password is required and validated by Yup.
 Login
-txt
 
 GET /users?email={email}&password={password}
 Validation:
 
 Invalid credentials show error toast.
 Get customer-visible books
-txt
+
 
 GET /books?status=APPROVED
 GET /listings?isActive=true
@@ -388,13 +387,13 @@ GET /sellers?status=APPROVED
 Customer catalog is filtered in the API layer so books appear only if they are approved and have at least one active listing from an approved seller.
 
 Get book details
-txt
+
 
 GET /books/:id
 GET /listings?bookId={bookId}&isActive=true
 GET /sellers/:id
 Add to cart
-txt
+
 
 POST /cartItems
 PATCH /cartItems/:id
@@ -403,7 +402,7 @@ Validation:
 Listing must be active.
 Quantity cannot exceed stock.
 Place order
-txt
+
 
 POST /orders
 POST /orderItems
@@ -416,7 +415,7 @@ Fresh stock is checked before order creation.
 Stock never becomes negative.
 Seller APIs
 Create listing
-txt
+
 
 POST /listings
 Validation:
@@ -425,7 +424,7 @@ Seller must be approved.
 Book must be approved.
 Seller cannot create duplicate listing for same book.
 Update listing
-txt
+
 
 PATCH /listings/:id
 Validation:
@@ -434,7 +433,6 @@ Seller can update only own listing.
 Stock cannot be negative.
 Price and MRP are validated.
 Request new book
-txt
 
 POST /books
 Validation:
@@ -443,12 +441,12 @@ Seller must be approved.
 ISBN must be unique.
 New book status is PENDING.
 View seller orders
-txt
+
 
 GET /orderItems?sellerId={sellerId}
 GET /orders/:id
 Update order status
-txt
+
 
 PATCH /orderItems/:id
 PATCH /orders/:id
@@ -456,10 +454,11 @@ Validation:
 
 Seller can update only own order item.
 Cancel is not allowed after shipment.
+
+
 Delivered/cancelled orders cannot be changed.
 Admin APIs
 Dashboard summary
-txt
 
 GET /sellers
 GET /customers
@@ -467,7 +466,7 @@ GET /books
 GET /orders
 GET /listings
 Seller approval
-txt
+
 
 GET /sellers
 PATCH /sellers/:id
@@ -479,7 +478,7 @@ JSON
   "status": "APPROVED"
 }
 Book approval
-txt
+
 
 GET /books
 PATCH /books/:id
@@ -491,7 +490,7 @@ JSON
   "status": "APPROVED"
 }
 Folder Structure
-txt
+
 
 src/
   api/              Axios API modules
@@ -507,7 +506,6 @@ src/
   utils/            Utility functions
 Important API modules:
 
-txt
 
 src/api/auth.api.ts
 src/api/books.api.ts
@@ -525,6 +523,8 @@ src/hooks/useCart.ts
 src/hooks/useOrders.ts
 src/hooks/useSeller.ts
 src/hooks/useAdmin.ts
+
+
 User Stories
 Customer
 As a customer, I want to register so that I can place book orders.
@@ -633,6 +633,8 @@ Add invoice generation.
 Add email notifications.
 Add real inventory locking for concurrent orders.
 Add automated test suite.
+
+
 Final Notes
 This project separates Books and Listings because a marketplace catalog and seller offers are different concepts.
 

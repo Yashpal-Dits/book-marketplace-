@@ -9,6 +9,7 @@ import { useAddToCart } from '@/hooks/useCart'
 import { formatCurrency } from '@/utils/formatCurrency'
 import type { BookCardProps } from '@/interfaces'
 
+
 export const BookCard = ({ book }: BookCardProps) => {
   const addToCart = useAddToCart()
   const [isFindingListing, setIsFindingListing] = useState(false)

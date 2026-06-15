@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { sellerApi, type CreateBookRequestPayload, type CreateListingPayload, type SellerListParams, type SellerOrdersParams, type UpdateListingPayload } from '@/api/seller.api'
+import { sellerApi} from '../api/seller.api'
+ import type {CreateBookRequestPayload, CreateListingPayload,SellerListParams,SellerOrdersParams,UpdateListingPayload } from '@/interfaces/seller-api.interface'
 import { OrderStatus } from '@/enums/order-status.enum'
 import { useAuthStore } from '@/store/auth.store'
 import { queryKeys } from '@/utils/queryKeys'
