@@ -6,8 +6,7 @@ import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { ProtectedRoute } from '@/components/common/ProtectedRoute'
 import { Loader } from '@/components/common/Loader'
 import { Role } from '@/enums/role.enum'
-// HomePage stays eager — it is the landing/LCP route and should not wait
-// for an extra lazy-chunk request.
+
 import { HomePage } from '@/pages/customer/HomePage'
 
 // All other routes are code-split so the landing page downloads less JS.
@@ -23,6 +22,16 @@ const BooksPage = lazy(() => import('@/pages/customer/BooksPage').then((m) => ({
 const BookDetailsPage = lazy(() =>
   import('@/pages/customer/BookDetailsPage').then((m) => ({ default: m.BookDetailsPage })),
 )
+const BestSellersPage = lazy(() =>
+  import('@/pages/customer/BestSellerPage').then((m) => ({ default: m.BestSellersPage })),
+)
+const NewArrivalsPage = lazy(() =>
+  import('@/pages/customer/NewArrivalsPage').then((m) => ({ default: m.NewArrivalsPage })),
+)
+const DealsPage = lazy(() =>
+  import('@/pages/customer/DealsPage').then((m) => ({ default: m.DealsPage })),
+)
+
 const CartPage = lazy(() => import('@/pages/customer/CartPage').then((m) => ({ default: m.CartPage })))
 const OrdersPage = lazy(() => import('@/pages/customer/OrdersPage').then((m) => ({ default: m.OrdersPage })))
 const ProfilePage = lazy(() => import('@/pages/customer/ProfilePage').then((m) => ({ default: m.ProfilePage })))
@@ -68,6 +77,9 @@ export const AppRoutes = () => {
           <Route index element={<HomePage />} />
           <Route path="books" element={<BooksPage />} />
           <Route path="books/:id" element={<BookDetailsPage />} />
+          <Route path="bestsellers" element={<BestSellersPage />} />
+          <Route path="new-arrivals" element={<NewArrivalsPage />} />
+          <Route path="deals" element={<DealsPage />} />
           <Route
             path="cart"
             element={

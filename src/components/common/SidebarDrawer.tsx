@@ -11,8 +11,11 @@ import {
   FiHome,
   FiLogIn,
   FiPackage,
+  FiPercent,
   FiShoppingBag,
   FiShoppingCart,
+  FiStar,
+  FiTrendingUp,
   FiUser,
   FiX
 } from 'react-icons/fi'
@@ -21,6 +24,9 @@ import {
 const customerLinks = [
   { to: '/', label: 'Home', icon: FiHome },
   { to: '/books', label: 'Shop Books', icon: FiBookOpen },
+  { to: '/bestsellers', label: 'Best Sellers', icon: FiStar },
+  { to: '/new-arrivals', label: 'New Arrivals', icon: FiTrendingUp },
+  { to: '/deals', label: 'Deals / Offer', icon: FiPercent },
   { to: '/cart', label: 'Cart', icon: FiShoppingCart },
   { to: '/orders', label: 'My Orders', icon: FiShoppingBag },
   { to: '/customer/profile', label: 'My Profile', icon: FiUser },

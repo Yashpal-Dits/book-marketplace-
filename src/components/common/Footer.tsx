@@ -65,7 +65,7 @@ export const Footer = () => (
             {column.links.map((link) => (
               <li key={link.label}>
                 {link.to ? (
-                  <Link to={link.to} className="transition hover:text-emerald-300">
+                  <Link to={link.to} className="cursor-pointer transition hover:text-emerald-300">
                     {link.label}
                   </Link>
                 ) : (

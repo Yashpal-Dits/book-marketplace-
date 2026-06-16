@@ -13,10 +13,9 @@ import { cn } from '@/utils/cn'
 const customerNavLinks = [
   { to: '/', label: 'Home' },
   { to: '/books', label: 'Shop' },
-  { to: '/books?category=Fiction', label: 'Categories' },
-  { to: '/books?sort=rating', label: 'Best Sellers' },
-  { to: '/books?sort=newest', label: 'New Arrivals' },
-  { to: '/books?filter=deals', label: 'Deals / Offer' },
+  { to: '/bestsellers', label: 'Best Sellers' },
+  { to: '/new-arrivals', label: 'New Arrivals' },
+  { to: '/deals', label: 'Deals / Offer' },
 ]
 
 const sellerNavLinks = [
@@ -79,12 +78,12 @@ export const Header = () => {
               type="button"
               aria-label="Open menu"
               onClick={toggleSidebar}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-xl transition hover:bg-white/10"
+              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-xl transition hover:bg-white/10"
             >
               <FiMenu />
             </button>
-            <Link to="/" className="flex items-center gap-2 text-lg font-bold text-emerald-300">
-              <FaBookOpen className="text-[#f5862e]" /> <span className="font-display tracking-wide">Bseller</span>
+            <Link to="/" className="cursor-pointer flex items-center gap-2 text-lg font-bold text-emerald-300">
+              <FaBookOpen className="text-[#f5862e]" /> <span className="cursor-pointer font-display tracking-wide">Bseller</span>
             </Link>
           </div>
 
@@ -101,10 +100,10 @@ export const Header = () => {
               <Link
                 to="/cart"
                 aria-label="Cart"
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/10"
+                className="relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition hover:bg-white/10"
               >
                 <FiShoppingCart />
-                <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#f0532d] text-[9px] font-bold">
+                <span className="cursor-pointer absolute -right-0.5 -top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#f0532d] text-[9px] font-bold">
                   {cartCount}
                 </span>
               </Link>
@@ -112,8 +111,13 @@ export const Header = () => {
 
             {isAuthenticated ? (
               <>
-                <Link to={profilePath} className="hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs transition hover:bg-white/15 sm:flex">
-                  <FiUser /> {user?.firstName || user?.email}
+                <Link
+                  to={profilePath}
+                  aria-label="Profile"
+                  className="cursor-pointer inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-sm font-semibold transition hover:bg-white/15"
+                >
+                  <FiUser className="text-lg" />
+                  <span className="cursor-pointer hidden sm:inline">{user?.firstName || user?.email}</span>
                 </Link>
                 <button
                   type="button"
@@ -122,17 +126,17 @@ export const Header = () => {
                   className="inline-flex h-9 items-center justify-center gap-2 rounded-full px-3 text-sm font-semibold transition hover:bg-white/10"
                 >
                   <FiLogOut />
-                  <span className="hidden sm:inline">Logout</span>
+                  <span className="cursor-pointer hidden sm:inline">Logout</span>
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="hidden text-sm text-white/85 transition hover:text-emerald-300 sm:inline">
+                <Link to="/login" className="cursor-pointer hidden text-sm text-white/85 transition hover:text-emerald-300 sm:inline">
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="ml-1 inline-flex h-9 items-center rounded-full bg-[#f0532d] px-4 text-sm font-semibold transition hover:bg-[#d8431f]"
+                  className="cursor-pointer ml-1 inline-flex h-9 items-center rounded-full bg-[#f0532d] px-4 text-sm font-semibold transition hover:bg-[#d8431f]"
                 >
                   Register
                 </Link>
@@ -163,7 +167,7 @@ export const Header = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f]"
+                className="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f]"
               >
                 <FiLogOut /> Logout
               </button>

@@ -38,11 +38,11 @@ export const AuthShell = ({ children, mode }: CommonAuthShellProps) => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/10 to-black/55" />
 
           <div className="relative z-10 flex h-full min-h-[620px] flex-col justify-between p-8 text-white xl:p-10">
-            <Link to="/" className="flex w-fit items-center gap-3 text-lg font-semibold">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/95 text-[#f0532d] shadow-lg">
+            <Link to="/" className="cursor-pointer flex w-fit items-center gap-3 text-lg font-semibold">
+              <span className="cursor-pointer grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/95 text-[#f0532d] shadow-lg">
                 <FaBookOpen />
               </span>
-              <span className="font-display tracking-wide">Bseller</span>
+              <span className="cursor-pointer font-display tracking-wide">Bseller</span>
             </Link>
 
             <div className="max-w-[460px] rounded-[1.5rem] bg-black/30 p-6 backdrop-blur-[2px]">
@@ -63,13 +63,13 @@ export const AuthShell = ({ children, mode }: CommonAuthShellProps) => {
         <section className="flex flex-col bg-[#fffdf9]">
           {/* mobile-only brand bar (image panel is hidden below lg) */}
           <header className="flex items-center justify-between border-b border-stone-100 px-5 py-4 lg:hidden">
-            <Link to="/" className="flex items-center gap-2 font-semibold text-[#0d2b1f]">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#0d2b1f] text-sm text-[#f5862e]">
+            <Link to="/" className="cursor-pointer flex items-center gap-2 font-semibold text-[#0d2b1f]">
+              <span className="cursor-pointer grid h-9 w-9 place-items-center rounded-full bg-[#0d2b1f] text-sm text-[#f5862e]">
                 <FaBookOpen />
               </span>
-              <span className="font-display text-lg tracking-wide">Bseller</span>
+              <span className="cursor-pointer font-display text-lg tracking-wide">Bseller</span>
             </Link>
-            <Link to="/" className="text-xs font-medium text-stone-500 hover:text-[#f0532d]">
+            <Link to="/" className="cursor-pointer text-xs font-medium text-stone-500 hover:text-[#f0532d]">
               ← Back to store
             </Link>
           </header>

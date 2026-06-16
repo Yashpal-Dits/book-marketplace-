@@ -12,7 +12,7 @@ const variantClasses: Record<ButtonVariant, string> = {
 export const Button = ({ children, className, variant = 'primary', ...props }: PropsWithChildren<CommonButtonProps>) => (
   <button
     className={cn(
-      'inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex h-10 cursor-pointer items-center justify-center rounded-full px-5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60',
       variantClasses[variant],
       className,
     )}

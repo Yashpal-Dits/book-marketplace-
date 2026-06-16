@@ -12,6 +12,12 @@ export interface ICustomer {
   state?: string
   pincode?: string
   profileImage?: string
+  bio?: string
+  gender?: string
+  dob?: string
+  nationalId?: string
+  country?: string
+  taxId?: string
   status: CustomerStatus
   createdAt: string
   updatedAt?: string

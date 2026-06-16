@@ -133,22 +133,13 @@ export const booksApi = {
   /**
    * Listings for a book joined with their seller, cheapest first.
    * Only listings from APPROVED sellers are shown (Rule 6).
+   * Uses JSON Server `_expand` to fetch sellers in a single request.
    */
   async getListingsWithSellers(bookId: string): Promise<IListingWithSeller[]> {
-    const { data: listings } = await axiosInstance.get<IListing[]>('/listings', {
-      params: { bookId, isActive: true, _sort: 'price', _order: 'asc' },
+    const { data: listings } = await axiosInstance.get<IListingWithSeller[]>('/listings', {
+      params: { bookId, isActive: true, _sort: 'price', _order: 'asc', _expand: 'seller' },
     })
 
-    const joined = await Promise.all(
-      listings.map(async (listing) => {
-        try {
-          const { data: seller } = await axiosInstance.get<ISeller>(`/sellers/${listing.sellerId}`)
-          return seller.status === SellerStatus.APPROVED ? { ...listing, seller } : null
-        } catch {
-          return null
-        }
-      }),
-    )
-    return joined.filter((item): item is IListingWithSeller => item !== null)
+    return listings.filter((listing) => listing.seller.status === SellerStatus.APPROVED)
   },
 }
