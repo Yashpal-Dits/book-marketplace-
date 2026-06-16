@@ -1,8 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import  type {AdminBookParams,AdminSellerParams } from '@/interfaces/admin-api.interface'
-import { adminApi } from '@/api'
+import { adminApi } from '@/api/admin.api'
+import type { AdminBookParams, AdminCustomerParams, AdminSellerParams, UpdateBookCatalogPayload } from '@/interfaces/admin-api.interface'
 import { BookStatus } from '@/enums/book-status.enum'
+import { CustomerStatus } from '@/enums/customer-status.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
 import { queryKeys } from '@/utils/queryKeys'
 
@@ -51,6 +52,49 @@ export const useUpdateBookStatus = () => {
       queryClient.invalidateQueries({ queryKey: ['admin'] })
       queryClient.invalidateQueries({ queryKey: ['books'] })
       queryClient.invalidateQueries({ queryKey: ['seller'] })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}
+
+export const useUpdateBookCatalog = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ bookId, payload }: { bookId: string; payload: UpdateBookCatalogPayload }) =>
+      adminApi.updateBookCatalog(bookId, payload),
+    onSuccess: () => {
+      toast.success('Book catalog updated successfully')
+      queryClient.invalidateQueries({ queryKey: ['admin'] })
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+      queryClient.invalidateQueries({ queryKey: ['seller'] })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}
+
+export const useAdminCustomers = (params: AdminCustomerParams) =>
+  useQuery({
+    queryKey: queryKeys.adminCustomers(params),
+    queryFn: () => adminApi.getCustomers(params),
+    placeholderData: keepPreviousData,
+  })
+
+export const useUpdateCustomerStatus = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ customerId, status }: { customerId: string; status: CustomerStatus }) =>
+      adminApi.updateCustomerStatus(customerId, status),
+    onSuccess: (_, variables) => {
+      toast.success(
+        variables.status === CustomerStatus.ACTIVE
+          ? 'Customer activated'
+          : variables.status === CustomerStatus.BLOCKED
+            ? 'Customer blocked'
+            : 'Customer status updated',
+      )
+      queryClient.invalidateQueries({ queryKey: ['admin'] })
     },
     onError: (error: Error) => toast.error(error.message),
   })

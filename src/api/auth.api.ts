@@ -1,5 +1,6 @@
 import { axiosInstance } from './axiosInstance'
 import { Role } from '@/enums/role.enum'
+import { CustomerStatus } from '@/enums/customer-status.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
 import type { ICustomer } from '@/interfaces'
 import type { ISeller } from '@/interfaces'
@@ -33,7 +34,11 @@ export const authApi = {
 
     if (user.role === Role.CUSTOMER) {
       const { data } = await axiosInstance.get<ICustomer[]>('/customers', { params: { userId: user.id } })
-      profileId = data[0]?.id
+      const customer = data[0]
+      if (customer?.status === CustomerStatus.BLOCKED) {
+        throw new Error('Your account has been blocked. Please contact support.')
+      }
+      profileId = customer?.id
     }
 
     if (user.role === Role.SELLER) {
@@ -65,6 +70,7 @@ export const authApi = {
       firstName: payload.firstName,
       lastName: payload.lastName,
       email: payload.email,
+      status: CustomerStatus.ACTIVE,
       createdAt: now,
     }
 

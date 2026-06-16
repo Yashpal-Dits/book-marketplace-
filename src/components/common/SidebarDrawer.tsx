@@ -1,10 +1,22 @@
 import { Link, NavLink } from 'react-router-dom'
-import { FiBookOpen, FiGrid, FiHome, FiLogIn, FiPackage, FiShoppingBag, FiShoppingCart, FiUser, FiX } from 'react-icons/fi'
 import { FaBookOpen } from 'react-icons/fa'
 import { Role } from '@/enums/role.enum'
 import { useAuthStore } from '@/store/auth.store'
 import { useUiStore } from '@/store/ui.store'
 import { cn } from '@/utils/cn'
+import {
+  FiBookOpen,
+  FiDatabase,
+  FiGrid,
+  FiHome,
+  FiLogIn,
+  FiPackage,
+  FiShoppingBag,
+  FiShoppingCart,
+  FiUser,
+  FiX
+} from 'react-icons/fi'
+
 
 const customerLinks = [
   { to: '/', label: 'Home', icon: FiHome },
@@ -26,6 +38,8 @@ const adminLinks = [
   { to: '/admin/dashboard', label: 'Admin Dashboard', icon: FiGrid },
   { to: '/admin/sellers', label: 'Seller Approval', icon: FiPackage },
   { to: '/admin/books', label: 'Book Approval', icon: FiBookOpen },
+  { to: '/admin/catalog', label: 'Catalog Management', icon: FiDatabase },
+  { to: '/admin/customers', label: 'Customer Management', icon: FiUser },
   { to: '/admin/profile', label: 'Admin Profile', icon: FiUser },
   { to: '/', label: 'Preview Store', icon: FiHome },
 ]

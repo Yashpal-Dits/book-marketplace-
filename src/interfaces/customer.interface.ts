@@ -1,3 +1,5 @@
+import { CustomerStatus } from '@/enums/customer-status.enum'
+
 export interface ICustomer {
   id: string
   userId: string
@@ -10,6 +12,7 @@ export interface ICustomer {
   state?: string
   pincode?: string
   profileImage?: string
+  status: CustomerStatus
   createdAt: string
   updatedAt?: string
 }

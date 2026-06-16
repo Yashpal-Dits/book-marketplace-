@@ -1,8 +1,10 @@
 import type { IBook } from '@/interfaces/book.interface'
+import type { ICustomer } from '@/interfaces/customer.interface'
 import type { IOrder } from '@/interfaces/order.interface'
 import type { ISeller } from '@/interfaces/seller.interface'
 import type { AdminBookSort, AdminSellerSort } from '@/enums/admin-sort.enum'
 import type { BookStatus } from '@/enums/book-status.enum'
+import type { CustomerStatus } from '@/enums/customer-status.enum'
 import type { SellerStatus } from '@/enums/seller-status.enum'
 
 export interface AdminSellerParams {
@@ -21,8 +23,29 @@ export interface AdminBookParams {
   status?: BookStatus | ''
 }
 
+export interface AdminCustomerParams {
+  page?: number
+  limit?: number
+  search?: string
+  status?: CustomerStatus | ''
+}
+
 export interface AdminBookDetailed extends IBook {
   seller?: ISeller
+}
+
+export interface AdminCustomerDetailed extends ICustomer {
+  ordersCount: number
+}
+
+export interface UpdateBookCatalogPayload {
+  isbn: string
+  title: string
+  author: string
+  publisher: string
+  description: string
+  coverImage?: string
+  category: string
 }
 
 export interface AdminDashboardSummary {

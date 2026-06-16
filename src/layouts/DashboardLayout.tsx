@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { FiBookOpen, FiGrid, FiPackage, FiShoppingBag, FiShield, FiX } from 'react-icons/fi'
+import { FiBookOpen, FiGrid, FiPackage, FiShoppingBag, FiShield, FiUser, FiX, FiDatabase } from 'react-icons/fi'
 import { Header } from '@/components/common/Header'
 import { Footer } from '@/components/common/Footer'
 import { Button } from '@/components/common/Button'
@@ -17,6 +17,8 @@ const adminLinks = [
   { to: '/admin/dashboard', label: 'Admin Dashboard', icon: FiShield },
   { to: '/admin/sellers', label: 'Seller Approval', icon: FiPackage },
   { to: '/admin/books', label: 'Book Approval', icon: FiBookOpen },
+  { to: '/admin/catalog', label: 'Catalog Management', icon: FiDatabase },
+  { to: '/admin/customers', label: 'Customer Management', icon: FiUser },
 ]
 
 export const DashboardLayout = () => {
@@ -33,7 +35,7 @@ export const DashboardLayout = () => {
   return (
     <div className="min-h-screen bg-[#faf7ef]">
       <Header />
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[260px_1fr] lg:px-8">
+      <div className="grid gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[260px_1fr] lg:px-8">
         <aside className="h-fit rounded-[1.75rem] border border-stone-200 bg-white p-4 shadow-sm">
           <div className="rounded-2xl bg-[#0d2b1f] p-4 text-white">
             <p className="text-xs uppercase tracking-[0.18em] text-emerald-300">

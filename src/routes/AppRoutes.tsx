@@ -6,14 +6,13 @@ import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { ProtectedRoute } from '@/components/common/ProtectedRoute'
 import { Loader } from '@/components/common/Loader'
 import { Role } from '@/enums/role.enum'
+// HomePage stays eager — it is the landing/LCP route and should not wait
+// for an extra lazy-chunk request.
 import { HomePage } from '@/pages/customer/HomePage'
 
-
-
+// All other routes are code-split so the landing page downloads less JS.
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then((m) => ({ default: m.LoginPage })))
-
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then((m) => ({ default: m.RegisterPage })))
-
 const SellerRegisterPage = lazy(() =>
   import('@/pages/auth/SellerRegisterPage').then((m) => ({ default: m.SellerRegisterPage })),
 )
@@ -27,7 +26,6 @@ const BookDetailsPage = lazy(() =>
 const CartPage = lazy(() => import('@/pages/customer/CartPage').then((m) => ({ default: m.CartPage })))
 const OrdersPage = lazy(() => import('@/pages/customer/OrdersPage').then((m) => ({ default: m.OrdersPage })))
 const ProfilePage = lazy(() => import('@/pages/customer/ProfilePage').then((m) => ({ default: m.ProfilePage })))
-
 const SellerDashboardPage = lazy(() =>
   import('@/pages/seller/SellerDashboardPage').then((m) => ({ default: m.SellerDashboardPage })),
 )
@@ -51,6 +49,12 @@ const SellerApprovalPage = lazy(() =>
 )
 const BookApprovalPage = lazy(() =>
   import('@/pages/admin/BookApprovalPage').then((m) => ({ default: m.BookApprovalPage })),
+)
+const CatalogManagementPage = lazy(() =>
+  import('@/pages/admin/CatalogManagementPage').then((m) => ({ default: m.CatalogManagementPage })),
+)
+const CustomerManagementPage = lazy(() =>
+  import('@/pages/admin/CustomerManagementPage').then((m) => ({ default: m.CustomerManagementPage })),
 )
 const AdminProfilePage = lazy(() =>
   import('@/pages/admin/AdminProfilePage').then((m) => ({ default: m.AdminProfilePage })),
@@ -182,6 +186,22 @@ export const AppRoutes = () => {
               element={
                 <ProtectedRoute allowedRoles={[Role.ADMIN]}>
                   <BookApprovalPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="catalog"
+              element={
+                <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                  <CatalogManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="customers"
+              element={
+                <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                  <CustomerManagementPage />
                 </ProtectedRoute>
               }
             />

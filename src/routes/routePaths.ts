@@ -12,5 +12,7 @@ export const routePaths = {
   sellerOrders: '/seller/orders',
   sellerProfile: '/seller/profile',
   adminDashboard: '/admin/dashboard',
+  adminCatalog: '/admin/catalog',
+  adminCustomers: '/admin/customers',
   adminProfile: '/admin/profile',
 }

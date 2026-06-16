@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiShoppingCart } from 'react-icons/fi'
 import { booksApi } from '@/api/books.api'
 import { BookCover } from '@/components/common/BookCover'
 import { RatingStars } from '@/components/common/RatingStars'
@@ -98,19 +97,6 @@ export const BookCard = ({ book }: BookCardProps) => {
             <p className="text-xs font-medium text-stone-400">No listings yet</p>
           )}
 
-          <button
-            type="button"
-            aria-label={`Add ${book.title} to cart`}
-            title={isFindingListing || addToCart.isPending ? 'Adding...' : isAdded ? 'Added' : 'Add to cart'}
-            onClick={handleAddToCart}
-            disabled={isOutOfStock || !hasPrice || isFindingListing || addToCart.isPending}
-            className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-[11px] font-bold uppercase tracking-wide shadow-sm transition disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500 ${
-              isAdded ? 'bg-emerald-100 text-emerald-800' : 'bg-[#9ed8c7] text-[#0d2b1f] hover:bg-[#87cbb7]'
-            }`}
-          >
-            <FiShoppingCart className="text-xs" />
-            {isFindingListing || addToCart.isPending ? 'Adding' : isAdded ? 'Added ✓' : 'Add'}
-          </button>
         </div>
       </div>
     </article>

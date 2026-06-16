@@ -1,6 +1,7 @@
 import { axiosInstance } from './axiosInstance'
 import { AdminBookSort, AdminSellerSort } from '@/enums/admin-sort.enum'
 import { BookStatus } from '@/enums/book-status.enum'
+import { CustomerStatus } from '@/enums/customer-status.enum'
 import { OrderStatus } from '@/enums/order-status.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
 import type { IBook } from '@/interfaces/book.interface'
@@ -9,7 +10,16 @@ import type { IListing } from '@/interfaces/listing.interface'
 import type { IOrder } from '@/interfaces/order.interface'
 import type { PaginatedResult } from '@/interfaces/pagination.interface'
 import type { ISeller } from '@/interfaces/seller.interface'
-import type { AdminBookDetailed, AdminBookParams, AdminDashboardSummary, AdminSellerParams } from '@/interfaces/admin-api.interface'
+import type {
+  AdminBookDetailed,
+  AdminBookParams,
+  AdminCustomerDetailed,
+  AdminCustomerParams,
+  AdminDashboardSummary,
+  AdminSellerParams,
+  UpdateBookCatalogPayload
+} from '@/interfaces/admin-api.interface'
+
 
 const sellerSortMap: Record<AdminSellerSort, { sort: string; order: 'asc' | 'desc' }> = {
   [AdminSellerSort.NEWEST]: { sort: 'createdAt', order: 'desc' },
@@ -71,6 +81,52 @@ export const adminApi = {
 
   async updateBookStatus(bookId: string, status: BookStatus): Promise<IBook> {
     const { data } = await axiosInstance.patch<IBook>(`/books/${bookId}`, { status })
+    return data
+  },
+
+  async updateBookCatalog(bookId: string, payload: UpdateBookCatalogPayload): Promise<IBook> {
+    const isbn = payload.isbn.trim()
+    const { data: existing } = await axiosInstance.get<IBook[]>('/books', { params: { isbn } })
+    const duplicate = existing.find((book) => book.id !== bookId)
+    if (duplicate) throw new Error('A book with this ISBN already exists')
+
+    const { data } = await axiosInstance.patch<IBook>(`/books/${bookId}`, {
+      isbn,
+      title: payload.title.trim(),
+      author: payload.author.trim(),
+      publisher: payload.publisher.trim(),
+      description: payload.description.trim(),
+      coverImage: payload.coverImage?.trim() || '',
+      category: payload.category.trim(),
+      updatedAt: new Date().toISOString(),
+    })
+    return data
+  },
+
+  async getCustomers({ page = 1, limit = 10, search = '', status }: AdminCustomerParams = {}): Promise<PaginatedResult<AdminCustomerDetailed>> {
+    const params: Record<string, string | number> = { _page: page, _limit: limit, _sort: 'createdAt', _order: 'desc' }
+    if (search.trim()) params.q = search.trim()
+    if (status) params.status = status
+
+    const response = await axiosInstance.get<ICustomer[]>('/customers', { params })
+    const total = Number(response.headers['x-total-count'] ?? response.data.length)
+
+    const { data: orders } = await axiosInstance.get<IOrder[]>('/orders')
+    const ordersCountByCustomer = new Map<string, number>()
+    orders.forEach((order) => {
+      ordersCountByCustomer.set(order.customerId, (ordersCountByCustomer.get(order.customerId) ?? 0) + 1)
+    })
+
+    const data = response.data.map((customer): AdminCustomerDetailed => ({
+      ...customer,
+      ordersCount: ordersCountByCustomer.get(customer.id) ?? 0,
+    }))
+
+    return { data, total, page, limit }
+  },
+
+  async updateCustomerStatus(customerId: string, status: CustomerStatus): Promise<ICustomer> {
+    const { data } = await axiosInstance.patch<ICustomer>(`/customers/${customerId}`, { status, updatedAt: new Date().toISOString() })
     return data
   },
 
