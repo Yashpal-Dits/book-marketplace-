@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { SellerListingSort, SellerOrderSort } from '@/enums/seller-sort.enum'
 import type { SellerListingFilterState, SellerOrderFilterState } from '@/interfaces'
-import { OrderStatus } from '@/enums/order-status.enum'
+
 
 
 export const useSellerListingFilterStore = create<SellerListingFilterState>((set) => ({

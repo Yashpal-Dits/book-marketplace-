@@ -1,9 +1,7 @@
 import { create } from 'zustand'
 import { AdminBookSort, AdminSellerSort } from '@/enums/admin-sort.enum'
 import type { AdminBookFilterState, AdminCustomerFilterState, AdminSellerFilterState } from '@/interfaces'
-import { BookStatus } from '@/enums/book-status.enum'
-import { CustomerStatus } from '@/enums/customer-status.enum'
-import { SellerStatus } from '@/enums/seller-status.enum'
+
 
 export const useAdminSellerFilterStore = create<AdminSellerFilterState>((set) => ({
   search: '',

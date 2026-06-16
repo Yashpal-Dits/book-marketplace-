@@ -1,6 +1,5 @@
 import { useState, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react'
-import { Form, Formik, type FormikHelpers } from 'formik'
-import type { AnyObjectSchema } from 'yup'
+import { Form, Formik } from 'formik'
 import { FiCamera, FiMail, FiMapPin, FiPhone, FiUser } from 'react-icons/fi'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
