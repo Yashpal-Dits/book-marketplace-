@@ -103,6 +103,10 @@ export const adminApi = {
     return data
   },
 
+  async deleteBook(bookId: string): Promise<void> {
+    await axiosInstance.delete(`/books/${bookId}`)
+  },
+
   async getCustomers({ page = 1, limit = 10, search = '', status }: AdminCustomerParams = {}): Promise<PaginatedResult<AdminCustomerDetailed>> {
     const params: Record<string, string | number> = { _page: page, _limit: limit, _sort: 'createdAt', _order: 'desc' }
     if (search.trim()) params.q = search.trim()

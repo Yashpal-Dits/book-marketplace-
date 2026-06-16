@@ -8,7 +8,10 @@ import type { ICartItemDetailed } from '@/interfaces'
 
 /** Customer profile id, or undefined when not logged in as a customer. */
 export const useCustomerId = () => {
-  const { user, profileId, isAuthenticated } = useAuthStore()
+  const { user, profileId, isAuthenticated, impersonatedCustomerId } = useAuthStore()
+  if (isAuthenticated && user?.role === Role.ADMIN && impersonatedCustomerId) {
+    return impersonatedCustomerId
+  }
   return isAuthenticated && user?.role === Role.CUSTOMER ? profileId : undefined
 }
 

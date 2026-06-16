@@ -13,7 +13,10 @@ import { cn } from '@/utils/cn'
 const customerNavLinks = [
   { to: '/', label: 'Home' },
   { to: '/books', label: 'Shop' },
-  { to: '/orders', label: 'Orders' },
+  { to: '/books?category=Fiction', label: 'Categories' },
+  { to: '/books?sort=rating', label: 'Best Sellers' },
+  { to: '/books?sort=newest', label: 'New Arrivals' },
+  { to: '/books?filter=deals', label: 'Deals / Offer' },
 ]
 
 const sellerNavLinks = [
@@ -31,7 +34,7 @@ const adminNavLinks = [
 ]
 
 export const Header = () => {
-  const { user, isAuthenticated, logout } = useAuthStore()
+  const { user, isAuthenticated, logout, impersonatedCustomerId } = useAuthStore()
   const toggleSidebar = useUiStore((state) => state.toggleSidebar)
   const navigate = useNavigate()
   const { data: cartItems = [] } = useCart()
@@ -45,10 +48,24 @@ export const Header = () => {
     navigate('/login')
   }
 
-  const profilePath =
-    user?.role === Role.ADMIN ? '/admin/profile' : user?.role === Role.SELLER ? '/seller/profile' : '/customer/profile'
-  const navLinks = user?.role === Role.ADMIN ? adminNavLinks : user?.role === Role.SELLER ? sellerNavLinks : customerNavLinks
-  const shouldShowCart = !isAuthenticated || user?.role === Role.CUSTOMER
+  const isImpersonatingCustomer = user?.role === Role.ADMIN && Boolean(impersonatedCustomerId)
+  const profilePath = isImpersonatingCustomer
+    ? '/customer/profile'
+    : user?.role === Role.ADMIN 
+      ? '/admin/profile' 
+      : user?.role === Role.SELLER 
+        ? '/seller/profile' 
+        : '/customer/profile'
+
+  const navLinks = isImpersonatingCustomer 
+    ? customerNavLinks 
+    : user?.role === Role.ADMIN 
+      ? adminNavLinks 
+      : user?.role === Role.SELLER 
+        ? sellerNavLinks 
+        : customerNavLinks
+
+  const shouldShowCart = !isAuthenticated || user?.role === Role.CUSTOMER || isImpersonatingCustomer
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn('text-sm font-medium transition hover:text-emerald-300', isActive ? 'text-emerald-300' : 'text-white/85')

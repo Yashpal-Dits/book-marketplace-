@@ -9,7 +9,7 @@ import { Loader } from '@/components/common/Loader'
 import { Pagination } from '@/components/common/Pagination'
 import { AdminBookSort } from '@/enums/admin-sort.enum'
 import { BookStatus } from '@/enums/book-status.enum'
-import { useAdminBooks, useUpdateBookCatalog } from '@/hooks/useAdmin'
+import { useAdminBooks, useUpdateBookCatalog, useDeleteBook } from '@/hooks/useAdmin'
 import { useDebounce } from '@/hooks/useDebounce'
 import { adminBookUpdateSchema } from '@/schemas/book.schema'
 import { useAdminBookFilterStore } from '@/store/adminFilter.store'
@@ -179,9 +179,11 @@ const EditBookModal = ({ book, onClose }: { book: AdminBookDetailed; onClose: ()
 const MobileBookCard = ({
   book,
   onEdit,
+  onDelete,
 }: {
   book: AdminBookDetailed
   onEdit: (book: AdminBookDetailed) => void
+  onDelete: (book: AdminBookDetailed) => void
 }) => {
   return (
     <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
@@ -200,17 +202,26 @@ const MobileBookCard = ({
           <p className="mt-2 text-xs text-stone-500">ISBN: {book.isbn}</p>
           <p className="text-xs text-stone-500">Category: {book.category || '—'}</p>
           <p className="text-xs text-stone-500">Seller: {book.seller?.businessName || 'Marketplace'}</p>
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex items-center justify-between gap-2">
             <span className="text-xs text-stone-500">
               Stock: <span className="font-semibold text-[#16243d]">{book.totalStock ?? 0}</span>
             </span>
-            <button
-              type="button"
-              onClick={() => onEdit(book)}
-              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-stone-100 px-3 text-xs font-semibold text-stone-700 transition hover:bg-stone-200"
-            >
-              <FiEdit3 /> Edit
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => onEdit(book)}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-stone-100 px-3 text-xs font-semibold text-stone-700 transition hover:bg-stone-200"
+              >
+                <FiEdit3 /> Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(book)}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-red-50 px-3 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+              >
+                <FiX /> Delete
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -229,10 +240,17 @@ export const CatalogManagementPage = () => {
     status: status || undefined,
   })
   const [editingBook, setEditingBook] = useState<AdminBookDetailed | null>(null)
+  const deleteBook = useDeleteBook()
   const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE)
 
   const startEntry = data?.total ? (page - 1) * PAGE_SIZE + 1 : 0
   const endEntry = data ? Math.min(page * PAGE_SIZE, data.total) : 0
+
+  const handleDeleteBook = (book: AdminBookDetailed) => {
+    if (window.confirm(`Are you sure you want to delete "${book.title}" from the catalog? This action cannot be undone.`)) {
+      deleteBook.mutate(book.id)
+    }
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -364,6 +382,13 @@ export const CatalogManagementPage = () => {
                           </button>
                           <button
                             type="button"
+                            onClick={() => handleDeleteBook(book)}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-red-50 px-3 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+                          >
+                            <FiX /> Delete
+                          </button>
+                          <button
+                            type="button"
                             aria-label="More actions"
                             className="inline-flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
                           >
@@ -381,7 +406,12 @@ export const CatalogManagementPage = () => {
           {/* Mobile Cards */}
           <section className="space-y-3 sm:hidden">
             {data.data.map((book) => (
-              <MobileBookCard key={book.id} book={book} onEdit={setEditingBook} />
+              <MobileBookCard
+                key={book.id}
+                book={book}
+                onEdit={setEditingBook}
+                onDelete={handleDeleteBook}
+              />
             ))}
           </section>
         </>

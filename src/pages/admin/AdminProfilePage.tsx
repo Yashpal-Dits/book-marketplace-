@@ -1,9 +1,9 @@
 import { EmptyState } from '@/components/common/EmptyState'
 import { Loader } from '@/components/common/Loader'
-import { ProfileForm, type ProfileField } from '@/components/profile/ProfileForm'
+import { ProfileForm } from '@/components/profile/ProfileForm'
 import { useAdminProfile, useUpdateAdminProfile } from '@/hooks/useProfile'
 import { adminProfileSchema } from '@/schemas/profile.schema'
-import type { UpdateAdminProfilePayload } from '@/interfaces'
+import type { UpdateAdminProfilePayload, ProfileField } from '@/interfaces'
 
 const adminFields: ProfileField[] = [
   { name: 'firstName', label: 'First name' },

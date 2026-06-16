@@ -5,7 +5,7 @@ import { FiCamera, FiMail, FiMapPin, FiPhone, FiUser } from 'react-icons/fi'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { FormInput } from '@/components/common/FormInput'
-import type { ProfileField, ProfileFormProps } from '@/interfaces'
+import type { ProfileFormProps } from '@/interfaces'
 
 const fieldError = <TValues extends object>(
   errors: Partial<Record<keyof TValues, string>>,

@@ -8,10 +8,14 @@ export interface AuthState {
   sellerStatus?: string
   impersonatedSellerId?: string
   impersonatedSellerName?: string
+  impersonatedCustomerId?: string
+  impersonatedCustomerName?: string
   isAuthenticated: boolean
   setSession: (session: AuthSession) => void
   updateUser: (user: Partial<SafeUser>) => void
   startSellerImpersonation: (seller: Pick<ISeller, 'id' | 'businessName'>) => void
   stopSellerImpersonation: () => void
+  startCustomerImpersonation: (customer: { id: string; name: string }) => void
+  stopCustomerImpersonation: () => void
   logout: () => void
 }

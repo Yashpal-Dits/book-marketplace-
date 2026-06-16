@@ -73,6 +73,21 @@ export const useUpdateBookCatalog = () => {
   })
 }
 
+export const useDeleteBook = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (bookId: string) => adminApi.deleteBook(bookId),
+    onSuccess: () => {
+      toast.success('Book deleted from catalog')
+      queryClient.invalidateQueries({ queryKey: ['admin'] })
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+      queryClient.invalidateQueries({ queryKey: ['seller'] })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}
+
 export const useAdminCustomers = (params: AdminCustomerParams) =>
   useQuery({
     queryKey: queryKeys.adminCustomers(params),

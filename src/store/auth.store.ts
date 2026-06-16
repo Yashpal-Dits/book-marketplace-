@@ -11,6 +11,8 @@ export const useAuthStore = create<AuthState>()(
       sellerStatus: undefined,
       impersonatedSellerId: undefined,
       impersonatedSellerName: undefined,
+      impersonatedCustomerId: undefined,
+      impersonatedCustomerName: undefined,
       isAuthenticated: false,
       setSession: (session) =>
         set({
@@ -19,12 +21,17 @@ export const useAuthStore = create<AuthState>()(
           sellerStatus: session.sellerStatus,
           impersonatedSellerId: undefined,
           impersonatedSellerName: undefined,
+          impersonatedCustomerId: undefined,
+          impersonatedCustomerName: undefined,
           isAuthenticated: true,
         }),
       updateUser: (user) => set((state) => ({ user: state.user ? { ...state.user, ...user } : state.user })),
       startSellerImpersonation: (seller) =>
         set({ impersonatedSellerId: seller.id, impersonatedSellerName: seller.businessName }),
       stopSellerImpersonation: () => set({ impersonatedSellerId: undefined, impersonatedSellerName: undefined }),
+      startCustomerImpersonation: (customer) =>
+        set({ impersonatedCustomerId: customer.id, impersonatedCustomerName: customer.name }),
+      stopCustomerImpersonation: () => set({ impersonatedCustomerId: undefined, impersonatedCustomerName: undefined }),
       logout: () =>
         set({
           user: null,
@@ -32,6 +39,8 @@ export const useAuthStore = create<AuthState>()(
           sellerStatus: undefined,
           impersonatedSellerId: undefined,
           impersonatedSellerName: undefined,
+          impersonatedCustomerId: undefined,
+          impersonatedCustomerName: undefined,
           isAuthenticated: false,
         }),
     }),

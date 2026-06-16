@@ -1,10 +1,10 @@
 import { EmptyState } from '@/components/common/EmptyState'
 import { Loader } from '@/components/common/Loader'
-import { ProfileForm, type ProfileField } from '@/components/profile/ProfileForm'
+import { ProfileForm } from '@/components/profile/ProfileForm'
 import { SellerStatus } from '@/enums/seller-status.enum'
 import { useSellerProfile, useUpdateSellerProfile } from '@/hooks/useProfile'
 import { sellerProfileSchema } from '@/schemas/profile.schema'
-import type { UpdateSellerProfilePayload } from '@/interfaces'
+import type { UpdateSellerProfilePayload, ProfileField } from '@/interfaces'
 
 const sellerFields: ProfileField[] = [
   { name: 'businessName', label: 'Business name' },

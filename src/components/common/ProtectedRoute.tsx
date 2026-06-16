@@ -13,7 +13,7 @@ const getRoleHomePath = (role: Role, sellerStatus?: string) => {
 }
 
 export const ProtectedRoute = ({ children, allowedRoles, requireApprovedSeller = false }: CommonProtectedRouteProps) => {
-  const { user, isAuthenticated, sellerStatus, impersonatedSellerId } = useAuthStore()
+  const { user, isAuthenticated, sellerStatus, impersonatedSellerId, impersonatedCustomerId } = useAuthStore()
   const location = useLocation()
 
   if (!isAuthenticated || !user) {
@@ -21,6 +21,10 @@ export const ProtectedRoute = ({ children, allowedRoles, requireApprovedSeller =
   }
 
   if (allowedRoles?.length && !allowedRoles.includes(user.role)) {
+    const isImpersonatingCustomer = user.role === Role.ADMIN && Boolean(impersonatedCustomerId)
+    if (isImpersonatingCustomer && allowedRoles.includes(Role.CUSTOMER)) {
+      return children
+    }
     return <Navigate to={getRoleHomePath(user.role, sellerStatus)} replace />
   }
 

@@ -9,27 +9,36 @@ import type { UpdateSellerProfilePayload } from '@/interfaces'
 import type { UpdateAdminProfilePayload } from '@/interfaces'
 
 export const useCustomerProfile = () => {
-  const { user, profileId } = useAuthStore()
+  const { user, profileId, impersonatedCustomerId } = useAuthStore()
+  const effectiveProfileId = user?.role === Role.ADMIN && impersonatedCustomerId 
+    ? impersonatedCustomerId 
+    : profileId
+
   return useQuery({
-    queryKey: queryKeys.customerProfile(profileId ?? ''),
-    queryFn: () => profileApi.getCustomerProfile(profileId as string),
-    enabled: user?.role === Role.CUSTOMER && Boolean(profileId),
+    queryKey: queryKeys.customerProfile(effectiveProfileId ?? ''),
+    queryFn: () => profileApi.getCustomerProfile(effectiveProfileId as string),
+    enabled: (user?.role === Role.CUSTOMER && Boolean(profileId)) || (user?.role === Role.ADMIN && Boolean(impersonatedCustomerId)),
   })
 }
 
 export const useUpdateCustomerProfile = () => {
   const queryClient = useQueryClient()
-  const { profileId, updateUser } = useAuthStore()
+  const { user, profileId, impersonatedCustomerId, updateUser } = useAuthStore()
+  const effectiveProfileId = user?.role === Role.ADMIN && impersonatedCustomerId 
+    ? impersonatedCustomerId 
+    : profileId
 
   return useMutation({
     mutationFn: (payload: UpdateCustomerProfilePayload) => {
-      if (!profileId) throw new Error('Customer profile not found')
-      return profileApi.updateCustomerProfile(profileId, payload)
+      if (!effectiveProfileId) throw new Error('Customer profile not found')
+      return profileApi.updateCustomerProfile(effectiveProfileId, payload)
     },
     onSuccess: (profile) => {
       toast.success('Profile updated successfully')
-      updateUser({ firstName: profile.firstName, lastName: profile.lastName, profileImage: profile.profileImage })
-      queryClient.invalidateQueries({ queryKey: queryKeys.customerProfile(profileId ?? '') })
+      if (user?.role !== Role.ADMIN) {
+        updateUser({ firstName: profile.firstName, lastName: profile.lastName, profileImage: profile.profileImage })
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.customerProfile(effectiveProfileId ?? '') })
     },
     onError: (error: Error) => toast.error(error.message),
   })
