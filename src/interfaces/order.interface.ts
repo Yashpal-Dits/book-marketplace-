@@ -31,6 +31,7 @@ export interface IOrderItem {
   subtotal: number
   status: OrderStatus
   createdAt: string
+  coverImage?: string
 }
 
 export interface IOrderDetailed extends IOrder {

@@ -48,7 +48,7 @@ export const RegisterPage = () => {
       <form onSubmit={formik.handleSubmit} noValidate className="mt-7 space-y-5 sm:mt-9">
         <div className="grid gap-5 sm:grid-cols-2 sm:gap-4">
           <FormInput
-            label="First Name * (Required)"
+            label={<>First Name <span className="text-[#f0532d] font-bold">*</span></>}
             name="firstName"
             autoComplete="given-name"
             maxLength={20}
@@ -59,7 +59,7 @@ export const RegisterPage = () => {
           />
 
           <FormInput
-            label="Last Name * (Required)"
+            label={<>Last Name <span className="text-[#f0532d] font-bold">*</span></>}
             name="lastName"
             autoComplete="family-name"
             maxLength={20}
@@ -71,7 +71,7 @@ export const RegisterPage = () => {
         </div>
 
         <FormInput
-          label="Email * (Required)"
+          label={<>Email <span className="text-[#f0532d] font-bold">*</span></>}
           name="email"
           type="email"
           autoComplete="email"
@@ -83,7 +83,7 @@ export const RegisterPage = () => {
         />
 
         <PasswordInput
-          label="Password * (Required)"
+          label={<>Password <span className="text-[#f0532d] font-bold">*</span></>}
           name="password"
           autoComplete="new-password"
           maxLength={50}
@@ -93,10 +93,14 @@ export const RegisterPage = () => {
           error={formik.touched.password ? formik.errors.password : undefined}
         />
 
+        <div className="pt-1 pb-1 text-center text-xs text-stone-400 font-medium">
+          <span className="text-[#f0532d] font-extrabold">*</span> All fields required
+        </div>
+
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:cursor-not-allowed disabled:opacity-60"
+          className="cursor-pointer inline-flex h-12 w-full items-center justify-center rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {mutation.isPending ? 'Creating account...' : 'Register'}
         </button>
@@ -110,7 +114,7 @@ export const RegisterPage = () => {
 
       <Link
         to="/seller-register"
-        className="block rounded-full border border-stone-200 px-4 py-3 text-center text-sm text-stone-600 transition hover:border-[#f0532d] hover:text-[#f0532d]"
+        className="cursor-pointer block rounded-full border border-stone-200 px-4 py-3 text-center text-sm text-stone-600 transition hover:border-[#f0532d] hover:text-[#f0532d]"
       >
         Register as seller instead
       </Link>

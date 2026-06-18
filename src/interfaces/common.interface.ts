@@ -23,12 +23,12 @@ export interface CommonButtonProps extends ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 export interface CommonFormInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string
+  label: React.ReactNode
   error?: string
 }
 
 export interface CommonPasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string
+  label: React.ReactNode
   error?: string
 }
 

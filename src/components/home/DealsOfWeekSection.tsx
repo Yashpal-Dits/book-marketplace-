@@ -50,7 +50,7 @@ export const DealsOfWeekSection = () => {
 
   return (
     <section className="bg-[#f3ecd9]">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,340px)_1fr] lg:px-8">
+      <div className="mx-auto grid max-w-8xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,340px)_1fr] lg:px-8">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Book Categories</p>
           <h2 className="font-display mt-2 text-3xl font-extrabold uppercase leading-tight text-[#16243d] sm:text-4xl">

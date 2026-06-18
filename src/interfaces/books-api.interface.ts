@@ -6,4 +6,7 @@ export interface GetBooksParams {
   search?: string
   sort?: BookSort
   category?: string
+  minRating?: number
+  maxPrice?: number
+  inStockOnly?: boolean
 }

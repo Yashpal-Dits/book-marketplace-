@@ -15,7 +15,7 @@ const customerNavLinks = [
   { to: '/books', label: 'Shop' },
   { to: '/bestsellers', label: 'Best Sellers' },
   { to: '/new-arrivals', label: 'New Arrivals' },
-  { to: '/deals', label: 'Deals / Offer' },
+  { to: '/deals', label: 'Deals & Offers' },
 ]
 
 const sellerNavLinks = [
@@ -78,7 +78,7 @@ export const Header = () => {
               type="button"
               aria-label="Open menu"
               onClick={toggleSidebar}
-              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-xl transition hover:bg-white/10"
+              className="md:hidden inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-xl transition hover:bg-white/10"
             >
               <FiMenu />
             </button>

@@ -2,7 +2,6 @@ import type { IBook } from '@/interfaces/book.interface'
 import type { ICustomer } from '@/interfaces/customer.interface'
 import type { IListing } from '@/interfaces/listing.interface'
 import type { IOrder, IOrderItem } from '@/interfaces/order.interface'
-import type { ISeller } from '@/interfaces/seller.interface'
 import type { OrderStatus } from '@/enums/order-status.enum'
 import type { SellerListingSort, SellerOrderSort } from '@/enums/seller-sort.enum'
 

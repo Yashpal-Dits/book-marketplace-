@@ -4,13 +4,11 @@ import { Loader } from '@/components/common/Loader'
 import { useBestSellers } from '@/hooks/useBooks'
 
 export const BookOfTheMonthSection = () => {
-  // Same limit as BestSellersSection so both sections share ONE cached query
-  // (one network request instead of two); we only render the top 4 here.
   const { data, isLoading, isError } = useBestSellers(6)
   const books = (data ?? []).slice(0, 4)
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <h2 className="font-display max-w-md text-3xl font-extrabold uppercase leading-tight text-[#16243d] sm:text-4xl">
           The #1 Book of the Month You Can't Miss

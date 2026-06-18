@@ -48,7 +48,7 @@ export const SellerRegisterPage = () => {
 
       <form onSubmit={formik.handleSubmit} noValidate className="mt-7 space-y-4 sm:mt-8">
         <FormInput
-          label="Business Name * (Required)"
+          label={<>Business Name <span className="text-[#f0532d] font-bold">*</span></>}
           name="businessName"
           autoComplete="organization"
           maxLength={80}
@@ -59,7 +59,7 @@ export const SellerRegisterPage = () => {
         />
 
         <FormInput
-          label="Contact Person * (Required)"
+          label={<>Contact Person <span className="text-[#f0532d] font-bold">*</span></>}
           name="contactPerson"
           autoComplete="name"
           maxLength={60}
@@ -71,7 +71,7 @@ export const SellerRegisterPage = () => {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormInput
-            label="Email * (Required)"
+            label={<>Email <span className="text-[#f0532d] font-bold">*</span></>}
             name="email"
             type="email"
             autoComplete="email"
@@ -83,7 +83,7 @@ export const SellerRegisterPage = () => {
           />
 
           <FormInput
-            label="Mobile Number * (Required)"
+            label={<>Mobile Number <span className="text-[#f0532d] font-bold">*</span></>}
             name="mobileNumber"
             inputMode="numeric"
             autoComplete="tel"
@@ -96,7 +96,7 @@ export const SellerRegisterPage = () => {
         </div>
 
         <PasswordInput
-          label="Password * (Required)"
+          label={<>Password <span className="text-[#f0532d] font-bold">*</span></>}
           name="password"
           autoComplete="new-password"
           maxLength={50}
@@ -106,10 +106,14 @@ export const SellerRegisterPage = () => {
           error={formik.touched.password ? formik.errors.password : undefined}
         />
 
+        <div className="pt-1 pb-1 text-center text-xs text-stone-400 font-medium">
+          <span className="text-[#f0532d] font-extrabold">*</span> All fields required
+        </div>
+
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:cursor-not-allowed disabled:opacity-60"
+          className="cursor-pointer inline-flex h-12 w-full items-center justify-center rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {mutation.isPending ? 'Submitting...' : 'Submit seller registration'}
         </button>

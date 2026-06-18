@@ -1,4 +1,4 @@
-import { useState, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { useState, type TextareaHTMLAttributes } from 'react'
 import { Form, Formik } from 'formik'
 import { FiCamera, FiMail, FiMapPin, FiPhone, FiUser } from 'react-icons/fi'
 import { Badge } from '@/components/common/Badge'
@@ -187,6 +187,12 @@ export const ProfileForm = <TValues extends object>({
                 </div>
 
                 <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+                  {noteTitle || noteDescription ? (
+                    <div className="flex-1 rounded-2xl border border-amber-200 bg-amber-50 p-3">
+                      {noteTitle ? <h4 className="text-xs font-bold text-amber-900">{noteTitle}</h4> : null}
+                      {noteDescription ? <p className="mt-0.5 text-xs text-amber-800">{noteDescription}</p> : null}
+                    </div>
+                  ) : null}
                   <Button type="submit" disabled={isSaving || isSubmitting}>
                     {isSaving ? 'Saving...' : submitLabel}
                   </Button>

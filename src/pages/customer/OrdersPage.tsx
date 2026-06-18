@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { FiMapPin, FiShoppingBag } from 'react-icons/fi'
 import { FaStore } from 'react-icons/fa'
+import { BookCover } from '@/components/common/BookCover'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Loader } from '@/components/common/Loader'
 import { OrderStatusBadge } from '@/components/orders/OrderStatusBadge'
@@ -61,17 +62,22 @@ export const OrdersPage = () => {
               {/* items */}
               <ul className="divide-y divide-stone-100 px-5 py-3">
                 {order.items.map((item) => (
-                  <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
-                    <div className="min-w-0">
-                      <Link to={`/books/${item.bookId}`} className="line-clamp-1 text-sm font-semibold text-[#16243d] hover:text-[#f0532d]">
-                        {item.bookTitle}
-                      </Link>
-                      <p className="mt-0.5 flex items-center gap-1.5 text-xs text-stone-500">
-                        <FaStore className="text-[#f0532d]" /> {item.sellerName} · Qty {item.quantity} ×{' '}
-                        {formatCurrency(item.priceAtPurchase)}
-                      </p>
+                  <li key={item.id} className="flex flex-wrap items-center justify-between gap-4 py-3.5">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <BookCover src={item.coverImage} title={item.bookTitle} className="h-16 w-11 shrink-0 rounded shadow-sm object-cover" />
+                      <div className="min-w-0">
+                        <Link to={`/books/${item.bookId}`} className="line-clamp-1 text-sm font-bold text-[#16243d] hover:text-[#f0532d]">
+                          {item.bookTitle}
+                        </Link>
+                        <p className="mt-1 flex items-center gap-1.5 text-xs text-stone-500 font-medium">
+                          <FaStore className="text-[#f0532d]" /> {item.sellerName} · Qty {item.quantity} ×{' '}
+                          {formatCurrency(item.priceAtPurchase)}
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-sm font-bold text-[#16243d]">{formatCurrency(item.subtotal)}</span>
+                    <div className="text-right shrink-0">
+                      <span className="text-base font-extrabold text-[#16243d]">{formatCurrency(item.subtotal)}</span>
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -20,7 +20,7 @@ const FEATURES: HomeFeature[] = [
 ]
 
 export const FeaturesSection = () => (
-  <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+  <section className="mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8">
     <div className="grid gap-10 sm:grid-cols-3">
       {FEATURES.map(({ icon: Icon, title, description }) => (
         <div key={title} className="flex flex-col items-center text-center">

@@ -11,6 +11,7 @@ import { SellerStatus } from '@/enums/seller-status.enum'
 import { loginSchema } from '@/schemas/auth.schema'
 import { useAuthStore } from '@/store/auth.store'
 
+
 export const LoginPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -60,7 +61,7 @@ export const LoginPage = () => {
 
       <form onSubmit={formik.handleSubmit} noValidate className="mt-8 space-y-5 sm:mt-10">
         <FormInput
-          label="Email * (Required)"
+          label={<>Email <span className="text-[#f0532d] font-bold">*</span></>}
           name="email"
           type="email"
           autoComplete="email"
@@ -72,7 +73,7 @@ export const LoginPage = () => {
         />
 
         <PasswordInput
-          label="Password * (Required)"
+          label={<>Password <span className="text-[#f0532d] font-bold">*</span></>}
           name="password"
           autoComplete="current-password"
           maxLength={50}
@@ -99,10 +100,14 @@ export const LoginPage = () => {
           </button>
         </div>
 
+        <div className="pt-1 pb-1 text-center text-xs text-stone-400 font-medium">
+          <span className="text-[#f0532d] font-extrabold">*</span> All fields required
+        </div>
+
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:cursor-not-allowed disabled:opacity-60"
+          className="cursor-pointer inline-flex h-12 w-full items-center justify-center rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {mutation.isPending ? 'Logging in...' : 'Login'}
         </button>

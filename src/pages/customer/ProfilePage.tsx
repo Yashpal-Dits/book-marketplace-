@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { FiCamera, FiEdit3, FiMail, FiMapPin, FiShoppingBag, FiUser, FiX } from 'react-icons/fi'
 import { FaStore } from 'react-icons/fa'
 import { EmptyState } from '@/components/common/EmptyState'
+import { BookCover } from '@/components/common/BookCover'
 import { Loader } from '@/components/common/Loader'
 import { FormInput } from '@/components/common/FormInput'
 import { OrderStatusBadge } from '@/components/orders/OrderStatusBadge'
@@ -52,15 +53,6 @@ export const ProfilePage = () => {
     profileImage: profile.profileImage || '',
   }
 
-  const name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
-  const initials = name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-
   const handleImageFile = (file?: File, setFieldValue?: (field: string, value: string) => void) => {
     if (!file) return
     if (!file.type.startsWith('image/')) {
@@ -81,15 +73,31 @@ export const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-stone-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
+        {/* Top Banner exactly like Admin/Seller profile */}
+        <div className="mb-8 rounded-[2rem] bg-[#0d2b1f] p-6 text-white shadow-sm sm:p-8">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Customer Account</p>
+          <h1 className="font-display mt-2 text-3xl font-extrabold uppercase sm:text-4xl">
+            Customer <span className="text-[#f5862e]">Portal</span>
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+            Manage your public profile, shipping addresses, security options, and track all your placed orders.
+          </p>
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
           {/* Left Sidebar */}
-          <aside className="h-fit rounded-2xl bg-white p-5 shadow-sm">
-            <div className="mb-4">
-              <h3 className="text-lg font-bold text-stone-900">Settings</h3>
-              <p className="text-xs text-stone-400 mt-1">You can find all settings here.</p>
+          <aside className="h-fit rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+            <div className="mb-6 flex items-center gap-3 border-b border-stone-100 pb-4">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#0d2b1f] text-[#f5862e]">
+                <FiUser size={20} />
+              </div>
+              <div>
+                <h3 className="font-display text-lg font-bold text-[#16243d]">Settings</h3>
+                <p className="text-xs text-stone-400">Customer preferences</p>
+              </div>
             </div>
-            <nav className="space-y-1">
+            <nav className="space-y-1.5">
               {sidebarLinks.map((link) => {
                 const Icon = link.icon
                 const isActive = activeTab === link.id
@@ -99,13 +107,13 @@ export const ProfilePage = () => {
                     type="button"
                     onClick={() => setActiveTab(link.id)}
                     className={cn(
-                      'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',
+                      'flex w-full cursor-pointer items-center gap-3.5 rounded-2xl px-4 py-3 text-sm font-semibold transition',
                       isActive
-                        ? 'bg-orange-50 text-[#f0532d]'
-                        : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
+                        ? 'bg-[#0d2b1f] text-[#f5862e] shadow-lg shadow-emerald-950/10'
+                        : 'text-stone-500 hover:bg-stone-100 hover:text-stone-800'
                     )}
                   >
-                    <Icon />
+                    <Icon className={isActive ? 'text-[#f5862e]' : 'text-stone-400'} size={18} />
                     {link.label}
                   </button>
                 )
@@ -392,17 +400,22 @@ export const ProfilePage = () => {
 
                       <ul className="divide-y divide-stone-100 px-5 py-3">
                         {order.items.map((item) => (
-                          <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
-                            <div className="min-w-0">
-                              <Link to={`/books/${item.bookId}`} className="cursor-pointer line-clamp-1 text-sm font-semibold text-[#16243d] hover:text-[#f0532d]">
-                                {item.bookTitle}
-                              </Link>
-                              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-stone-500">
-                                <FaStore className="text-[#f0532d]" /> {item.sellerName} · Qty {item.quantity} ×{' '}
-                                {formatCurrency(item.priceAtPurchase)}
-                              </p>
+                          <li key={item.id} className="flex flex-wrap items-center justify-between gap-4 py-3.5">
+                            <div className="flex items-center gap-3.5 min-w-0">
+                              <BookCover src={item.coverImage} title={item.bookTitle} className="h-16 w-11 shrink-0 rounded shadow-sm object-cover" />
+                              <div className="min-w-0">
+                                <Link to={`/books/${item.bookId}`} className="cursor-pointer line-clamp-1 text-sm font-bold text-[#16243d] hover:text-[#f0532d]">
+                                  {item.bookTitle}
+                                </Link>
+                                <p className="mt-1 flex items-center gap-1.5 text-xs text-stone-500 font-medium">
+                                  <FaStore className="text-[#f0532d]" /> {item.sellerName} · Qty {item.quantity} ×{' '}
+                                  {formatCurrency(item.priceAtPurchase)}
+                                </p>
+                              </div>
                             </div>
-                            <span className="cursor-pointer text-sm font-bold text-[#16243d]">{formatCurrency(item.subtotal)}</span>
+                            <div className="text-right shrink-0">
+                              <span className="cursor-pointer text-base font-extrabold text-[#16243d]">{formatCurrency(item.subtotal)}</span>
+                            </div>
                           </li>
                         ))}
                       </ul>

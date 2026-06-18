@@ -1,6 +1,7 @@
 import { useState, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { Form, Formik } from 'formik'
-import { FiEdit3, FiPlus, FiRefreshCw, FiSearch } from 'react-icons/fi'
+import toast from 'react-hot-toast'
+import { FiEdit3, FiPlus, FiRefreshCw, FiSearch, FiLayers } from 'react-icons/fi'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -16,6 +17,7 @@ import { sellerBookRequestSchema, sellerListingSchema, sellerListingUpdateSchema
 import { useSellerListingFilterStore } from '@/store/sellerFilter.store'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { formatDate } from '@/utils/formatDate'
+import { cn } from '@/utils/cn'
 
 const PAGE_SIZE = 8
 
@@ -99,6 +101,7 @@ export const SellerListingsPage = () => {
   const createListing = useCreateSellerListing()
   const createBookRequest = useCreateSellerBookRequest()
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'inventory' | 'create-listing' | 'request-book'>('inventory')
   const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE)
 
   return (
@@ -115,7 +118,50 @@ export const SellerListingsPage = () => {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1fr_360px]">
+      {/* Tab Switcher Bar */}
+      <section className="flex flex-wrap items-center gap-3 border-b border-stone-200 pb-4">
+        <button
+          type="button"
+          onClick={() => setActiveTab('inventory')}
+          className={cn(
+            'flex cursor-pointer items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition',
+            activeTab === 'inventory'
+              ? 'bg-[#0d2b1f] text-[#f5862e] shadow-md'
+              : 'bg-white text-stone-600 hover:bg-stone-100'
+          )}
+        >
+          <FiLayers size={18} /> Inventory Management
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('create-listing')}
+          className={cn(
+            'flex cursor-pointer items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition',
+            activeTab === 'create-listing'
+              ? 'bg-[#0d2b1f] text-[#f5862e] shadow-md'
+              : 'bg-white text-stone-600 hover:bg-stone-100'
+          )}
+        >
+          <FiPlus size={18} /> Add Approved Book
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('request-book')}
+          className={cn(
+            'flex cursor-pointer items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition',
+            activeTab === 'request-book'
+              ? 'bg-[#0d2b1f] text-[#f5862e] shadow-md'
+              : 'bg-white text-stone-600 hover:bg-stone-100'
+          )}
+        >
+          <FiRefreshCw size={18} /> Request New Book
+        </button>
+      </section>
+
+      {/* Tab 1: Inventory Table */}
+      {activeTab === 'inventory' && (
         <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-3 border-b border-stone-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
             <label className="relative block lg:w-80">
@@ -148,7 +194,10 @@ export const SellerListingsPage = () => {
             ) : isError ? (
               <EmptyState title="Could not load listings" />
             ) : !data?.data.length ? (
-              <EmptyState title="No listings found" description="Create your first listing from the form on the right." />
+              <EmptyState
+                title="No listings found"
+                description="Click 'Add Approved Book' at the top to create your first listing."
+              />
             ) : (
               <div className="space-y-3">
                 {data.data.map((listing) => (
@@ -177,68 +226,106 @@ export const SellerListingsPage = () => {
           </div>
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-6" />
         </div>
+      )}
 
-        <aside className="space-y-6">
-          <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <FiPlus className="text-[#f0532d]" />
-              <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Create Listing</h2>
+      {/* Tab 2: Create Listing (Add Approved Book) */}
+      {activeTab === 'create-listing' && (
+        <div className="mx-auto max-w-3xl rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#0d2b1f] text-[#f5862e]">
+              <FiPlus size={20} />
             </div>
-            <p className="mt-1 text-xs text-stone-500">For an already approved book.</p>
-            <Formik
-              initialValues={{ bookId: '', price: '', mrp: '', stock: '' }}
-              validationSchema={sellerListingSchema}
-              onSubmit={(values, helpers) =>
-                createListing.mutate(
-                  { bookId: values.bookId, price: Number(values.price), mrp: Number(values.mrp), stock: Number(values.stock) },
-                  { onSuccess: () => helpers.resetForm(), onSettled: () => helpers.setSubmitting(false) },
-                )
-              }
-            >
-              {({ values, errors, touched, handleChange, handleBlur, isSubmitting }) => (
-                <Form className="mt-4 space-y-3">
-                  <SelectField label="Approved book" name="bookId" value={values.bookId} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'bookId')}>
-                    <option value="">Select book</option>
-                    {approvedBooks.map((book) => <option key={book.id} value={book.id}>{book.title} — {book.author}</option>)}
-                  </SelectField>
-                  <FormInput label="Selling price" name="price" type="number" value={values.price} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'price')} />
-                  <FormInput label="MRP" name="mrp" type="number" value={values.mrp} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'mrp')} />
-                  <FormInput label="Stock" name="stock" type="number" value={values.stock} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'stock')} />
-                  <Button type="submit" className="w-full" disabled={createListing.isPending || isSubmitting}>{createListing.isPending ? 'Creating...' : 'Create listing'}</Button>
-                </Form>
-              )}
-            </Formik>
+            <div>
+              <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Add Approved Book</h2>
+              <p className="text-xs text-stone-500">Create a commercial listing for an already approved catalog book.</p>
+            </div>
           </div>
+          <Formik
+            initialValues={{ bookId: '', price: '', mrp: '', stock: '' }}
+            validationSchema={sellerListingSchema}
+            onSubmit={(values, helpers) =>
+              createListing.mutate(
+                { bookId: values.bookId, price: Number(values.price), mrp: Number(values.mrp), stock: Number(values.stock) },
+                {
+                  onSuccess: () => {
+                    toast.success('Listing created successfully!')
+                    helpers.resetForm()
+                    setActiveTab('inventory')
+                  },
+                  onSettled: () => helpers.setSubmitting(false),
+                },
+              )
+            }
+          >
+            {({ values, errors, touched, handleChange, handleBlur, isSubmitting }) => (
+              <Form className="mt-6 space-y-4">
+                <SelectField label="Approved Book Catalog" name="bookId" value={values.bookId} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'bookId')}>
+                  <option value="">Select book</option>
+                  {approvedBooks.map((book) => <option key={book.id} value={book.id}>{book.title} — {book.author}</option>)}
+                </SelectField>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FormInput label="Selling price (₹)" name="price" type="number" value={values.price} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'price')} />
+                  <FormInput label="MRP (₹)" name="mrp" type="number" value={values.mrp} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'mrp')} />
+                </div>
+                <FormInput label="Initial stock" name="stock" type="number" value={values.stock} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'stock')} />
+                <div className="pt-4 flex justify-end gap-3">
+                  <Button type="button" variant="secondary" onClick={() => setActiveTab('inventory')}>Cancel</Button>
+                  <Button type="submit" className="px-8" disabled={createListing.isPending || isSubmitting}>{createListing.isPending ? 'Creating...' : 'Create listing'}</Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
+      )}
 
-          <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <FiRefreshCw className="text-[#f0532d]" />
-              <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Request New Book</h2>
+      {/* Tab 3: Request New Book */}
+      {activeTab === 'request-book' && (
+        <div className="mx-auto max-w-3xl rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#0d2b1f] text-[#f5862e]">
+              <FiRefreshCw size={20} />
             </div>
-            <p className="mt-1 text-xs text-stone-500">Duplicate ISBN is blocked. New books stay pending until admin approval.</p>
-            <Formik
-              initialValues={{ isbn: '', title: '', author: '', publisher: '', category: '', coverImage: '', description: '' }}
-              validationSchema={sellerBookRequestSchema}
-              onSubmit={(values, helpers) =>
-                createBookRequest.mutate(values, { onSuccess: () => helpers.resetForm(), onSettled: () => helpers.setSubmitting(false) })
-              }
-            >
-              {({ values, errors, touched, handleChange, handleBlur, isSubmitting }) => (
-                <Form className="mt-4 space-y-3">
+            <div>
+              <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Request New Book</h2>
+              <p className="text-xs text-stone-500">Duplicate ISBN is blocked. New books stay pending until admin approval.</p>
+            </div>
+          </div>
+          <Formik
+            initialValues={{ isbn: '', title: '', author: '', publisher: '', category: '', coverImage: '', description: '' }}
+            validationSchema={sellerBookRequestSchema}
+            onSubmit={(values, helpers) =>
+              createBookRequest.mutate(values, {
+                onSuccess: () => {
+                  toast.success('Book requested successfully! It is now pending admin approval.')
+                  helpers.resetForm()
+                  setActiveTab('inventory')
+                },
+                onSettled: () => helpers.setSubmitting(false),
+              })
+            }
+          >
+            {({ values, errors, touched, handleChange, handleBlur, isSubmitting }) => (
+              <Form className="mt-6 space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormInput label="ISBN" name="isbn" value={values.isbn} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'isbn')} />
-                  <FormInput label="Title" name="title" value={values.title} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'title')} />
+                  <FormInput label="Category" name="category" value={values.category} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'category')} />
+                </div>
+                <FormInput label="Title" name="title" value={values.title} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'title')} />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormInput label="Author" name="author" value={values.author} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'author')} />
                   <FormInput label="Publisher" name="publisher" value={values.publisher} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'publisher')} />
-                  <FormInput label="Category" name="category" value={values.category} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'category')} />
-                  <FormInput label="Cover image URL" name="coverImage" value={values.coverImage} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'coverImage')} />
-                  <TextareaField label="Description" name="description" value={values.description} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'description')} />
-                  <Button type="submit" className="w-full" disabled={createBookRequest.isPending || isSubmitting}>{createBookRequest.isPending ? 'Submitting...' : 'Submit for approval'}</Button>
-                </Form>
-              )}
-            </Formik>
-          </div>
-        </aside>
-      </section>
+                </div>
+                <FormInput label="Cover image URL" name="coverImage" value={values.coverImage} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'coverImage')} />
+                <TextareaField label="Description" name="description" value={values.description} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'description')} />
+                <div className="pt-4 flex justify-end gap-3">
+                  <Button type="button" variant="secondary" onClick={() => setActiveTab('inventory')}>Cancel</Button>
+                  <Button type="submit" className="px-8" disabled={createBookRequest.isPending || isSubmitting}>{createBookRequest.isPending ? 'Submitting...' : 'Submit for approval'}</Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
+      )}
     </div>
   )
 }

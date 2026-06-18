@@ -10,7 +10,7 @@ export const BestSellersSection = () => {
   const promoCovers = books.filter((b) => b.coverImage).slice(0, 3)
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <h2 className="font-display max-w-sm text-3xl font-extrabold uppercase leading-tight text-[#16243d] sm:text-4xl">
           Best Sellers of the Month

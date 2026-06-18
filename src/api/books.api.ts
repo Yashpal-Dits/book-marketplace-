@@ -54,6 +54,9 @@ export const booksApi = {
     search = '',
     sort = BookSort.NEWEST,
     category,
+    minRating = 0,
+    maxPrice = 2000,
+    inStockOnly = false,
   }: GetBooksParams = {}): Promise<PaginatedResult<IBook>> {
     const params: Record<string, string | number> = { status: BookStatus.APPROVED }
     if (search.trim()) params.q = search.trim()
@@ -65,7 +68,13 @@ export const booksApi = {
     ])
 
     const customerVisibleBooks = sortCustomerBooks(
-      books.filter((book) => visibleBookIds.has(book.id)),
+      books.filter((book) => {
+        const isVisible = visibleBookIds.has(book.id)
+        const matchesRating = (book.rating ?? 0) >= minRating
+        const matchesPrice = (book.minPrice ?? Number.MAX_SAFE_INTEGER) <= maxPrice
+        const matchesStock = inStockOnly ? (book.totalStock ?? 0) > 0 : true
+        return isVisible && matchesRating && matchesPrice && matchesStock
+      }),
       sort,
     )
 

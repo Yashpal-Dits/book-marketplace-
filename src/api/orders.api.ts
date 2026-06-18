@@ -55,6 +55,7 @@ export const ordersApi = {
         subtotal: item.listing.price * item.quantity,
         status: OrderStatus.CREATED,
         createdAt: now,
+        coverImage: item.book.coverImage,
       }
       await axiosInstance.post('/orderItems', orderItem)
 
@@ -85,7 +86,18 @@ export const ordersApi = {
         const { data: items } = await axiosInstance.get<IOrderItem[]>('/orderItems', {
           params: { orderId: order.id },
         })
-        return { ...order, items }
+        const itemsWithCovers = await Promise.all(
+          items.map(async (item) => {
+            if (item.coverImage) return item
+            try {
+              const { data: book } = await axiosInstance.get(`/books/${item.bookId}`)
+              return { ...item, coverImage: book.coverImage }
+            } catch {
+              return item
+            }
+          }),
+        )
+        return { ...order, items: itemsWithCovers }
       }),
     )
     return withItems

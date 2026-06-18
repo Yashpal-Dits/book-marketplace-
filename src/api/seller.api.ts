@@ -22,6 +22,8 @@ import type {
 import { generateId } from '@/utils/generateId'
 import { syncBookAggregates } from '@/utils/syncBookAggregates'
 
+export type { SellerListingDetailed } from '@/interfaces/seller-api.interface'
+
 const paginate = <T>(rows: T[], page = 1, limit = 8): PaginatedResult<T> => {
   const start = (page - 1) * limit
   return { data: rows.slice(start, start + limit), total: rows.length, page, limit }
