@@ -37,10 +37,12 @@ export const SellerOrdersPage = () => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] bg-white p-6 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Seller Orders</p>
-        <h1 className="font-display mt-1 text-3xl font-extrabold uppercase text-[#16243d]">Process Orders</h1>
-        <p className="mt-2 max-w-2xl text-sm text-stone-500">
+      <section className="overflow-hidden rounded-[2rem] bg-secondary p-6 text-white shadow-sm sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Seller Orders</p>
+        <h1 className="font-display mt-1 text-3xl font-extrabold uppercase sm:text-4xl">
+          Process <span className="text-accent">Orders</span>
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
           Each row is an order item for your listing. Move orders through Created → Accepted → Shipped → Delivered, or cancel before shipment.
         </p>
       </section>
@@ -53,14 +55,14 @@ export const SellerOrdersPage = () => {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by book, customer or order id..."
-              className="h-11 w-full rounded-full border border-stone-200 bg-stone-50 pl-11 pr-4 text-sm outline-none focus:border-[#f0532d] focus:ring-4 focus:ring-orange-500/10"
+              className="h-11 w-full rounded-full border border-stone-200 bg-stone-50 pl-11 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-orange-500/10"
             />
           </label>
           <div className="flex flex-col gap-3 sm:flex-row">
             <select
               value={status}
               onChange={(event) => setStatus(event.target.value as OrderStatus | '')}
-              className="h-11 rounded-full border border-stone-200 bg-white px-4 text-sm outline-none focus:border-[#f0532d]"
+              className="h-11 rounded-full border border-stone-200 bg-white px-4 text-sm outline-none focus:border-primary"
             >
               <option value="">All statuses</option>
               <option value={OrderStatus.CREATED}>Created</option>
@@ -72,7 +74,7 @@ export const SellerOrdersPage = () => {
             <select
               value={sort}
               onChange={(event) => setSort(event.target.value as SellerOrderSort)}
-              className="h-11 rounded-full border border-stone-200 bg-white px-4 text-sm outline-none focus:border-[#f0532d]"
+              className="h-11 rounded-full border border-stone-200 bg-white px-4 text-sm outline-none focus:border-primary"
             >
               <option value={SellerOrderSort.NEWEST}>Newest</option>
               <option value={SellerOrderSort.OLDEST}>Oldest</option>
@@ -101,23 +103,23 @@ export const SellerOrdersPage = () => {
                     <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 bg-stone-50/70 px-5 py-3">
                       <div>
                         <p className="text-xs text-stone-500">Order item</p>
-                        <p className="font-mono text-sm font-bold text-[#16243d]">#{item.id.slice(-10)}</p>
+                        <p className="font-mono text-sm font-bold text-heading">#{item.id.slice(-10)}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold text-[#16243d]">{formatCurrency(item.subtotal)}</span>
+                        <span className="text-sm font-bold text-heading">{formatCurrency(item.subtotal)}</span>
                         <OrderStatusBadge status={item.status} />
                       </div>
                     </header>
 
                     <div className="grid gap-4 p-5 lg:grid-cols-[1fr_260px]">
                       <div className="min-w-0">
-                        <h3 className="line-clamp-1 text-base font-bold text-[#16243d]">{item.bookTitle}</h3>
+                        <h3 className="line-clamp-1 text-base font-bold text-heading">{item.bookTitle}</h3>
                         <p className="mt-1 text-sm text-stone-500">
                           Qty {item.quantity} × {formatCurrency(item.priceAtPurchase)} · Ordered {formatDate(item.createdAt)}
                         </p>
                         <p className="mt-2 text-sm font-medium text-stone-700">Customer: {customerName}</p>
                         <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-stone-500">
-                          <FiMapPin className="mt-0.5 shrink-0 text-[#f0532d]" />
+                          <FiMapPin className="mt-0.5 shrink-0 text-primary" />
                           <span>
                             {item.order.shippingAddress.addressLine}, {item.order.shippingAddress.city}, {item.order.shippingAddress.state} — {item.order.shippingAddress.pincode} · {item.order.shippingAddress.mobileNumber}
                           </span>

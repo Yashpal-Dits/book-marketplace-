@@ -56,7 +56,7 @@ const SOCIAL_ICONS = [
 ]
 
 export const Footer = () => (
-  <footer className="bg-[#0d2b1f] text-white">
+  <footer className="bg-secondary text-white">
     <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
       {FOOTER_COLUMNS.map((column) => (
         <nav key={column.heading} aria-label={column.heading}>
@@ -117,7 +117,7 @@ export const Footer = () => (
           <span className="cursor-default transition hover:text-emerald-300">Sitemap</span>
         </div>
         <p className="flex items-center gap-2">
-          <FaBookOpen className="text-[#f5862e]" />
+          <FaBookOpen className="text-accent" />
           © 2026 Bseller. All Rights Reserved
         </p>
       </div>

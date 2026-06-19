@@ -49,10 +49,10 @@ export const ProfileForm = <TValues extends object>({
 
   return (
     <section className={wrapperClassName}>
-      <div className="rounded-[2rem] bg-[#0d2b1f] p-6 text-white shadow-sm sm:p-8">
+      <div className="rounded-[2rem] bg-secondary p-6 text-white shadow-sm sm:p-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">{eyebrow}</p>
         <h1 className="font-display mt-2 text-3xl font-extrabold uppercase sm:text-4xl">
-          {title} <span className="text-[#f5862e]">{highlight}</span>
+          {title} <span className="text-accent">{highlight}</span>
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">{description}</p>
       </div>
@@ -128,10 +128,10 @@ export const ProfileForm = <TValues extends object>({
                       event.preventDefault()
                       handleImageFile(event.dataTransfer.files[0])
                     }}
-                    className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-300 bg-white px-4 py-5 text-center transition hover:border-[#f0532d] hover:bg-orange-50"
+                    className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-300 bg-white px-4 py-5 text-center transition hover:border-primary hover:bg-orange-50"
                   >
-                    <FiCamera className="text-xl text-[#f0532d]" />
-                    <span className="mt-2 text-sm font-semibold text-[#16243d]">Upload image</span>
+                    <FiCamera className="text-xl text-primary" />
+                    <span className="mt-2 text-sm font-semibold text-heading">Upload image</span>
                     <span className="mt-1 text-xs leading-5 text-stone-500">Drag & drop here or click to choose from your device</span>
                     <input
                       type="file"
@@ -145,8 +145,8 @@ export const ProfileForm = <TValues extends object>({
 
               <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
                 <div className="flex items-center gap-2 border-b border-stone-100 pb-4">
-                  <FiCamera className="text-[#f0532d]" />
-                  <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">{sectionTitle}</h2>
+                  <FiCamera className="text-primary" />
+                  <h2 className="font-display text-xl font-extrabold uppercase text-heading">{sectionTitle}</h2>
                 </div>
 
                 <div className="mt-5 grid gap-4 md:grid-cols-2">

@@ -24,7 +24,7 @@ const StatCard = ({ label, value, icon: Icon, tone = 'amber' }: { label: string;
         <Icon />
       </div>
       <p className="mt-5 text-sm text-stone-500">{label}</p>
-      <p className="mt-1 text-2xl font-extrabold text-[#16243d]">{value}</p>
+      <p className="mt-1 text-2xl font-extrabold text-heading">{value}</p>
     </div>
   )
 }
@@ -49,19 +49,19 @@ export const AdminDashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] bg-[#0d2b1f] p-6 text-white shadow-sm sm:p-8">
+      <section className="overflow-hidden rounded-[2rem] bg-secondary p-6 text-white shadow-sm sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Admin Portal</p>
             <h1 className="font-display mt-2 text-3xl font-extrabold uppercase sm:text-4xl">
-              Marketplace <span className="text-[#f5862e]">Dashboard</span>
+              Marketplace <span className="text-accent">Dashboard</span>
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
               Review sellers, approve catalog books, and monitor marketplace operations from one simple dashboard.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link to="/admin/sellers" className="inline-flex h-11 items-center rounded-full bg-[#f0532d] px-5 text-sm font-semibold text-white transition hover:bg-[#d8431f]">
+            <Link to="/admin/sellers" className="inline-flex h-11 items-center rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover">
               Review sellers
             </Link>
             <Link to="/admin/books" className="inline-flex h-11 items-center rounded-full bg-white/10 px-5 text-sm font-semibold text-white transition hover:bg-white/15">
@@ -85,15 +85,15 @@ export const AdminDashboardPage = () => {
       <section className="grid gap-6 xl:grid-cols-3">
         <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Recent Sellers</h2>
-            <Link to="/admin/sellers" className="text-sm font-semibold text-[#f0532d] hover:text-[#d8431f]">View all</Link>
+            <h2 className="font-display text-xl font-extrabold uppercase text-heading">Recent Sellers</h2>
+            <Link to="/admin/sellers" className="text-sm font-semibold text-primary hover:text-primary-hover">View all</Link>
           </div>
           <div className="mt-4 space-y-3">
             {data.recentSellers.map((seller) => (
               <div key={seller.id} className="rounded-2xl border border-stone-100 bg-stone-50/70 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="line-clamp-1 text-sm font-bold text-[#16243d]">{seller.businessName}</p>
+                    <p className="line-clamp-1 text-sm font-bold text-heading">{seller.businessName}</p>
                     <p className="mt-1 text-xs text-stone-500">{seller.email} · {formatDate(seller.createdAt)}</p>
                   </div>
                   <Badge className={sellerStatusClass[seller.status]}>{seller.status}</Badge>
@@ -105,15 +105,15 @@ export const AdminDashboardPage = () => {
 
         <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Recent Books</h2>
-            <Link to="/admin/books" className="text-sm font-semibold text-[#f0532d] hover:text-[#d8431f]">View all</Link>
+            <h2 className="font-display text-xl font-extrabold uppercase text-heading">Recent Books</h2>
+            <Link to="/admin/books" className="text-sm font-semibold text-primary hover:text-primary-hover">View all</Link>
           </div>
           <div className="mt-4 space-y-3">
             {data.recentBooks.map((book) => (
               <div key={book.id} className="rounded-2xl border border-stone-100 bg-stone-50/70 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="line-clamp-1 text-sm font-bold text-[#16243d]">{book.title}</p>
+                    <p className="line-clamp-1 text-sm font-bold text-heading">{book.title}</p>
                     <p className="mt-1 text-xs text-stone-500">{book.author} · {book.seller?.businessName ?? 'Marketplace'}</p>
                   </div>
                   <Badge className={bookStatusClass[book.status]}>{book.status}</Badge>
@@ -124,14 +124,14 @@ export const AdminDashboardPage = () => {
         </div>
 
         <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-          <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Recent Orders</h2>
+          <h2 className="font-display text-xl font-extrabold uppercase text-heading">Recent Orders</h2>
           <div className="mt-4 space-y-3">
             {data.recentOrders.length ? (
               data.recentOrders.map((order) => (
                 <div key={order.id} className="rounded-2xl border border-stone-100 bg-stone-50/70 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-mono text-sm font-bold text-[#16243d]">#{order.id.slice(-10)}</p>
+                      <p className="font-mono text-sm font-bold text-heading">#{order.id.slice(-10)}</p>
                       <p className="mt-1 text-xs text-stone-500">{formatDate(order.createdAt)} · {formatCurrency(order.totalAmount)}</p>
                     </div>
                     <OrderStatusBadge status={order.status} />

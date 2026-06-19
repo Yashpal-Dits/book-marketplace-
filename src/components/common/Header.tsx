@@ -71,7 +71,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-[#0d2b1f]/95 text-white backdrop-blur">
+      <header className="sticky top-0 z-40 bg-secondary/95 text-white backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <button
@@ -83,7 +83,7 @@ export const Header = () => {
               <FiMenu />
             </button>
             <Link to="/" className="cursor-pointer flex items-center gap-2 text-lg font-bold text-emerald-300">
-              <FaBookOpen className="text-[#f5862e]" /> <span className="cursor-pointer font-display tracking-wide">Bseller</span>
+              <FaBookOpen className="text-accent" /> <span className="cursor-pointer font-display tracking-wide">Bseller</span>
             </Link>
           </div>
 
@@ -103,7 +103,7 @@ export const Header = () => {
                 className="relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition hover:bg-white/10"
               >
                 <FiShoppingCart />
-                <span className="cursor-pointer absolute -right-0.5 -top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#f0532d] text-[9px] font-bold">
+                <span className="cursor-pointer absolute -right-0.5 -top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold">
                   {cartCount}
                 </span>
               </Link>
@@ -136,7 +136,7 @@ export const Header = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="cursor-pointer ml-1 inline-flex h-9 items-center rounded-full bg-[#f0532d] px-4 text-sm font-semibold transition hover:bg-[#d8431f]"
+                  className="cursor-pointer ml-1 inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-semibold transition hover:bg-primary-hover"
                 >
                   Register
                 </Link>
@@ -152,7 +152,7 @@ export const Header = () => {
             <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-amber-100 text-amber-700">
               <FiAlertTriangle className="text-xl" />
             </div>
-            <h2 className="mt-4 font-display text-2xl font-extrabold uppercase text-[#16243d]">Logout?</h2>
+            <h2 className="mt-4 font-display text-2xl font-extrabold uppercase text-heading">Logout?</h2>
             <p className="mt-2 text-sm leading-6 text-stone-500">
               Are you sure you want to logout from your account?
             </p>
@@ -167,7 +167,7 @@ export const Header = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f]"
+                className="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-white transition hover:bg-primary-hover"
               >
                 <FiLogOut /> Logout
               </button>

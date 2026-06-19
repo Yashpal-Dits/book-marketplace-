@@ -30,7 +30,7 @@ export const DiscountBannerSection = () => {
   })
 
   return (
-    <section className="mx-auto max-w-8xl px-4 pb-20 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
       <div className="relative overflow-hidden rounded-[2rem] border border-amber-900/10 bg-[#f3ecd9] px-6 py-12 sm:px-10">
         {/* decorative sparkles */}
         <span className="absolute left-[30%] top-6 text-lg text-[#f0532d]" aria-hidden>✦</span>

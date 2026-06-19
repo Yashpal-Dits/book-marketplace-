@@ -21,7 +21,7 @@ const StatCard = ({ label, value, icon: Icon, tone = 'amber' }: { label: string;
         <Icon />
       </div>
       <p className="mt-5 text-sm text-stone-500">{label}</p>
-      <p className="mt-1 text-2xl font-extrabold text-[#16243d]">{value}</p>
+      <p className="mt-1 text-2xl font-extrabold text-heading">{value}</p>
     </div>
   )
 }
@@ -34,12 +34,12 @@ export const SellerDashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] bg-[#0d2b1f] p-6 text-white shadow-sm sm:p-8">
+      <section className="overflow-hidden rounded-[2rem] bg-secondary p-6 text-white shadow-sm sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Seller Portal</p>
             <h1 className="font-display mt-2 text-3xl font-extrabold uppercase sm:text-4xl">
-              Dashboard <span className="text-[#f5862e]">Overview</span>
+              Dashboard <span className="text-accent">Overview</span>
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
               Manage seller-specific listings, inventory, and order processing as required by the marketplace flow.
@@ -47,7 +47,7 @@ export const SellerDashboardPage = () => {
           </div>
           <Link
             to="/seller/listings"
-            className="inline-flex h-11 items-center gap-2 rounded-full bg-[#f0532d] px-5 text-sm font-semibold text-white transition hover:bg-[#d8431f]"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover"
           >
             <FiPlus /> Add listing
           </Link>
@@ -68,8 +68,8 @@ export const SellerDashboardPage = () => {
       <section className="grid gap-6 xl:grid-cols-2">
         <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Recent Orders</h2>
-            <Link to="/seller/orders" className="text-sm font-semibold text-[#f0532d] hover:text-[#d8431f]">
+            <h2 className="font-display text-xl font-extrabold uppercase text-heading">Recent Orders</h2>
+            <Link to="/seller/orders" className="text-sm font-semibold text-primary hover:text-primary-hover">
               View all
             </Link>
           </div>
@@ -79,7 +79,7 @@ export const SellerDashboardPage = () => {
                 <div key={item.id} className="rounded-2xl border border-stone-100 bg-stone-50/70 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="line-clamp-1 text-sm font-bold text-[#16243d]">{item.bookTitle}</p>
+                      <p className="line-clamp-1 text-sm font-bold text-heading">{item.bookTitle}</p>
                       <p className="mt-1 text-xs text-stone-500">
                         #{item.orderId.slice(-8)} · Qty {item.quantity} · {formatDate(item.createdAt)}
                       </p>
@@ -96,8 +96,8 @@ export const SellerDashboardPage = () => {
 
         <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Inventory Alerts</h2>
-            <Link to="/seller/listings" className="text-sm font-semibold text-[#f0532d] hover:text-[#d8431f]">
+            <h2 className="font-display text-xl font-extrabold uppercase text-heading">Inventory Alerts</h2>
+            <Link to="/seller/listings" className="text-sm font-semibold text-primary hover:text-primary-hover">
               Manage stock
             </Link>
           </div>
@@ -106,7 +106,7 @@ export const SellerDashboardPage = () => {
               data.lowStockListings.map((listing) => (
                 <div key={listing.id} className="flex items-center justify-between gap-4 rounded-2xl border border-stone-100 bg-stone-50/70 p-4">
                   <div className="min-w-0">
-                    <p className="line-clamp-1 text-sm font-bold text-[#16243d]">{listing.book.title}</p>
+                    <p className="line-clamp-1 text-sm font-bold text-heading">{listing.book.title}</p>
                     <p className="mt-1 text-xs text-stone-500">{listing.stock === 0 ? 'Out of stock' : `Only ${listing.stock} left`}</p>
                   </div>
                   <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">Stock {listing.stock}</span>

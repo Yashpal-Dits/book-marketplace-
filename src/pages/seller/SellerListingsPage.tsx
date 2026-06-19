@@ -1,13 +1,15 @@
 import { useState, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { Form, Formik } from 'formik'
 import toast from 'react-hot-toast'
-import { FiEdit3, FiPlus, FiRefreshCw, FiSearch, FiLayers } from 'react-icons/fi'
+import { FiEdit3, FiPlus, FiRefreshCw, FiSearch, FiLayers, FiX } from 'react-icons/fi'
 import { Badge } from '@/components/common/Badge'
+import { BookCover } from '@/components/common/BookCover'
 import { Button } from '@/components/common/Button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { FormInput } from '@/components/common/FormInput'
 import { Loader } from '@/components/common/Loader'
 import { Pagination } from '@/components/common/Pagination'
+import { RatingStars } from '@/components/common/RatingStars'
 import { BookStatus } from '@/enums/book-status.enum'
 import { SellerListingSort } from '@/enums/seller-sort.enum'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -16,7 +18,6 @@ import type { SellerListingDetailed } from '@/api/seller.api'
 import { sellerBookRequestSchema, sellerListingSchema, sellerListingUpdateSchema } from '@/schemas/seller.schema'
 import { useSellerListingFilterStore } from '@/store/sellerFilter.store'
 import { formatCurrency } from '@/utils/formatCurrency'
-import { formatDate } from '@/utils/formatDate'
 import { cn } from '@/utils/cn'
 
 const PAGE_SIZE = 8
@@ -25,15 +26,18 @@ const fieldError = <T extends Record<string, unknown>>(errors: T, touched: Recor
   touched[name as string] && errors[name] ? String(errors[name]) : undefined
 
 const SelectField = ({ label, error, children, ...props }: SelectHTMLAttributes<HTMLSelectElement> & { label: string; error?: string }) => (
-  <label className="block text-left">
-    <span className="mb-1.5 block text-sm font-medium text-stone-700">{label}</span>
+  <label className="block text-left min-w-0">
+    <span className="mb-1.5 block text-xs font-medium text-stone-700">{label}</span>
     <select
-      className={`h-11 w-full rounded-xl border bg-white px-4 text-sm outline-none transition focus:border-amber-700 focus:ring-4 focus:ring-amber-900/10 ${error ? 'border-red-400' : 'border-stone-200'}`}
+      className={cn(
+        'h-11 w-full cursor-pointer rounded-xl border border-stone-200 bg-white px-3 text-xs outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10',
+        error && 'border-red-400'
+      )}
       {...props}
     >
       {children}
     </select>
-    {error ? <span className="mt-1 block text-xs text-red-600">{error}</span> : null}
+    {error ? <span className="mt-1 block text-[11px] text-red-600">{error}</span> : null}
   </label>
 )
 
@@ -41,7 +45,10 @@ const TextareaField = ({ label, error, ...props }: TextareaHTMLAttributes<HTMLTe
   <label className="block text-left">
     <span className="mb-1.5 block text-sm font-medium text-stone-700">{label}</span>
     <textarea
-      className={`min-h-28 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none transition focus:border-amber-700 focus:ring-4 focus:ring-amber-900/10 ${error ? 'border-red-400' : 'border-stone-200'}`}
+      className={cn(
+        'min-h-28 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10',
+        error ? 'border-red-400' : 'border-stone-200'
+      )}
       {...props}
     />
     {error ? <span className="mt-1 block text-xs text-red-600">{error}</span> : null}
@@ -54,42 +61,75 @@ const statusStyle: Record<BookStatus, string> = {
   [BookStatus.REJECTED]: 'bg-red-100 text-red-700',
 }
 
-const EditListingForm = ({ listing, onClose }: { listing: SellerListingDetailed; onClose: () => void }) => {
+const EditListingModal = ({ listing, onClose }: { listing: SellerListingDetailed; onClose: () => void }) => {
   const updateListing = useUpdateSellerListing()
 
   return (
-    <Formik
-      initialValues={{ price: listing.price, mrp: listing.mrp, stock: listing.stock, isActive: listing.isActive }}
-      validationSchema={sellerListingUpdateSchema}
-      onSubmit={(values) =>
-        updateListing.mutate(
-          {
-            listingId: listing.id,
-            price: Number(values.price),
-            mrp: Number(values.mrp),
-            stock: Number(values.stock),
-            isActive: values.isActive,
-          },
-          { onSuccess: onClose },
-        )
-      }
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
     >
-      {({ values, errors, touched, handleChange, handleBlur, isSubmitting }) => (
-        <Form className="mt-4 grid gap-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-4 sm:grid-cols-2 lg:grid-cols-5">
-          <FormInput label="Price" name="price" type="number" value={values.price} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'price')} />
-          <FormInput label="MRP" name="mrp" type="number" value={values.mrp} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'mrp')} />
-          <FormInput label="Stock" name="stock" type="number" value={values.stock} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'stock')} />
-          <SelectField label="Status" name="isActive" value={String(values.isActive)} onChange={handleChange} onBlur={handleBlur}>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
-          </SelectField>
-          <div className="flex items-end gap-2">
-            <Button type="submit" className="w-full" disabled={updateListing.isPending || isSubmitting}>{updateListing.isPending ? 'Saving...' : 'Save'}</Button>
-            <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+      <div
+        className="w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl text-left space-y-6 animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-primary">Listing terms</p>
+            <h2 className="font-display text-xl sm:text-2xl font-black text-heading line-clamp-1">{listing.book.title}</h2>
           </div>
-        </Form>
-      )}
-    </Formik>
+          <button
+            type="button"
+            onClick={onClose}
+            className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition"
+          >
+            <FiX size={20} />
+          </button>
+        </div>
+
+        <Formik
+          initialValues={{ price: listing.price, mrp: listing.mrp, stock: listing.stock, isActive: listing.isActive }}
+          validationSchema={sellerListingUpdateSchema}
+          onSubmit={(values) =>
+            updateListing.mutate(
+              {
+                listingId: listing.id,
+                price: Number(values.price),
+                mrp: Number(values.mrp),
+                stock: Number(values.stock),
+                isActive: values.isActive,
+              },
+              { onSuccess: onClose },
+            )
+          }
+        >
+          {({ values, errors, touched, handleChange, handleBlur, isSubmitting }) => (
+            <Form className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormInput label="Selling Price (₹)" name="price" type="number" value={values.price} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'price')} />
+                <FormInput label="MRP (₹)" name="mrp" type="number" value={values.mrp} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'mrp')} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormInput label="Stock Units Available" name="stock" type="number" value={values.stock} onChange={handleChange} onBlur={handleBlur} error={fieldError(errors, touched, 'stock')} />
+                <SelectField label="Listing Visibility" name="isActive" value={String(values.isActive)} onChange={handleChange} onBlur={handleBlur}>
+                  <option value="true">Active (Visible)</option>
+                  <option value="false">Inactive (Hidden)</option>
+                </SelectField>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-100">
+                <Button type="button" variant="secondary" onClick={onClose} className="px-6">Cancel</Button>
+                <Button type="submit" className="px-8" disabled={updateListing.isPending || isSubmitting}>
+                  {updateListing.isPending ? 'Saving changes...' : 'Save changes'}
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
   )
 }
 
@@ -106,12 +146,14 @@ export const SellerListingsPage = () => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] bg-white p-6 shadow-sm">
+      <section className="overflow-hidden rounded-[2rem] bg-secondary p-6 text-white shadow-sm sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Listings</p>
-            <h1 className="font-display mt-1 text-3xl font-extrabold uppercase text-[#16243d]">Inventory Management</h1>
-            <p className="mt-2 max-w-2xl text-sm text-stone-500">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Listings</p>
+            <h1 className="font-display mt-1 text-3xl font-extrabold uppercase sm:text-4xl">
+              Inventory <span className="text-accent">Management</span>
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
               Create seller-specific book offers and update only your own price, stock, and active status.
             </p>
           </div>
@@ -126,7 +168,7 @@ export const SellerListingsPage = () => {
           className={cn(
             'flex cursor-pointer items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition',
             activeTab === 'inventory'
-              ? 'bg-[#0d2b1f] text-[#f5862e] shadow-md'
+              ? 'bg-secondary text-accent shadow-md'
               : 'bg-white text-stone-600 hover:bg-stone-100'
           )}
         >
@@ -139,7 +181,7 @@ export const SellerListingsPage = () => {
           className={cn(
             'flex cursor-pointer items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition',
             activeTab === 'create-listing'
-              ? 'bg-[#0d2b1f] text-[#f5862e] shadow-md'
+              ? 'bg-secondary text-accent shadow-md'
               : 'bg-white text-stone-600 hover:bg-stone-100'
           )}
         >
@@ -152,7 +194,7 @@ export const SellerListingsPage = () => {
           className={cn(
             'flex cursor-pointer items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition',
             activeTab === 'request-book'
-              ? 'bg-[#0d2b1f] text-[#f5862e] shadow-md'
+              ? 'bg-secondary text-accent shadow-md'
               : 'bg-white text-stone-600 hover:bg-stone-100'
           )}
         >
@@ -160,37 +202,37 @@ export const SellerListingsPage = () => {
         </button>
       </section>
 
-      {/* Tab 1: Inventory Table */}
+      {/* Tab 1: Inventory Management Grid */}
       {activeTab === 'inventory' && (
-        <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-stone-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
-            <label className="relative block lg:w-80">
+        <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm space-y-8">
+          <div className="flex flex-col gap-3 border-b border-stone-100 pb-6 lg:flex-row lg:items-center lg:justify-between">
+            <label className="relative block w-full lg:w-96">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search by title, author, ISBN..."
-                className="h-11 w-full rounded-full border border-stone-200 bg-stone-50 pl-11 pr-4 text-sm outline-none focus:border-[#f0532d] focus:ring-4 focus:ring-orange-500/10"
+                className="h-12 w-full rounded-full border border-stone-200 bg-stone-50 pl-12 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition"
               />
             </label>
             <select
               value={sort}
               onChange={(event) => setSort(event.target.value as SellerListingSort)}
-              className="h-11 rounded-full border border-stone-200 bg-white px-4 text-sm outline-none focus:border-[#f0532d]"
+              className="cursor-pointer h-12 rounded-full border border-stone-200 bg-white px-5 text-sm font-bold text-heading outline-none focus:border-primary shadow-sm transition"
             >
-              <option value={SellerListingSort.NEWEST}>Newest</option>
-              <option value={SellerListingSort.TITLE_ASC}>Title A-Z</option>
-              <option value={SellerListingSort.TITLE_DESC}>Title Z-A</option>
-              <option value={SellerListingSort.PRICE_LOW_TO_HIGH}>Price low to high</option>
-              <option value={SellerListingSort.PRICE_HIGH_TO_LOW}>Price high to low</option>
-              <option value={SellerListingSort.STOCK_LOW_TO_HIGH}>Stock low to high</option>
-              <option value={SellerListingSort.STOCK_HIGH_TO_LOW}>Stock high to low</option>
+              <option value={SellerListingSort.NEWEST}>Sort: Newest</option>
+              <option value={SellerListingSort.TITLE_ASC}>Sort: Title A-Z</option>
+              <option value={SellerListingSort.TITLE_DESC}>Sort: Title Z-A</option>
+              <option value={SellerListingSort.PRICE_LOW_TO_HIGH}>Sort: Price Low to High</option>
+              <option value={SellerListingSort.PRICE_HIGH_TO_LOW}>Sort: Price High to Low</option>
+              <option value={SellerListingSort.STOCK_LOW_TO_HIGH}>Sort: Stock Low to High</option>
+              <option value={SellerListingSort.STOCK_HIGH_TO_LOW}>Sort: Stock High to Low</option>
             </select>
           </div>
 
-          <div className="mt-4">
+          <div>
             {isLoading ? (
-              <Loader />
+              <div className="py-16 text-center"><Loader /></div>
             ) : isError ? (
               <EmptyState title="Could not load listings" />
             ) : !data?.data.length ? (
@@ -199,32 +241,98 @@ export const SellerListingsPage = () => {
                 description="Click 'Add Approved Book' at the top to create your first listing."
               />
             ) : (
-              <div className="space-y-3">
-                {data.data.map((listing) => (
-                  <article key={listing.id} className="rounded-2xl border border-stone-200 p-4">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="line-clamp-1 text-sm font-bold text-[#16243d]">{listing.book.title}</h3>
-                          <Badge className={statusStyle[listing.book.status]}>{listing.book.status}</Badge>
-                          {!listing.isActive ? <Badge className="bg-stone-200 text-stone-700">Inactive</Badge> : null}
-                          {listing.stock === 0 ? <Badge className="bg-red-100 text-red-700">Out of stock</Badge> : null}
+              <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 text-left">
+                  {data.data.map((listing) => {
+                    const isOutOfStock = listing.stock <= 0
+
+                    return (
+                      <article
+                        key={listing.id}
+                        className="flex flex-col justify-between overflow-hidden rounded-3xl border border-stone-200 transition shadow-sm hover:shadow-md bg-white hover:border-stone-300"
+                      >
+                        {/* Top Cover Showcase */}
+                        <div className="relative bg-gradient-to-b from-stone-100 to-stone-200/60 p-6 flex flex-col items-center">
+                          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+                            <Badge className={cn('text-[10px] uppercase font-black', statusStyle[listing.book.status])}>
+                              {listing.book.status}
+                            </Badge>
+                            {!listing.isActive ? <Badge className="bg-stone-300 text-stone-800 text-[10px] font-extrabold">Inactive</Badge> : null}
+                            {isOutOfStock ? <Badge className="bg-red-100 text-red-700 text-[10px] font-black">Sold Out</Badge> : null}
+                          </div>
+
+                          <BookCover
+                            src={listing.book.coverImage}
+                            title={listing.book.title}
+                            className="aspect-[3/4.2] w-full max-w-[140px] rounded-xl shadow-[0_18px_30px_-10px_rgba(0,0,0,0.4)] transition hover:scale-105 duration-300 object-cover mt-4"
+                          />
                         </div>
-                        <p className="mt-1 text-xs text-stone-500">{listing.book.author} · ISBN {listing.book.isbn} · Created {formatDate(listing.createdAt)}</p>
-                      </div>
-                      <div className="grid grid-cols-3 gap-3 text-sm lg:min-w-[300px]">
-                        <div><p className="text-xs text-stone-500">Price</p><p className="font-bold text-[#16243d]">{formatCurrency(listing.price)}</p></div>
-                        <div><p className="text-xs text-stone-500">Stock</p><p className="font-bold text-[#16243d]">{listing.stock}</p></div>
-                        <div className="text-right"><Button type="button" variant="secondary" onClick={() => setEditingId(editingId === listing.id ? null : listing.id)}><FiEdit3 /> Edit</Button></div>
-                      </div>
-                    </div>
-                    {editingId === listing.id ? <EditListingForm listing={listing} onClose={() => setEditingId(null)} /> : null}
-                  </article>
-                ))}
+
+                        {/* Middle Book Meta */}
+                        <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                          <div>
+                            <RatingStars rating={listing.book.rating} className="mb-1" />
+                            <h3 className="font-display text-base font-black text-heading line-clamp-2 leading-snug">
+                              {listing.book.title}
+                            </h3>
+                            <p className="mt-1 text-xs font-bold text-stone-500 line-clamp-1">
+                              By {listing.book.author}
+                            </p>
+                            <p className="mt-1 font-mono text-[11px] text-stone-400">
+                              ISBN: {listing.book.isbn}
+                            </p>
+                          </div>
+
+                          {/* Price & Stock Summary */}
+                          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-stone-100 bg-stone-50/60 -mx-5 px-5 py-3 rounded-2xl">
+                            <div>
+                              <p className="text-[10px] uppercase font-bold text-stone-400">Selling Price</p>
+                              <p className="text-base font-black text-heading mt-0.5">
+                                {formatCurrency(listing.price)}
+                              </p>
+                              {listing.mrp > listing.price && (
+                                <p className="text-[10px] text-stone-400 line-through font-semibold">
+                                  {formatCurrency(listing.mrp)}
+                                </p>
+                              )}
+                            </div>
+
+                            <div>
+                              <p className="text-[10px] uppercase font-bold text-stone-400">Stock Qty</p>
+                              <p className={cn('text-base font-black mt-0.5', isOutOfStock ? 'text-red-600' : 'text-emerald-700')}>
+                                {listing.stock} <span className="text-xs font-semibold">{isOutOfStock ? 'Empty' : 'Units'}</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Adjust Button */}
+                          <div className="pt-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={() => setEditingId(listing.id)}
+                              className="w-full gap-2 text-xs py-2.5 h-11 font-black transition hover:border-primary hover:text-primary active:scale-95"
+                            >
+                              <FiEdit3 className="text-primary text-base shrink-0" /> Adjust Price & Stock
+                            </Button>
+                          </div>
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
+
+                {/* Adjust Terms Modal */}
+                {editingId && data.data.some((l) => l.id === editingId) ? (
+                  <EditListingModal
+                    listing={data.data.find((l) => l.id === editingId)!}
+                    onClose={() => setEditingId(null)}
+                  />
+                ) : null}
               </div>
             )}
           </div>
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-6" />
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-10" />
         </div>
       )}
 
@@ -232,11 +340,11 @@ export const SellerListingsPage = () => {
       {activeTab === 'create-listing' && (
         <div className="mx-auto max-w-3xl rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#0d2b1f] text-[#f5862e]">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary text-accent">
               <FiPlus size={20} />
             </div>
             <div>
-              <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Add Approved Book</h2>
+              <h2 className="font-display text-xl font-extrabold uppercase text-heading">Add Approved Book</h2>
               <p className="text-xs text-stone-500">Create a commercial listing for an already approved catalog book.</p>
             </div>
           </div>
@@ -282,11 +390,11 @@ export const SellerListingsPage = () => {
       {activeTab === 'request-book' && (
         <div className="mx-auto max-w-3xl rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#0d2b1f] text-[#f5862e]">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary text-accent">
               <FiRefreshCw size={20} />
             </div>
             <div>
-              <h2 className="font-display text-xl font-extrabold uppercase text-[#16243d]">Request New Book</h2>
+              <h2 className="font-display text-xl font-extrabold uppercase text-heading">Request New Book</h2>
               <p className="text-xs text-stone-500">Duplicate ISBN is blocked. New books stay pending until admin approval.</p>
             </div>
           </div>
