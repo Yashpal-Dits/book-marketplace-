@@ -14,7 +14,7 @@ export const OrdersPage = () => {
   const { data: orders = [], isLoading, isError } = useOrders()
 
   return (
-    <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-8xl px-4 py-10 sm:px-6 lg:px-8">
       <h1 className="font-display text-3xl font-extrabold uppercase text-[#16243d] sm:text-4xl">
         My <span className="text-[#f0532d]">Orders</span>
       </h1>

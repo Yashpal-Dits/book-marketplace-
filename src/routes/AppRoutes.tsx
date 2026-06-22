@@ -30,11 +30,14 @@ const NewArrivalsPage = lazy(() =>
 )
 const DealsPage = lazy(() =>
   import('@/pages/customer/DealsPage').then((m) => ({ default: m.DealsPage })),
-)
 
+)
 const CartPage = lazy(() => import('@/pages/customer/CartPage').then((m) => ({ default: m.CartPage })))
+
 const OrdersPage = lazy(() => import('@/pages/customer/OrdersPage').then((m) => ({ default: m.OrdersPage })))
+
 const ProfilePage = lazy(() => import('@/pages/customer/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+
 const SellerDashboardPage = lazy(() =>
   import('@/pages/seller/SellerDashboardPage').then((m) => ({ default: m.SellerDashboardPage })),
 )

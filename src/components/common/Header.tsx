@@ -78,7 +78,7 @@ export const Header = () => {
               type="button"
               aria-label="Open menu"
               onClick={toggleSidebar}
-              className="md:hidden inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-xl transition hover:bg-white/10"
+              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-xl transition hover:bg-white/10 lg:hidden"
             >
               <FiMenu />
             </button>
@@ -87,7 +87,7 @@ export const Header = () => {
             </Link>
           </div>
 
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden items-center gap-8 lg:flex">
             {navLinks.map((link) => (
               <NavLink key={link.to} to={link.to} className={linkClass} end={link.to === '/'}>
                 {link.label}

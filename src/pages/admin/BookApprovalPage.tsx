@@ -30,10 +30,12 @@ export const BookApprovalPage = () => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] bg-white p-6 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Book Management</p>
-        <h1 className="font-display mt-1 text-3xl font-extrabold uppercase text-[#16243d]">Book Approval</h1>
-        <p className="mt-2 max-w-2xl text-sm text-stone-500">
+      <section className=" overflow-hidden rounded-[2rem] bg-secondary p-6 text-white shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Book Management</p>
+        <h1 className="font-display mt-2 text-3xl font-extrabold uppercase">
+          Book <span className="text-accent">Approval</span>
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
           Books are master catalog records. Pending books are hidden from customers until admin approval.
         </p>
       </section>

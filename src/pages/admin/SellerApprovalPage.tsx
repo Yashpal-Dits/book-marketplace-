@@ -43,10 +43,12 @@ export const SellerApprovalPage = () => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] bg-white p-6 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Seller Management</p>
-        <h1 className="font-display mt-1 text-3xl font-extrabold uppercase text-[#16243d]">Seller Approval</h1>
-        <p className="mt-2 max-w-2xl text-sm text-stone-500">
+      <section className="overflow-hidden rounded-[2rem] bg-secondary p-6 text-white shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Seller Management</p>
+        <h1 className="font-display mt-2 text-3xl font-extrabold uppercase">
+          Seller <span className="text-accent">Approval</span>
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
           Admin reviews seller registration requests. Only approved sellers can access seller dashboard and create listings.
         </p>
       </section>

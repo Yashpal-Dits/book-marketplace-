@@ -1,12 +1,7 @@
 @import "tailwindcss";
 
-/**
- * Professional Marketplace Design System & Theme Utilities
- * Production-grade CSS token setup with strict circular-reference prevention.
- */
-
 :root {
-  /* Core Brand Tokens */
+  /* Core Brand  */
   --brand-primary: #f0532d;
   --brand-primary-hover: #d8431f;
   --brand-secondary: #0d2b1f;

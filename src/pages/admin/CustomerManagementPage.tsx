@@ -23,6 +23,7 @@ import {
 } from 'react-icons/fi'
 
 
+
 const PAGE_SIZE = 10
 
 const statusClass: Record<CustomerStatus, string> = {
@@ -211,12 +212,12 @@ export const CustomerManagementPage = () => {
     return (
         <div className="space-y-4 sm:space-y-6">
             {/* Header */}
-            <section className="rounded-[2rem] bg-white p-5 shadow-sm sm:p-6">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">User Management</p>
-                <h1 className="font-display mt-1 text-2xl font-extrabold uppercase text-[#16243d] sm:text-3xl">
-                    Manage Customers
+            <section className="overflow-hidden rounded-[2rem] bg-secondary p-5 text-white shadow-sm sm:p-6">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">User Management</p>
+                <h1 className="font-display mt-2 text-2xl font-extrabold uppercase sm:text-3xl">
+                    Manage <span className="text-accent">Customers</span>
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm text-stone-500">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
                     View registered customers, track their orders, and manage their account status.
                 </p>
             </section>

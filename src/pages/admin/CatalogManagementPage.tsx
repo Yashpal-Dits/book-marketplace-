@@ -254,12 +254,12 @@ export const CatalogManagementPage = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <section className="rounded-[2rem] bg-white p-5 shadow-sm sm:p-6">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Catalog Management</p>
-        <h1 className="font-display mt-1 text-2xl font-extrabold uppercase text-[#16243d] sm:text-3xl">
-          Manage Book Catalog
+      <section className="overflow-hidden rounded-[2rem] bg-secondary p-5 text-white shadow-sm sm:p-6">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Catalog Management</p>
+        <h1 className="font-display mt-2 text-2xl font-extrabold uppercase sm:text-3xl">
+          Manage Book <span className="text-accent">Catalog</span>
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-stone-500">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
           Edit master catalog details for any book. ISBN uniqueness is enforced when changed.
         </p>
       </section>
@@ -417,8 +417,8 @@ export const CatalogManagementPage = () => {
       )}
 
       {/* Footer pagination */}
-      <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <p className="text-center text-sm text-stone-500 sm:text-left">
+      <div className="space-y-3 text-center">
+        <p className="text-sm text-stone-500">
           Showing <span className="font-semibold text-stone-700">{startEntry}</span>–
           <span className="font-semibold text-stone-700">{endEntry}</span> of{' '}
           <span className="font-semibold text-stone-700">{data?.total ?? 0}</span> books
