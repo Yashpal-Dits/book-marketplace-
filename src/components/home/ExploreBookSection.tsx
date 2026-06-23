@@ -92,7 +92,7 @@ export const ExploreBooksSection = () => {
 
   return (
     <section id={EXPLORE_BOOKS_SECTION_ID} className="scroll-mt-20 bg-stone-50 py-12">
-      <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8 w-full">
+      <div className="mx-auto max-w-8xl px-4 py-12 sm:px-8 lg:px-20">
         
         {/* Mobile Filter Toggle & Search Toolbar */}
         <div className="flex flex-col gap-4 border-b border-stone-200 pb-6 lg:flex-row lg:items-center lg:justify-between">

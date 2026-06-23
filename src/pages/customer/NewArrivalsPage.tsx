@@ -20,7 +20,7 @@ export const NewArrivalsPage = () => {
         </p>
       </section>
 
-      <section className="mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8">
+     <section className="mx-auto max-w-8xl px-4 py-12 sm:px-8 lg:px-20">
         {isLoading ? (
           <Loader />
         ) : isError ? (

@@ -167,7 +167,7 @@
       "rating": 4.8,
       "minPrice": 380,
       "mrp": 550,
-      "totalStock": 33
+      "totalStock": 32
     },
     {
       "id": "book-2",
@@ -626,7 +626,7 @@
       "rating": 4.9,
       "minPrice": 449,
       "mrp": 649,
-      "totalStock": 30
+      "totalStock": 29
     },
     {
       "id": "book-28",
@@ -660,7 +660,7 @@
       "rating": 4.8,
       "minPrice": 499,
       "mrp": 749,
-      "totalStock": 20
+      "totalStock": 19
     },
     {
       "id": "book-30",
@@ -1101,10 +1101,10 @@
       "bookId": "book-1",
       "price": 566,
       "mrp": 876,
-      "stock": 20,
+      "stock": 19,
       "isActive": true,
       "createdAt": "2026-06-16T03:54:47.966Z",
-      "updatedAt": "2026-06-16T03:54:47.966Z"
+      "updatedAt": "2026-06-23T12:56:27.721Z"
     },
     {
       "id": "listing-new-24",
@@ -1144,10 +1144,10 @@
       "bookId": "book-27",
       "sellerId": "seller-2",
       "price": 449,
-      "stock": 30,
+      "stock": 29,
       "isActive": true,
       "createdAt": "2026-06-17T00:00:00.000Z",
-      "updatedAt": "2026-06-17T00:00:00.000Z",
+      "updatedAt": "2026-06-23T12:56:27.721Z",
       "mrp": 649
     },
     {
@@ -1166,10 +1166,10 @@
       "bookId": "book-29",
       "sellerId": "seller-2",
       "price": 499,
-      "stock": 20,
+      "stock": 19,
       "isActive": true,
       "createdAt": "2026-06-17T00:00:00.000Z",
-      "updatedAt": "2026-06-17T00:00:00.000Z",
+      "updatedAt": "2026-06-23T12:56:27.721Z",
       "mrp": 749
     },
     {
@@ -1271,13 +1271,6 @@
       "listingId": "listing-26",
       "quantity": 1,
       "createdAt": "2026-06-12T12:52:09.874Z"
-    },
-    {
-      "id": "cart-item-1782116837504-4o8122",
-      "cartId": "cart-1",
-      "listingId": "listing-new-27",
-      "quantity": 1,
-      "createdAt": "2026-06-22T08:27:17.504Z"
     }
   ],
   "orders": [
@@ -1430,6 +1423,21 @@
       "totalAmount": 899,
       "status": "CREATED",
       "createdAt": "2026-06-22T03:17:32.142Z"
+    },
+    {
+      "id": "order-1782219387722-qzhfcb",
+      "customerId": "customer-1",
+      "shippingAddress": {
+        "fullName": "Aarav verma",
+        "mobileNumber": "9845436272",
+        "addressLine": "1324 , sector 80, mohali, punjab, 149004",
+        "city": "mohali",
+        "state": "456789098765",
+        "pincode": "149004"
+      },
+      "totalAmount": 1514,
+      "status": "CREATED",
+      "createdAt": "2026-06-23T12:56:27.721Z"
     }
   ],
   "orderItems": [
@@ -1700,6 +1708,51 @@
       "status": "CREATED",
       "createdAt": "2026-06-22T03:17:32.142Z",
       "coverImage": "https://covers.openlibrary.org/b/id/12483359-L.jpg"
+    },
+    {
+      "id": "order-item-1782219387736-m0hjgw",
+      "orderId": "order-1782219387722-qzhfcb",
+      "listingId": "listing-new-27",
+      "bookId": "book-27",
+      "sellerId": "seller-2",
+      "bookTitle": "Can't Hurt Me",
+      "sellerName": "Chapter House",
+      "priceAtPurchase": 449,
+      "quantity": 1,
+      "subtotal": 449,
+      "status": "CREATED",
+      "createdAt": "2026-06-23T12:56:27.721Z",
+      "coverImage": "https://covers.openlibrary.org/b/id/14606379-L.jpg"
+    },
+    {
+      "id": "order-item-1782219387803-45z79z",
+      "orderId": "order-1782219387722-qzhfcb",
+      "listingId": "listing-new-29",
+      "bookId": "book-29",
+      "sellerId": "seller-2",
+      "bookTitle": "Project Hail Mary",
+      "sellerName": "Chapter House",
+      "priceAtPurchase": 499,
+      "quantity": 1,
+      "subtotal": 499,
+      "status": "CREATED",
+      "createdAt": "2026-06-23T12:56:27.721Z",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780593135204-L.jpg"
+    },
+    {
+      "id": "order-item-1782219387862-drm288",
+      "orderId": "order-1782219387722-qzhfcb",
+      "listingId": "listing-1781582087966-s8hrob",
+      "bookId": "book-1",
+      "sellerId": "seller-1781425242852-0mi0mq",
+      "bookTitle": "Atomic Habits",
+      "sellerName": "E-books",
+      "priceAtPurchase": 566,
+      "quantity": 1,
+      "subtotal": 566,
+      "status": "CREATED",
+      "createdAt": "2026-06-23T12:56:27.721Z",
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781847941831-L.jpg"
     }
   ],
   "deal": {

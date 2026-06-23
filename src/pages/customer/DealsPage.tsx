@@ -23,7 +23,7 @@ export const DealsPage = () => {
 
       <DealsOfWeekSection />
 
-      <section className="mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-8xl px-4 py-12 sm:px-8 lg:px-20">
         <div className="text-center">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Just Added</p>
           <h2 className="font-display mt-2 text-3xl font-extrabold uppercase text-[#16243d] sm:text-4xl">

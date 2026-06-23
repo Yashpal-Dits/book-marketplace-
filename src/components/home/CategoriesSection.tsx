@@ -45,7 +45,7 @@ export const CategoriesSection = () => {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+   <section className="mx-auto max-w-8xl px-4 py-12 sm:px-8 lg:px-20">
       <div className="text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Book Categories</p>
         <h2 className="font-display mx-auto mt-2 max-w-xl text-3xl font-extrabold uppercase leading-tight text-[#16243d] sm:text-4xl">
