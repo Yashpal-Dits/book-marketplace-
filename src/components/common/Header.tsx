@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { FiAlertTriangle, FiLogOut, FiMenu, FiShoppingCart, FiUser } from 'react-icons/fi'
@@ -40,6 +40,15 @@ export const Header = () => {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false)
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
 
+  useEffect(() => {
+    if (!isLogoutConfirmOpen) return
+    const originalStyle = window.getComputedStyle(document.body).overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalStyle
+    }
+  }, [isLogoutConfirmOpen])
+
   const handleLogout = () => {
     logout()
     setIsLogoutConfirmOpen(false)
@@ -48,42 +57,26 @@ export const Header = () => {
   }
 
   const isImpersonatingCustomer = user?.role === Role.ADMIN && Boolean(impersonatedCustomerId)
-  const profilePath = isImpersonatingCustomer
-    ? '/customer/profile'
-    : user?.role === Role.ADMIN 
-      ? '/admin/profile' 
-      : user?.role === Role.SELLER 
-        ? '/seller/profile' 
-        : '/customer/profile'
+  const profilePath = isImpersonatingCustomer ? '/customer/profile' : user?.role === Role.ADMIN ? '/admin/profile' : user?.role === Role.SELLER ? '/seller/profile' : '/customer/profile'
 
-  const navLinks = isImpersonatingCustomer 
-    ? customerNavLinks 
-    : user?.role === Role.ADMIN 
-      ? adminNavLinks 
-      : user?.role === Role.SELLER 
-        ? sellerNavLinks 
-        : customerNavLinks
+  const navLinks = isImpersonatingCustomer ? customerNavLinks : user?.role === Role.ADMIN ? adminNavLinks : user?.role === Role.SELLER ? sellerNavLinks : customerNavLinks
 
   const shouldShowCart = !isAuthenticated || user?.role === Role.CUSTOMER || isImpersonatingCustomer
 
- const linkClass = ({ isActive }: { isActive: boolean }) =>
-  cn('text-sm font-medium transition hover:text-emerald-400', isActive ? 'text-emerald-400' : 'text-white/85')
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    cn('text-sm font-medium transition hover:text-emerald-400', isActive ? 'text-emerald-400 underline underline-offset-4' : 'text-white/85')
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-secondary/95 text-white backdrop-blur">
-        <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-8">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Open menu"
-              onClick={toggleSidebar}
-              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-xl transition hover:bg-white/10 lg:hidden"
-            >
-              <FiMenu />
+      <header className="sticky top-0 z-40 left-0 right-0 bg-secondary text-white shadow-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={toggleSidebar} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-white/10 lg:hidden">
+              <FiMenu size={20} />
             </button>
-            <Link to="/" className="cursor-pointer flex items-center gap-2 text-lg font-bold text-emerald-300">
-              <FaBookOpen className="text-accent" /> <span className="cursor-pointer font-display tracking-wide">Bseller</span>
+            <Link to="/" className="flex items-center gap-2 whitespace-nowrap">
+              <FaBookOpen className="text-accent shrink-0" size={18} />
+              <span className="font-display text-base font-bold tracking-tight text-emerald-300">Bseller</span>
             </Link>
           </div>
 
@@ -95,87 +88,47 @@ export const Header = () => {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1 sm:gap-2 lg:justify-self-end">
-            {shouldShowCart ? (
-              <Link
-                to="/cart"
-                aria-label="Cart"
-                className="relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition hover:bg-white/10"
-              >
-                <FiShoppingCart />
-                <span className="cursor-pointer absolute -right-0.5 -top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold">
+          <div className="flex items-center gap-3 lg:justify-self-end">
+            {shouldShowCart && (
+              <Link to="/cart" className="relative inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/10">
+                <FiShoppingCart size={18} />
+                <span className="absolute right-0 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold ring-2 ring-secondary">
                   {cartCount}
                 </span>
               </Link>
-            ) : null}
+            )}
 
             {isAuthenticated ? (
-              <>
-                <Link
-                  to={profilePath}
-                  aria-label="Profile"
-                  className="cursor-pointer inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-sm font-semibold transition hover:bg-white/15"
-                >
-                  <FiUser className="text-lg" />
-                  <span className="cursor-pointer hidden sm:inline">{user?.firstName || user?.email}</span>
+              <div className="flex items-center gap-2">
+                <Link to={profilePath} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20">
+                  <FiUser size={18} />
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => setIsLogoutConfirmOpen(true)}
-                  aria-label="Logout"
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-full px-3 text-sm font-semibold transition hover:bg-white/10"
-                >
-                  <FiLogOut />
-                  <span className="cursor-pointer hidden sm:inline">Logout</span>
+                <button onClick={() => setIsLogoutConfirmOpen(true)} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/5 transition hover:bg-red-500/20">
+                  <FiLogOut size={18} />
                 </button>
-              </>
+              </div>
             ) : (
-              <>
-                <Link to="/login" className="cursor-pointer hidden text-sm text-white/85 transition hover:text-emerald-300 sm:inline">
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="cursor-pointer ml-1 inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-semibold transition hover:bg-primary-hover"
-                >
-                  Register
-                </Link>
-              </>
+              <Link to="/login" className="rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider transition hover:bg-primary-hover">
+                Login
+              </Link>
             )}
           </div>
         </div>
       </header>
 
-      {isLogoutConfirmOpen ? (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Confirm logout">
+      {isLogoutConfirmOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-amber-100 text-amber-700">
-              <FiAlertTriangle className="text-xl" />
-            </div>
-            <h2 className="mt-4 font-display text-2xl font-extrabold uppercase text-heading">Logout?</h2>
-            <p className="mt-2 text-sm leading-6 text-stone-500">
-              Are you sure you want to logout from your account?
-            </p>
+            <FiAlertTriangle className="mx-auto text-3xl text-amber-500" />
+            <h2 className="mt-4 font-display text-2xl font-bold text-slate-900">Logout?</h2>
+            <p className="mt-2 text-sm text-slate-500">Are you sure you want to exit?</p>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setIsLogoutConfirmOpen(false)}
-                className="inline-flex h-11 items-center justify-center rounded-full border border-stone-200 bg-white text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-white transition hover:bg-primary-hover"
-              >
-                <FiLogOut /> Logout
-              </button>
+              <button onClick={() => setIsLogoutConfirmOpen(false)} className="rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-600">Cancel</button>
+              <button onClick={handleLogout} className="rounded-xl bg-primary py-3 text-sm font-semibold text-white">Logout</button>
             </div>
           </div>
         </div>
-      ) : null}
-
+      )}
       <SidebarDrawer />
     </>
   )

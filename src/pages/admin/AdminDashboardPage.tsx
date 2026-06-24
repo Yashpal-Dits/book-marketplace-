@@ -9,6 +9,7 @@ import { SellerStatus } from '@/enums/seller-status.enum'
 import { useAdminDashboard } from '@/hooks/useAdmin'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { formatDate } from '@/utils/formatDate'
+import { cn } from '@/utils/cn'
 
 const StatCard = ({ label, value, icon: Icon, tone = 'amber' }: { label: string; value: string | number; icon: typeof FiUsers; tone?: 'amber' | 'green' | 'blue' | 'red' }) => {
   const colors = {
@@ -19,12 +20,12 @@ const StatCard = ({ label, value, icon: Icon, tone = 'amber' }: { label: string;
   }
 
   return (
-    <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-      <div className={`grid h-11 w-11 place-items-center rounded-2xl ${colors[tone]}`}>
-        <Icon />
+    <div className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
+      <div className={`grid h-10 w-10 place-items-center rounded-xl sm:h-11 sm:w-11 sm:rounded-2xl ${colors[tone]}`}>
+        <Icon size={18} />
       </div>
-      <p className="mt-5 text-sm text-stone-500">{label}</p>
-      <p className="mt-1 text-2xl font-extrabold text-heading">{value}</p>
+      <p className="mt-4 text-xs text-stone-500 sm:text-sm">{label}</p>
+      <p className="mt-1 text-xl font-extrabold text-heading sm:text-2xl">{value}</p>
     </div>
   )
 }
@@ -48,93 +49,92 @@ export const AdminDashboardPage = () => {
   if (isError || !data) return <EmptyState title="Could not load admin dashboard" description="Make sure JSON Server is running on port 4000." />
 
   return (
-    <div className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] bg-secondary p-6 text-white shadow-sm sm:p-8">
+    <div className="w-full min-w-0 space-y-6">
+      <section className="overflow-hidden rounded-2xl bg-secondary p-5 text-white shadow-sm sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Admin Portal</p>
-            <h1 className="font-display mt-2 text-3xl font-extrabold uppercase sm:text-4xl">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">Admin Portal</p>
+            <h1 className="font-display mt-1 text-2xl font-extrabold uppercase leading-tight sm:text-4xl">
               Marketplace <span className="text-accent">Dashboard</span>
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
-              Review sellers, approve catalog books, and monitor marketplace operations from one simple dashboard.
+            <p className="mt-2 max-w-2xl text-xs leading-5 text-white/70 sm:text-sm">
+              Review sellers, approve catalog books, and monitor marketplace operations.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/admin/sellers" className="inline-flex h-11 items-center rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            <Link to="/admin/sellers" className="flex-1 text-center inline-flex h-10 items-center justify-center rounded-full bg-primary px-4 text-xs font-semibold text-white shadow-lg shadow-orange-600/20 sm:flex-none sm:h-11 sm:px-5">
               Review sellers
             </Link>
-            <Link to="/admin/books" className="inline-flex h-11 items-center rounded-full bg-white/10 px-5 text-sm font-semibold text-white transition hover:bg-white/15">
+            <Link to="/admin/books" className="flex-1 text-center inline-flex h-10 items-center justify-center rounded-full bg-white/10 px-4 text-xs font-semibold text-white sm:flex-none sm:h-11 sm:px-5">
               Review books
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid w-full grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
         <StatCard label="Total sellers" value={data.totalSellers} icon={FiPackage} />
-        <StatCard label="Pending sellers" value={data.pendingSellers} icon={FiClock} tone="red" />
-        <StatCard label="Total customers" value={data.totalCustomers} icon={FiUsers} tone="blue" />
+        <StatCard label="Pending" value={data.pendingSellers} icon={FiClock} tone="red" />
+        <StatCard label="Customers" value={data.totalCustomers} icon={FiUsers} tone="blue" />
         <StatCard label="Total books" value={data.totalBooks} icon={FiBookOpen} />
-        <StatCard label="Pending books" value={data.pendingBooks} icon={FiPackage} tone="red" />
-        <StatCard label="Total orders" value={data.totalOrders} icon={FiShoppingBag} tone="blue" />
-        <StatCard label="Marketplace revenue" value={formatCurrency(data.marketplaceRevenue)} icon={FiCheckCircle} tone="green" />
-        <StatCard label="Out of stock listings" value={data.outOfStockListings} icon={FiXCircle} tone="red" />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-3">
-        <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-xl font-extrabold uppercase text-heading">Recent Sellers</h2>
-            <Link to="/admin/sellers" className="text-sm font-semibold text-primary hover:text-primary-hover">View all</Link>
+      <section className="grid w-full gap-6 xl:grid-cols-3">
+        <div className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-display text-base font-bold uppercase text-heading sm:text-xl">Recent Sellers</h2>
+            <Link to="/admin/sellers" className="shrink-0 text-xs font-semibold text-primary hover:text-primary-hover">View all</Link>
           </div>
           <div className="mt-4 space-y-3">
             {data.recentSellers.map((seller) => (
-              <div key={seller.id} className="rounded-2xl border border-stone-100 bg-stone-50/70 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="line-clamp-1 text-sm font-bold text-heading">{seller.businessName}</p>
-                    <p className="mt-1 text-xs text-stone-500">{seller.email} · {formatDate(seller.createdAt)}</p>
+              <div key={seller.id} className="rounded-xl border border-stone-100 bg-stone-50/70 p-3 sm:p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-heading">{seller.businessName}</p>
+                    <p className="mt-0.5 truncate text-[10px] text-stone-500">{seller.email}</p>
+                    <p className="mt-0.5 text-[10px] text-stone-400">{formatDate(seller.createdAt)}</p>
                   </div>
-                  <Badge className={sellerStatusClass[seller.status]}>{seller.status}</Badge>
+                  <Badge className={cn(sellerStatusClass[seller.status], 'shrink-0 px-2 py-0.5 text-[9px] font-bold')}>{seller.status}</Badge>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-xl font-extrabold uppercase text-heading">Recent Books</h2>
-            <Link to="/admin/books" className="text-sm font-semibold text-primary hover:text-primary-hover">View all</Link>
+        <div className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-display text-base font-bold uppercase text-heading sm:text-xl">Recent Books</h2>
+            <Link to="/admin/books" className="shrink-0 text-xs font-semibold text-primary hover:text-primary-hover">View all</Link>
           </div>
           <div className="mt-4 space-y-3">
             {data.recentBooks.map((book) => (
-              <div key={book.id} className="rounded-2xl border border-stone-100 bg-stone-50/70 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="line-clamp-1 text-sm font-bold text-heading">{book.title}</p>
-                    <p className="mt-1 text-xs text-stone-500">{book.author} · {book.seller?.businessName ?? 'Marketplace'}</p>
+              <div key={book.id} className="rounded-xl border border-stone-100 bg-stone-50/70 p-3 sm:p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-heading">{book.title}</p>
+                    <p className="mt-0.5 truncate text-[10px] text-stone-500">{book.author}</p>
+                    <p className="mt-0.5 truncate text-[10px] text-stone-400">{book.seller?.businessName ?? 'Marketplace'}</p>
                   </div>
-                  <Badge className={bookStatusClass[book.status]}>{book.status}</Badge>
+                  <Badge className={cn(bookStatusClass[book.status], 'shrink-0 px-2 py-0.5 text-[9px] font-bold')}>{book.status}</Badge>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-          <h2 className="font-display text-xl font-extrabold uppercase text-heading">Recent Orders</h2>
+        <div className="min-w-0 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="font-display text-base font-bold uppercase text-heading sm:text-xl">Recent Orders</h2>
           <div className="mt-4 space-y-3">
             {data.recentOrders.length ? (
               data.recentOrders.map((order) => (
-                <div key={order.id} className="rounded-2xl border border-stone-100 bg-stone-50/70 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-mono text-sm font-bold text-heading">#{order.id.slice(-10)}</p>
-                      <p className="mt-1 text-xs text-stone-500">{formatDate(order.createdAt)} · {formatCurrency(order.totalAmount)}</p>
+                <div key={order.id} className="rounded-xl border border-stone-100 bg-stone-50/70 p-3 sm:p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-mono text-xs font-bold text-heading">#{order.id.slice(-8)}</p>
+                      <p className="mt-0.5 text-[10px] text-stone-500">{formatCurrency(order.totalAmount)}</p>
+                      <p className="mt-0.5 text-[10px] text-stone-400">{formatDate(order.createdAt)}</p>
                     </div>
-                    <OrderStatusBadge status={order.status} />
+                    <OrderStatusBadge status={order.status} className="shrink-0 px-2 py-0.5 text-[9px] font-bold" />
                   </div>
                 </div>
               ))

@@ -1,5 +1,6 @@
 import { OrderStatus } from '@/enums/order-status.enum'
 import { Badge } from '@/components/common/Badge'
+import { cn } from '@/utils/cn'
 
 const statusStyles: Record<OrderStatus, string> = {
   [OrderStatus.CREATED]: 'bg-blue-100 text-blue-800',
@@ -17,6 +18,6 @@ const statusLabels: Record<OrderStatus, string> = {
   [OrderStatus.CANCELLED]: 'Cancelled',
 }
 
-export const OrderStatusBadge = ({ status }: { status: OrderStatus }) => (
-  <Badge className={statusStyles[status]}>{statusLabels[status]}</Badge>
+export const OrderStatusBadge = ({ status, className }: { status: OrderStatus; className?: string }) => (
+  <Badge className={cn(statusStyles[status], className)}>{statusLabels[status]}</Badge>
 )

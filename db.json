@@ -7,7 +7,10 @@
       "email": "admin@bookbazaar.com",
       "password": "admin123",
       "role": "ADMIN",
-      "createdAt": "2026-06-11T00:00:00.000Z"
+      "createdAt": "2026-06-11T00:00:00.000Z",
+      "mobileNumber": "",
+      "profileImage": "",
+      "updatedAt": "2026-06-24T18:10:58.780Z"
     },
     {
       "id": "user-customer-1",
