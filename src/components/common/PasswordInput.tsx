@@ -21,12 +21,11 @@ export const PasswordInput = ({ label, error, className, ...props }: CommonPassw
           {...props}
         />
         <button
-          type="button"
-          aria-label={isVisible ? 'Hide password' : 'Show password'}
-          onClick={() => setIsVisible((v) => !v)}
-          tabIndex={-1}
-          className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-stone-400 transition hover:text-stone-700"
-        >
+  type="button"
+  aria-label={isVisible ? 'Hide password' : 'Show password'}
+  onClick={() => setIsVisible((v) => !v)}
+  className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-stone-400 transition hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+>
           {isVisible ? <FiEyeOff /> : <FiEye />}
         </button>
       </div>

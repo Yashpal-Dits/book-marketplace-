@@ -5,7 +5,7 @@ const BUSINESS_NAME_REGEX = /^[A-Za-z0-9]+(?:[ &.'-][A-Za-z0-9]+)*$/
 
 const EMAIL_MAX_LENGTH = 50
 const PASSWORD_MIN_LENGTH = 8
-const PASSWORD_MAX_LENGTH = 50
+const PASSWORD_MAX_LENGTH = 15
 
 const emailValidation = Yup.string()
   .trim()
@@ -44,7 +44,7 @@ export const customerRegisterSchema = Yup.object({
   firstName: Yup.string()
     .trim()
     .min(2, 'First name must be at least 2 characters')
-    .max(30, 'First name cannot exceed 30 characters')
+    .max(20, 'First name cannot exceed 30 characters')
     .matches(
       NAME_REGEX,
       'First name can contain only letters, spaces, apostrophe, or hyphen',
@@ -54,7 +54,7 @@ export const customerRegisterSchema = Yup.object({
   lastName: Yup.string()
     .trim()
     .min(2, 'Last name must be at least 2 characters')
-    .max(30, 'Last name cannot exceed 30 characters')
+    .max(20, 'Last name cannot exceed 30 characters')
     .matches(
       NAME_REGEX,
       'Last name can contain only letters, spaces, apostrophe, or hyphen',
@@ -70,14 +70,14 @@ export const sellerRegisterSchema = Yup.object({
   businessName: Yup.string()
     .trim()
     .min(2, 'Business name must be at least 2 characters')
-    .max(80, 'Business name cannot exceed 80 characters')
+    .max(20, 'Business name cannot exceed 80 characters')
     .matches(BUSINESS_NAME_REGEX, 'Business name contains invalid characters')
     .required('Business name is required'),
 
   contactPerson: Yup.string()
     .trim()
     .min(2, 'Contact person name must be at least 2 characters')
-    .max(60, 'Contact person name cannot exceed 60 characters')
+    .max(20, 'Contact person name cannot exceed 20 characters')
     .matches(
       NAME_REGEX,
       'Contact person name can contain only letters, spaces, apostrophe, or hyphen',

@@ -130,8 +130,8 @@ export const SidebarDrawer = () => {
                   onClick={closeSidebar}
                   className={({ isActive }) =>
                     cn(
-                      'flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-stone-700 transition hover:bg-amber-50 hover:text-amber-900',
-                      isActive && 'bg-amber-100 text-amber-950',
+                      'flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-stone-700 transition hover:bg-orange-50 hover:text-[#f0532d]',
+                      isActive && 'bg-orange-100 text-[#f0532d]',
                     )
                   }
                   end={link.to === '/'}

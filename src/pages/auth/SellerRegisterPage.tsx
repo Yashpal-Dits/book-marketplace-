@@ -38,7 +38,7 @@ export const SellerRegisterPage = () => {
   return (
     <AuthShell mode="seller">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
+       <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
           Register Your Bookstore
         </h1>
         <p className="mt-2 text-sm text-stone-500 sm:mt-3">
@@ -62,7 +62,7 @@ export const SellerRegisterPage = () => {
           label={<>Contact Person <span className="text-[#f0532d] font-bold">*</span></>}
           name="contactPerson"
           autoComplete="name"
-          maxLength={60}
+          maxLength={20}
           value={formik.values.contactPerson}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -99,7 +99,7 @@ export const SellerRegisterPage = () => {
           label={<>Password <span className="text-[#f0532d] font-bold">*</span></>}
           name="password"
           autoComplete="new-password"
-          maxLength={50}
+          maxLength={15}
           value={formik.values.password}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}

@@ -71,7 +71,7 @@
       "username": "customer",
       "email": "customer@genz.store",
       "password": "customer123",
-      "role": "customer",
+      "role": "CUSTOMER",
       "image": "https://i.pravatar.cc/150?img=12"
     }
   ],
@@ -1271,6 +1271,13 @@
       "listingId": "listing-26",
       "quantity": 1,
       "createdAt": "2026-06-12T12:52:09.874Z"
+    },
+    {
+      "id": "cart-item-1782303678944-36a4wu",
+      "cartId": "cart-1",
+      "listingId": "listing-new-25",
+      "quantity": 2,
+      "createdAt": "2026-06-24T12:21:18.944Z"
     }
   ],
   "orders": [

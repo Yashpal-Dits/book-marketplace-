@@ -66,8 +66,8 @@ export const Header = () => {
 
   const shouldShowCart = !isAuthenticated || user?.role === Role.CUSTOMER || isImpersonatingCustomer
 
-  const linkClass = ({ isActive }: { isActive: boolean }) =>
-    cn('text-sm font-medium transition hover:text-emerald-300', isActive ? 'text-emerald-300' : 'text-white/85')
+ const linkClass = ({ isActive }: { isActive: boolean }) =>
+  cn('text-sm font-medium transition hover:text-emerald-400', isActive ? 'text-emerald-400' : 'text-white/85')
 
   return (
     <>

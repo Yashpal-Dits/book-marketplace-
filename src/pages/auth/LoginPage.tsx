@@ -53,7 +53,7 @@ export const LoginPage = () => {
   return (
     <AuthShell mode="login">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
+      <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
           Welcome Back to Bseller!
         </h1>
         <p className="mt-2 text-sm text-stone-500 sm:mt-3">Sign in to your account</p>
@@ -76,7 +76,7 @@ export const LoginPage = () => {
           label={<>Password <span className="text-[#f0532d] font-bold">*</span></>}
           name="password"
           autoComplete="current-password"
-          maxLength={50}
+          maxLength={15}
           value={formik.values.password}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}

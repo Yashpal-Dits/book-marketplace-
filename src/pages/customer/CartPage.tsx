@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useFormik } from 'formik'
 import { FiArrowRight, FiMinus, FiPlus, FiShoppingBag, FiTrash2, FiX } from 'react-icons/fi'
@@ -33,6 +33,16 @@ export const CartPage = () => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
   const [addressMode, setAddressMode] = useState<'saved' | 'new'>('new')
   const [cartFeedback, setCartFeedback] = useState('')
+
+  // Scroll lock fix for accessibility & UX
+  useEffect(() => {
+    if (!isCheckoutOpen) return
+    const originalStyle = window.getComputedStyle(document.body).overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalStyle
+    }
+  }, [isCheckoutOpen])
 
   const total = items.reduce((sum, item) => sum + item.listing.price * item.quantity, 0)
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
@@ -127,101 +137,106 @@ export const CartPage = () => {
               return (
                 <div
                   key={item.id}
-                  className="flex flex-wrap items-center gap-4 rounded-2xl border border-stone-200 bg-white p-4 sm:flex-nowrap"
+                  className="relative flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 sm:flex-row sm:items-center"
                 >
-                  <Link to={`/books/${item.book.id}`} className="shrink-0">
-                    <BookCover src={item.book.coverImage} title={item.book.title} className="h-24 w-[68px] rounded shadow-md" />
-                  </Link>
-
-                  <div className="min-w-0 flex-1">
-                    <Link to={`/books/${item.book.id}`} className="line-clamp-1 text-sm font-bold text-[#16243d] hover:text-[#f0532d]">
-                      {item.book.title}
+                  <div className="flex gap-4">
+                    <Link to={`/books/${item.book.id}`} className="shrink-0">
+                      <BookCover src={item.book.coverImage} title={item.book.title} className="h-24 w-[68px] rounded shadow-md" />
                     </Link>
-                    <p className="mt-0.5 text-xs text-stone-500">{item.book.author}</p>
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-stone-600">
-                      <FaStore className="text-[#f0532d]" /> Sold by{' '}
-                      <span className="font-semibold">{item.seller.businessName}</span>
-                    </p>
-                    {isOutOfSync ? (
-                      <p className="mt-1 text-xs font-semibold text-red-600">
-                        Only {item.listing.stock} left in stock — reduce quantity to checkout
+
+                    <div className="min-w-0 flex-1">
+                      <Link to={`/books/${item.book.id}`} className="line-clamp-2 text-sm font-bold leading-tight text-[#16243d] hover:text-[#f0532d]">
+                        {item.book.title}
+                      </Link>
+                      <p className="mt-1 text-xs text-stone-500">{item.book.author}</p>
+                      <p className="mt-2 flex flex-wrap items-center gap-1 text-[11px] text-stone-600">
+                        <FaStore className="text-[#f0532d]" /> 
+                        <span>Sold by</span>
+                        <span className="font-bold text-[#16243d]">{item.seller.businessName}</span>
                       </p>
-                    ) : null}
+                      {isOutOfSync ? (
+                        <p className="mt-2 text-[10px] font-bold text-red-600">
+                          Only {item.listing.stock} left in stock
+                        </p>
+                      ) : null}
+                    </div>
                   </div>
 
-                  {/* quantity stepper */}
-                  <div className="flex items-center rounded-full border border-stone-300">
+                  <div className="flex items-center justify-between gap-4 border-t border-stone-100 pt-4 sm:flex-1 sm:border-none sm:pt-0">
+                    {/* quantity stepper */}
+                    <div className="flex items-center rounded-full border border-stone-300 bg-stone-50/50">
+                      <button
+                        type="button"
+                        aria-label="Decrease quantity"
+                        disabled={item.quantity <= 1 || updateQuantity.isPending}
+                        onClick={() =>
+                          updateQuantity.mutate(
+                            { itemId: item.id, quantity: item.quantity - 1 },
+                            { onSuccess: () => showCartFeedback('Quantity updated ✓') },
+                          )
+                        }
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-l-full text-stone-700 transition hover:bg-stone-100 disabled:opacity-40"
+                      >
+                        <FiMinus className="text-xs" />
+                      </button>
+                      <span className="w-7 text-center text-xs font-bold text-[#16243d]">{item.quantity}</span>
+                      <button
+                        type="button"
+                        aria-label="Increase quantity"
+                        disabled={item.quantity >= item.listing.stock || updateQuantity.isPending}
+                        onClick={() =>
+                          updateQuantity.mutate(
+                            { itemId: item.id, quantity: item.quantity + 1 },
+                            { onSuccess: () => showCartFeedback('Quantity updated ✓') },
+                          )
+                        }
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-r-full text-stone-700 transition hover:bg-stone-100 disabled:opacity-40"
+                      >
+                        <FiPlus className="text-xs" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-1 items-baseline justify-end gap-2 pr-2">
+                      <p className="text-base font-black text-[#16243d]">{formatCurrency(item.listing.price * item.quantity)}</p>
+                      <p className="hidden text-[10px] text-stone-400 sm:block">{formatCurrency(item.listing.price)} each</p>
+                    </div>
+
                     <button
                       type="button"
-                      aria-label="Decrease quantity"
-                      disabled={item.quantity <= 1 || updateQuantity.isPending}
-                      onClick={() =>
-                        updateQuantity.mutate(
-                          { itemId: item.id, quantity: item.quantity - 1 },
-                          { onSuccess: () => showCartFeedback('Quantity updated ✓') },
-                        )
-                      }
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-l-full text-stone-700 transition hover:bg-stone-100 disabled:opacity-40"
+                      aria-label={`Remove ${item.book.title}`}
+                      onClick={() => removeItem.mutate(item.id, { onSuccess: () => showCartFeedback('Item removed ✓') })}
+                      disabled={removeItem.isPending}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-stone-50 text-stone-400 transition hover:bg-red-50 hover:text-red-600"
                     >
-                      <FiMinus className="text-sm" />
-                    </button>
-                    <span className="w-8 text-center text-sm font-bold text-[#16243d]">{item.quantity}</span>
-                    <button
-                      type="button"
-                      aria-label="Increase quantity"
-                      disabled={item.quantity >= item.listing.stock || updateQuantity.isPending}
-                      onClick={() =>
-                        updateQuantity.mutate(
-                          { itemId: item.id, quantity: item.quantity + 1 },
-                          { onSuccess: () => showCartFeedback('Quantity updated ✓') },
-                        )
-                      }
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-r-full text-stone-700 transition hover:bg-stone-100 disabled:opacity-40"
-                    >
-                      <FiPlus className="text-sm" />
+                      <FiTrash2 size={18} />
                     </button>
                   </div>
-
-                  <div className="w-24 text-right">
-                    <p className="text-sm font-bold text-[#16243d]">{formatCurrency(item.listing.price * item.quantity)}</p>
-                    <p className="text-[11px] text-stone-400">{formatCurrency(item.listing.price)} each</p>
-                  </div>
-
-                  <button
-                    type="button"
-                    aria-label={`Remove ${item.book.title}`}
-                    onClick={() => removeItem.mutate(item.id, { onSuccess: () => showCartFeedback('Item removed ✓') })}
-                    disabled={removeItem.isPending}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-400 transition hover:bg-red-50 hover:text-red-600"
-                  >
-                    <FiTrash2 />
-                  </button>
                 </div>
               )
             })}
           </div>
 
           {/* summary */}
-          <aside className="h-fit rounded-2xl bg-[#101d33] p-6 text-white">
-            <h2 className="font-display text-xl font-extrabold uppercase">Order Summary</h2>
-            <dl className="mt-4 space-y-3 text-sm">
-              <div className="flex justify-between text-white/70">
-                <dt>Items ({totalQuantity})</dt>
-                <dd>{formatCurrency(total)}</dd>
+          <aside className="h-fit rounded-[2rem] bg-[#101d33] p-6 text-white sm:rounded-3xl sm:p-8">
+            <h2 className="font-display text-lg font-extrabold uppercase tracking-tight sm:text-xl">Order Summary</h2>
+            <dl className="mt-5 space-y-3.5 text-sm">
+              <div className="flex justify-between text-white/60">
+                <dt className="font-medium">Items ({totalQuantity})</dt>
+                <dd className="font-bold">{formatCurrency(total)}</dd>
               </div>
-              <div className="flex justify-between text-white/70">
-                <dt>Delivery</dt>
-                <dd className="font-semibold text-emerald-400">Free</dd>
+              <div className="flex justify-between text-white/60">
+                <dt className="font-medium">Delivery</dt>
+                <dd className="font-bold text-emerald-400">Free</dd>
               </div>
-              <div className="flex justify-between border-t border-white/15 pt-3 text-base font-bold">
-                <dt>Total</dt>
-                <dd>{formatCurrency(total)}</dd>
+              <div className="mt-4 flex justify-between border-t border-white/10 pt-4 text-base font-black">
+                <dt className="uppercase tracking-wider">Total</dt>
+                <dd className="text-xl text-[#f5862e]">{formatCurrency(total)}</dd>
               </div>
             </dl>
             <button
               type="button"
               onClick={handleOpenCheckout}
-              className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f0532d] text-sm font-semibold transition hover:bg-[#d8431f]"
+              className="mt-8 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f0532d] text-sm font-bold uppercase tracking-widest shadow-xl shadow-orange-600/20 transition hover:bg-[#d8431f]"
             >
               Proceed to Checkout <FiArrowRight />
             </button>
@@ -231,134 +246,132 @@ export const CartPage = () => {
 
       {/* checkout modal — shipping address (PDF Step 6) */}
       {isCheckoutOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-label="Checkout">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-2xl font-extrabold uppercase text-[#16243d]">Shipping Address</h2>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Checkout">
+          <div className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-[2.5rem] bg-white p-4 shadow-2xl custom-scrollbar sm:rounded-3xl sm:p-8">
+            {/* Grab handle for mobile */}
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-stone-200 sm:hidden" />
+
+            <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
+              <h2 className="font-display text-base font-extrabold uppercase tracking-tight text-[#16243d] sm:text-xl">Checkout Details</h2>
               <button
                 type="button"
                 aria-label="Close checkout"
                 onClick={() => setIsCheckoutOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition hover:bg-stone-100"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-stone-50 text-stone-400 transition hover:text-stone-700"
               >
-                <FiX />
+                <FiX size={18} />
               </button>
             </div>
 
-            <form onSubmit={formik.handleSubmit} noValidate className="mt-5 space-y-4">
+            <form onSubmit={formik.handleSubmit} noValidate className="mt-4 space-y-2.5">
               {savedAddress ? (
-                <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
-                  <p className="text-sm font-bold text-[#16243d]">Choose delivery address</p>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-stone-100 bg-stone-50/50 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Delivery Method</p>
+                  <div className="mt-2 flex gap-2">
                     <button
                       type="button"
                       onClick={handleUseSavedAddress}
-                      className={`rounded-2xl border p-3 text-left text-sm transition ${
+                      className={`flex-1 rounded-xl border py-2 text-center transition ${
                         addressMode === 'saved'
-                          ? 'border-[#f0532d] bg-orange-50 text-[#16243d]'
-                          : 'border-stone-200 bg-white text-stone-600 hover:border-[#f0532d]'
+                          ? 'border-[#f0532d] bg-[#f0532d] text-white shadow-md shadow-orange-500/20'
+                          : 'border-stone-200 bg-white text-stone-500'
                       }`}
                     >
-                      <span className="font-semibold">Use saved address</span>
-                      <span className="mt-1 block text-xs leading-5 text-stone-500">
-                        {savedAddress.addressLine}, {savedAddress.city}, {savedAddress.state} — {savedAddress.pincode}
-                      </span>
+                      <span className="text-[11px] font-bold uppercase">Saved Info</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleUseNewAddress}
-                      className={`rounded-2xl border p-3 text-left text-sm transition ${
+                      className={`flex-1 rounded-xl border py-2 text-center transition ${
                         addressMode === 'new'
-                          ? 'border-[#f0532d] bg-orange-50 text-[#16243d]'
-                          : 'border-stone-200 bg-white text-stone-600 hover:border-[#f0532d]'
+                          ? 'border-[#f0532d] bg-[#f0532d] text-white shadow-md shadow-orange-500/20'
+                          : 'border-stone-200 bg-white text-stone-500'
                       }`}
                     >
-                      <span className="font-semibold">Use another address</span>
-                      <span className="mt-1 block text-xs leading-5 text-stone-500">Enter a different delivery address for this order.</span>
+                      <span className="text-[11px] font-bold uppercase">New Address</span>
                     </button>
                   </div>
                 </div>
-              ) : (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                  No saved address found. Add one here for this order, or save it later from your profile page.
-                </div>
-              )}
+              ) : null}
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 <FormInput
-                  label="Full Name"
+                  label={<span className="text-[10px] font-bold uppercase tracking-wider">Full Name</span>}
                   name="fullName"
+                  className="h-9 text-xs"
                   value={formik.values.fullName}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   error={formik.touched.fullName ? formik.errors.fullName : undefined}
-                  placeholder="Aarav Sharma"
                 />
                 <FormInput
-                  label="Mobile Number"
+                  label={<span className="text-[10px] font-bold uppercase tracking-wider">Mobile</span>}
                   name="mobileNumber"
+                  className="h-9 text-xs"
                   inputMode="numeric"
                   maxLength={10}
                   value={formik.values.mobileNumber}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   error={formik.touched.mobileNumber ? formik.errors.mobileNumber : undefined}
-                  placeholder="9876543210"
                 />
               </div>
+
               <FormInput
-                label="Address"
+                label={<span className="text-[10px] font-bold uppercase tracking-wider">Street Address</span>}
                 name="addressLine"
+                className="h-9 text-xs"
                 value={formik.values.addressLine}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 error={formik.touched.addressLine ? formik.errors.addressLine : undefined}
-                placeholder="Flat / Street / Area"
               />
-              <div className="grid gap-4 sm:grid-cols-3">
+
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 <FormInput
-                  label="City"
+                  label={<span className="text-[10px] font-bold uppercase tracking-wider">City</span>}
                   name="city"
+                  className="h-9 text-xs"
                   value={formik.values.city}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   error={formik.touched.city ? formik.errors.city : undefined}
-                  placeholder="Mumbai"
                 />
                 <FormInput
-                  label="State"
+                  label={<span className="text-[10px] font-bold uppercase tracking-wider">State</span>}
                   name="state"
+                  className="h-9 text-xs"
                   value={formik.values.state}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   error={formik.touched.state ? formik.errors.state : undefined}
-                  placeholder="Maharashtra"
                 />
                 <FormInput
-                  label="Pincode"
+                  label={<span className="text-[10px] font-bold uppercase tracking-wider">Pincode</span>}
                   name="pincode"
+                  className="h-9 text-xs col-span-2 sm:col-span-1"
                   inputMode="numeric"
                   maxLength={6}
                   value={formik.values.pincode}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   error={formik.touched.pincode ? formik.errors.pincode : undefined}
-                  placeholder="400001"
                 />
               </div>
 
-              <div className="flex items-center justify-between rounded-xl bg-stone-50 px-4 py-3">
-                <span className="text-sm text-stone-600">Payable Amount</span>
-                <span className="text-lg font-bold text-[#16243d]">{formatCurrency(total)}</span>
+              <div className="mt-4 flex items-center justify-between rounded-2xl bg-[#16243d] px-5 py-4 text-white">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Total Amount</p>
+                  <p className="text-xl font-extrabold">{formatCurrency(total)}</p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={placeOrder.isPending}
+                  className="cursor-pointer inline-flex h-11 items-center justify-center rounded-xl bg-[#f0532d] px-6 text-xs font-black uppercase tracking-widest text-white shadow-lg transition hover:bg-[#d8431f] disabled:opacity-60"
+                >
+                  {placeOrder.isPending ? 'Placing...' : 'Place Order'}
+                </button>
               </div>
-
-              <button
-                type="submit"
-                disabled={placeOrder.isPending}
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f0532d] text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:opacity-60"
-              >
-                {placeOrder.isPending ? 'Placing Order…' : 'Place Order'}
-              </button>
             </form>
           </div>
         </div>

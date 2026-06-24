@@ -51,8 +51,8 @@ export const HeroSection = () => {
       <span className="absolute bottom-24 left-[28%] text-sm text-orange-400">✦</span>
       <span className="absolute bottom-32 right-[30%] text-xl text-amber-300">✦</span>
 
-      {/* floating covers — left (Config array approach) */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-56 lg:block" aria-hidden>
+      {/* floating covers — left (Fixed: hidden until XL to prevent overlap) */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-64 xl:block" aria-hidden>
         {left.map((book, i) => {
           const config = leftPositions[i] || leftPositions[0]
           return (
@@ -67,8 +67,8 @@ export const HeroSection = () => {
         })}
       </div>
 
-      {/* floating covers — right (Config array approach) */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-56 lg:block" aria-hidden>
+      {/* floating covers — right (Fixed: hidden until XL to prevent overlap) */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-64 xl:block" aria-hidden>
         {right.map((book, i) => {
           const config = rightPositions[i] || rightPositions[0]
           return (
@@ -83,7 +83,8 @@ export const HeroSection = () => {
         })}
       </div>
 
-      <div className="relative mx-auto max-w-3xl px-4 text-center">
+      {/* Central Content (Fixed: Added relative z-20) */}
+      <div className="relative z-20 mx-auto max-w-3xl px-4 text-center">
         <h1 className="font-display text-[44px] font-extrabold uppercase leading-[1.05] tracking-tight sm:text-6xl">
           The Next{' '}
           <span className="text-emerald-400">Chapter</span> in{' '}

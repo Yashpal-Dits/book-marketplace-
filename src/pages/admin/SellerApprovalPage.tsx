@@ -106,7 +106,7 @@ export const SellerApprovalPage = () => {
               </div>
               <div className="divide-y divide-stone-100">
                 {data.data.map((seller) => (
-                  <article key={seller.id} className="grid gap-4 px-4 py-4 lg:grid-cols-[1.2fr_1fr_0.8fr_120px_300px] lg:items-center">
+                  <article key={seller.id} className="grid gap-4 px-4 py-5 lg:grid-cols-[1.2fr_1fr_0.8fr_120px_300px] lg:items-center lg:py-4">
                     <div className="min-w-0">
                       <p className="line-clamp-1 text-sm font-bold text-[#16243d]">{seller.businessName}</p>
                       <p className="mt-1 text-xs text-stone-500">{seller.email}</p>
@@ -116,32 +116,36 @@ export const SellerApprovalPage = () => {
                       <p className="mt-1 text-xs text-stone-500">{seller.mobileNumber}</p>
                     </div>
                     <p className="text-sm text-stone-500">{formatDate(seller.createdAt)}</p>
-                    <div className="flex items-center gap-2 lg:block">
+                    
+                    {/* Fixed: Improved status wrapper for mobile spacing */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-stone-50 pt-3 lg:border-none lg:pt-0 lg:block">
                       <span className="text-xs font-semibold uppercase tracking-wide text-stone-400 lg:hidden">Status</span>
-                      <Badge className={`${statusClass[seller.status]} w-fit whitespace-nowrap px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs`}>
+                      <Badge className={`${statusClass[seller.status]} whitespace-nowrap px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs`}>
                         {statusLabel[seller.status]}
                       </Badge>
                     </div>
-                    <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-end">
+
+                    {/* Fixed: Actions container with better wrapping and grid for mobile */}
+                    <div className="grid grid-cols-1 gap-2 xs:grid-cols-2 lg:flex lg:flex-wrap lg:justify-end">
                       {seller.status === SellerStatus.APPROVED ? (
                         <>
                           <Button
                             type="button"
                             variant="secondary"
-                            className="h-9 gap-2 px-3 text-xs"
+                            className="h-9 gap-2 px-3 text-xs justify-center"
                             title="Impersonate this seller and open seller dashboard"
                             onClick={() => handleAccessDashboard(seller)}
                           >
-                            <FiEye /> Impersonate
+                            <FiEye className="shrink-0" /> <span className="truncate">Impersonate</span>
                           </Button>
                           <Button
                             type="button"
                             variant="danger"
-                            className="h-9 gap-2 px-3 text-xs"
+                            className="h-9 gap-2 px-3 text-xs justify-center"
                             disabled={updateStatus.isPending}
                             onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.REJECTED })}
                           >
-                            <FiX /> Reject
+                            <FiX className="shrink-0" /> Reject
                           </Button>
                         </>
                       ) : null}
@@ -150,20 +154,20 @@ export const SellerApprovalPage = () => {
                         <>
                           <Button
                             type="button"
-                            className="h-9 gap-2 bg-emerald-700 px-3 text-xs hover:bg-emerald-800"
+                            className="h-9 gap-2 bg-emerald-700 px-3 text-xs hover:bg-emerald-800 justify-center"
                             disabled={updateStatus.isPending}
                             onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.APPROVED })}
                           >
-                            <FiCheck /> Approve
+                            <FiCheck className="shrink-0" /> Approve
                           </Button>
                           <Button
                             type="button"
                             variant="danger"
-                            className="h-9 gap-2 px-3 text-xs"
+                            className="h-9 gap-2 px-3 text-xs justify-center"
                             disabled={updateStatus.isPending}
                             onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.REJECTED })}
                           >
-                            <FiX /> Reject
+                            <FiX className="shrink-0" /> Reject
                           </Button>
                         </>
                       ) : null}
@@ -171,11 +175,11 @@ export const SellerApprovalPage = () => {
                       {seller.status === SellerStatus.REJECTED ? (
                         <Button
                           type="button"
-                          className="h-9 gap-2 bg-emerald-700 px-3 text-xs hover:bg-emerald-800 sm:col-span-2"
+                          className="h-9 gap-2 bg-emerald-700 px-3 text-xs hover:bg-emerald-800 justify-center xs:col-span-2 lg:col-span-1"
                           disabled={updateStatus.isPending}
                           onClick={() => updateStatus.mutate({ sellerId: seller.id, status: SellerStatus.APPROVED })}
                         >
-                          <FiCheck /> Approve Again
+                          <FiCheck className="shrink-0" /> Approve Again
                         </Button>
                       ) : null}
                     </div>
