@@ -53,7 +53,7 @@ export const Header = () => {
     logout()
     setIsLogoutConfirmOpen(false)
     toast.success('Logged out successfully')
-    navigate('/login')
+    navigate('/', { replace: true })
   }
 
   const isImpersonatingCustomer = user?.role === Role.ADMIN && Boolean(impersonatedCustomerId)

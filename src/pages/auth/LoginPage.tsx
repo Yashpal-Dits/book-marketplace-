@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '@/api/auth.api'
 import { AuthShell } from '@/components/common/AuthShell'
 import { FormInput } from '@/components/common/FormInput'
@@ -14,7 +14,6 @@ import { useAuthStore } from '@/store/auth.store'
 
 export const LoginPage = () => {
   const navigate = useNavigate()
-  const location = useLocation()
   const setSession = useAuthStore((state) => state.setSession)
 
   const mutation = useMutation({
@@ -23,19 +22,18 @@ export const LoginPage = () => {
       setSession(session)
       toast.success('Login successful')
 
-      const from = (location.state as { from?: { pathname: string } } | null)
-        ?.from?.pathname
-
+     
       if (session.role === Role.ADMIN) {
-        return navigate(from?.startsWith('/admin') ? from : '/admin/dashboard', { replace: true })
+        return navigate('/admin/dashboard', { replace: true })
       }
 
       if (session.role === Role.SELLER) {
-        const sellerHome = session.sellerStatus === SellerStatus.APPROVED ? '/seller/dashboard' : '/seller/pending-approval'
-        return navigate(from?.startsWith('/seller') ? from : sellerHome, { replace: true })
+        const sellerHome =
+          session.sellerStatus === SellerStatus.APPROVED ? '/seller/dashboard' : '/seller/pending-approval'
+        return navigate(sellerHome, { replace: true })
       }
 
-      return navigate(from && !from.startsWith('/admin') && !from.startsWith('/seller') ? from : '/', { replace: true })
+      return navigate('/', { replace: true })
     },
     onError: (error) => toast.error(error.message),
   })

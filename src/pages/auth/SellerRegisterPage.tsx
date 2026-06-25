@@ -7,18 +7,15 @@ import { AuthShell } from '@/components/common/AuthShell'
 import { FormInput } from '@/components/common/FormInput'
 import { PasswordInput } from '@/components/common/PasswordInput'
 import { sellerRegisterSchema } from '@/schemas/auth.schema'
-import { useAuthStore } from '@/store/auth.store'
 
 export const SellerRegisterPage = () => {
   const navigate = useNavigate()
-  const setSession = useAuthStore((state) => state.setSession)
 
   const mutation = useMutation({
     mutationFn: authApi.registerSeller,
-    onSuccess: (session) => {
-      setSession(session)
-      toast.success('Seller registration submitted for admin approval')
-      navigate('/seller/pending-approval')
+    onSuccess: () => {
+      toast.success('Seller registration submitted! Please log in once your account is approved.')
+      navigate('/login')
     },
     onError: (error) => toast.error(error.message),
   })
