@@ -7,18 +7,15 @@ import { AuthShell } from '@/components/common/AuthShell'
 import { FormInput } from '@/components/common/FormInput'
 import { PasswordInput } from '@/components/common/PasswordInput'
 import { customerRegisterSchema } from '@/schemas/auth.schema'
-import { useAuthStore } from '@/store/auth.store'
 
 export const RegisterPage = () => {
   const navigate = useNavigate()
-  const setSession = useAuthStore((state) => state.setSession)
 
   const mutation = useMutation({
     mutationFn: authApi.registerCustomer,
-    onSuccess: (session) => {
-      setSession(session)
-      toast.success('Customer registration successful')
-      navigate('/')
+    onSuccess: () => {
+      toast.success('Registration successful! Please log in to continue.')
+      navigate('/login')
     },
     onError: (error) => toast.error(error.message),
   })
@@ -37,7 +34,7 @@ export const RegisterPage = () => {
   return (
     <AuthShell mode="register">
       <div>
-       <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
+        <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
           Create Your Bseller Account
         </h1>
         <p className="mt-2 text-sm text-stone-500 sm:mt-3">
