@@ -74,6 +74,59 @@ export const ordersApi = {
     return order
   },
 
+  /**
+   * Cancel an order on behalf of the customer who owns it.
+   *
+   * Allowed only while the order has not yet been shipped — i.e. the status is
+   * still CREATED or ACCEPTED. Cancelling marks the order and every one of its
+   * items as CANCELLED and restocks the seller listings so inventory reflects
+   * the reversal (mirroring the decrement applied at placement time).
+   */
+  async cancelOrder(orderId: string, customerId: string): Promise<IOrder> {
+    const { data: order } = await axiosInstance.get<IOrder>(`/orders/${orderId}`)
+    if (order.customerId !== customerId) {
+      throw new Error("You cannot cancel another customer's order")
+    }
+    if (order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) {
+      throw new Error('This order has already been shipped and can no longer be cancelled')
+    }
+    if (order.status === OrderStatus.CANCELLED) {
+      throw new Error('This order is already cancelled')
+    }
+
+    const now = new Date().toISOString()
+    const { data: items } = await axiosInstance.get<IOrderItem[]>('/orderItems', {
+      params: { orderId },
+    })
+
+    // Cancel each still-active item and restock its listing.
+    const affectedBookIds = new Set<string>()
+    for (const item of items) {
+      if (item.status === OrderStatus.CANCELLED) continue
+
+      await axiosInstance.patch(`/orderItems/${item.id}`, { status: OrderStatus.CANCELLED })
+
+      try {
+        const { data: listing } = await axiosInstance.get<IListing>(`/listings/${item.listingId}`)
+        await axiosInstance.patch(`/listings/${item.listingId}`, {
+          stock: listing.stock + item.quantity,
+          updatedAt: now,
+        })
+        affectedBookIds.add(item.bookId)
+      } catch {
+        // Listing may have been removed; skip restock but still cancel the item.
+      }
+    }
+
+    const { data: updatedOrder } = await axiosInstance.patch<IOrder>(`/orders/${orderId}`, {
+      status: OrderStatus.CANCELLED,
+    })
+
+    await Promise.all([...affectedBookIds].map((bookId) => syncBookAggregates(bookId)))
+
+    return updatedOrder
+  },
+
   /** Order history for a customer, newest first, with items joined. */
   async getOrdersByCustomerId(customerId: string): Promise<IOrderDetailed[]> {
     const { data: orders } = await axiosInstance.get<IOrder[]>('/orders', {

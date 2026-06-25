@@ -1,4 +1,4 @@
-import { useState, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { useEffect, useState, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { Form, Formik } from 'formik'
 import toast from 'react-hot-toast'
 import { FiEdit3, FiPlus, FiRefreshCw, FiSearch, FiLayers, FiX } from 'react-icons/fi'
@@ -142,6 +142,17 @@ export const SellerListingsPage = () => {
   const createBookRequest = useCreateSellerBookRequest()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'inventory' | 'create-listing' | 'request-book'>('inventory')
+  const isFormModalOpen = activeTab === 'create-listing' || activeTab === 'request-book'
+
+  // Lock background scroll while a form modal is open.
+  useEffect(() => {
+    if (!isFormModalOpen) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [isFormModalOpen])
   const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE)
 
   return (
@@ -202,8 +213,8 @@ export const SellerListingsPage = () => {
         </button>
       </section>
 
-      {/* Tab 1: Inventory Management Grid */}
-      {activeTab === 'inventory' && (
+      {/* Tab 1: Inventory Management Grid (always visible; the other tabs open as modals over it) */}
+      {(
         <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm space-y-8">
           <div className="flex flex-col gap-3 border-b border-stone-100 pb-6 lg:flex-row lg:items-center lg:justify-between">
             <label className="relative block w-full lg:w-96">
@@ -336,17 +347,34 @@ export const SellerListingsPage = () => {
         </div>
       )}
 
-      {/* Tab 2: Create Listing (Add Approved Book) */}
+      {/* Tab 2: Create Listing (Add Approved Book) — modal */}
       {activeTab === 'create-listing' && (
-        <div className="mx-auto max-w-3xl rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setActiveTab('inventory')}
+        >
+          <div
+            className="custom-scrollbar max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-stone-200 bg-white p-6 shadow-2xl sm:p-8 animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary text-accent">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary text-accent">
               <FiPlus size={20} />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h2 className="font-display text-xl font-extrabold uppercase text-heading">Add Approved Book</h2>
               <p className="text-xs text-stone-500">Create a commercial listing for an already approved catalog book.</p>
             </div>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setActiveTab('inventory')}
+              className="cursor-pointer inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+            >
+              <FiX size={20} />
+            </button>
           </div>
           <Formik
             initialValues={{ bookId: '', price: '', mrp: '', stock: '' }}
@@ -383,20 +411,38 @@ export const SellerListingsPage = () => {
               </Form>
             )}
           </Formik>
+          </div>
         </div>
       )}
 
-      {/* Tab 3: Request New Book */}
+      {/* Tab 3: Request New Book — modal */}
       {activeTab === 'request-book' && (
-        <div className="mx-auto max-w-3xl rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setActiveTab('inventory')}
+        >
+          <div
+            className="custom-scrollbar max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-stone-200 bg-white p-6 shadow-2xl sm:p-8 animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary text-accent">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary text-accent">
               <FiRefreshCw size={20} />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h2 className="font-display text-xl font-extrabold uppercase text-heading">Request New Book</h2>
               <p className="text-xs text-stone-500">Duplicate ISBN is blocked. New books stay pending until admin approval.</p>
             </div>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setActiveTab('inventory')}
+              className="cursor-pointer inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+            >
+              <FiX size={20} />
+            </button>
           </div>
           <Formik
             initialValues={{ isbn: '', title: '', author: '', publisher: '', category: '', coverImage: '', description: '' }}
@@ -432,6 +478,7 @@ export const SellerListingsPage = () => {
               </Form>
             )}
           </Formik>
+          </div>
         </div>
       )}
     </div>

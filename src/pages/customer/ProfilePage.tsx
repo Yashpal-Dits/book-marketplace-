@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Form, Formik } from 'formik'
 import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import {
   FiCalendar,
   FiCamera,
@@ -18,6 +19,7 @@ import {
   FiTruck,
   FiUser,
   FiX,
+  FiXCircle,
   FiZap,
 } from 'react-icons/fi'
 import { FaStore } from 'react-icons/fa'
@@ -29,7 +31,8 @@ import { OrderStatusBadge } from '@/components/orders/OrderStatusBadge'
 import { OrderStatusTracker } from '@/components/orders/OrderStatusTracker'
 import { OrderStatus } from '@/enums/order-status.enum'
 import { useCustomerProfile, useUpdateCustomerProfile } from '@/hooks/useProfile'
-import { useOrders } from '@/hooks/useOrders'
+import { useCancelOrder, useOrders } from '@/hooks/useOrders'
+import { isOrderCancellableByCustomer } from '@/utils/orderStatus'
 import { customerProfileSchema } from '@/schemas/profile.schema'
 import { formatDate } from '@/utils/formatDate'
 import { formatCurrency } from '@/utils/formatCurrency'
@@ -97,6 +100,12 @@ const StatCard = ({
   )
 }
 
+const DemoTag = () => (
+  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700">
+    Demo
+  </span>
+)
+
 const ChecklistItem = ({ completed, label }: { completed: boolean; label: string }) => (
   <div className="flex items-center gap-3 rounded-2xl bg-stone-50 px-3 py-2.5">
     <span
@@ -115,8 +124,14 @@ export const ProfilePage = () => {
   const { data: profile, isLoading: profileLoading, isError: profileError } = useCustomerProfile()
   const { data: ordersData = [], isLoading: ordersLoading, isError: ordersError } = useOrders()
   const updateProfile = useUpdateCustomerProfile()
+  const cancelOrder = useCancelOrder()
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState<ProfileTab>('profile')
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null)
+
+  const handleCancelOrder = (orderId: string) => {
+    cancelOrder.mutate(orderId, { onSettled: () => setConfirmCancelId(null) })
+  }
 
   if (profileLoading) return <Loader />
   if (profileError || !profile) return <EmptyState title="Could not load profile" description="Please make sure you are logged in as a customer." />
@@ -174,11 +189,11 @@ export const ProfilePage = () => {
   const handleImageFile = (file?: File, setFieldValue?: (field: string, value: string) => void) => {
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      window.alert('Please select an image file')
+      toast.error('Please select an image file')
       return
     }
     if (file.size > 700 * 1024) {
-      window.alert('Please select an image smaller than 700 KB')
+      toast.error('Please select an image smaller than 700 KB')
       return
     }
     const reader = new FileReader()
@@ -191,12 +206,12 @@ export const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-[#faf7ef]">
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6 overflow-hidden rounded-[2rem] bg-[#0d2b1f] p-6 text-white shadow-sm sm:p-8">
+      <div className="w-full px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-6 overflow-hidden rounded-3xl bg-[#0d2b1f] p-5 text-white shadow-sm sm:rounded-[2rem] sm:p-8">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Customer Account</p>
-              <h1 className="font-display mt-2 text-3xl font-extrabold uppercase sm:text-4xl">
+              <h1 className="font-display mt-2 text-2xl font-extrabold uppercase sm:text-4xl">
                 Customer <span className="text-[#f5862e]">Portal</span>
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
@@ -204,18 +219,59 @@ export const ProfilePage = () => {
               </p>
             </div>
 
+            <div className="w-full max-w-xs rounded-2xl bg-white/10 p-4 lg:w-72">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">Profile Completion</p>
+                <span className="text-sm font-extrabold text-[#f5862e]">{profileCompletion}%</span>
+              </div>
+              <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/15">
+                <div
+                  className="h-full rounded-full bg-[#f5862e] transition-all duration-500"
+                  style={{ width: `${profileCompletion}%` }}
+                />
+              </div>
+              <p className="mt-2.5 text-xs leading-5 text-white/60">
+                {profileCompletion >= 100
+                  ? 'Your profile is fully complete. Nice!'
+                  : 'Add your photo and delivery details to reach 100%.'}
+              </p>
+            </div>
           </div>
         </div>
 
-        <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mb-6 grid gap-3 sm:mb-8 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Total Orders" value={totalOrders} description="Orders placed from your customer account." icon={FiShoppingBag} tone="amber" />
           <StatCard label="Books Bought" value={totalBooks} description="Total book quantity purchased across orders." icon={FiPackage} tone="blue" />
           <StatCard label="Total Spend" value={formatCurrency(totalSpent)} description="Calculated from all non-cancelled orders." icon={FiCreditCard} tone="emerald" />
           <StatCard label="Active Orders" value={activeOrders} description="Orders still moving through seller fulfilment." icon={FiTruck} tone="orange" />
         </section>
 
-        <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
-          <aside className="h-fit rounded-3xl border border-stone-200 bg-white p-5 shadow-sm lg:sticky lg:top-24">
+        {/* Mobile tab switcher — quick access without scrolling the sidebar */}
+        <nav className="mb-6 flex gap-2 overflow-x-auto pb-1 lg:hidden" aria-label="Profile sections">
+          {sidebarLinks.map((link) => {
+            const Icon = link.icon
+            const isActive = activeTab === link.id
+            return (
+              <button
+                key={link.id}
+                type="button"
+                onClick={() => setActiveTab(link.id)}
+                className={cn(
+                  'inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition',
+                  isActive
+                    ? 'border-[#0d2b1f] bg-[#0d2b1f] text-[#f5862e] shadow-sm'
+                    : 'border-stone-200 bg-white text-stone-600 hover:bg-stone-50',
+                )}
+              >
+                <Icon size={16} className={isActive ? 'text-[#f5862e]' : 'text-stone-400'} />
+                {link.label}
+              </button>
+            )
+          })}
+        </nav>
+
+        <div className="grid gap-6 lg:grid-cols-[300px_1fr] lg:gap-8">
+          <aside className="hidden h-fit rounded-3xl border border-stone-200 bg-white p-5 shadow-sm lg:sticky lg:top-24 lg:block">
             <div className="rounded-[1.5rem] bg-[#0d2b1f] p-4 text-white">
               <div className="flex items-center gap-3">
                 <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-amber-100 text-lg font-extrabold text-amber-800 ring-4 ring-white/10">
@@ -316,7 +372,7 @@ export const ProfilePage = () => {
 
                   return (
                     <Form className="space-y-6">
-                      <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                      <div className="rounded-3xl border border-stone-200 bg-white p-4 shadow-sm sm:p-6">
                         <div className="mb-6 flex flex-col gap-3 border-b border-stone-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Personal Details</p>
@@ -326,23 +382,23 @@ export const ProfilePage = () => {
                             <button
                               type="button"
                               onClick={() => setIsEditing(true)}
-                              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f0532d] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#d8431f]"
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#f0532d] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#d8431f] sm:w-auto"
                             >
                               <FiEdit3 size={14} /> Edit Profile
                             </button>
                           ) : (
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                               <button
                                 type="button"
                                 onClick={() => setIsEditing(false)}
-                                className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:bg-stone-50"
+                                className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:bg-stone-50"
                               >
                                 <FiX size={14} /> Cancel
                               </button>
                               <button
                                 type="submit"
                                 disabled={isSubmitting || updateProfile.isPending}
-                                className="cursor-pointer inline-flex items-center gap-2 rounded-full bg-[#f0532d] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:opacity-60"
+                                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-full bg-[#f0532d] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#d8431f] disabled:opacity-60"
                               >
                                 <FiEdit3 size={14} /> {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
                               </button>
@@ -432,7 +488,7 @@ export const ProfilePage = () => {
                                 <FormInput name="firstName" label="First Name" value={values.firstName} onChange={handleChange} onBlur={handleBlur} error={touched.firstName && errors.firstName ? String(errors.firstName) : undefined} />
                                 <FormInput name="lastName" label="Last Name" value={values.lastName} onChange={handleChange} onBlur={handleBlur} error={touched.lastName && errors.lastName ? String(errors.lastName) : undefined} />
                                 <div className="space-y-1">
-                                  <label className="cursor-pointer block text-xs font-medium text-stone-500">Email address</label>
+                                  <label className="block text-xs font-medium text-stone-500">Email address</label>
                                   <div className="flex h-11 items-center rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm text-stone-500">
                                     <FiMail className="mr-2 text-stone-400" size={14} />
                                     {profile.email}
@@ -471,7 +527,7 @@ export const ProfilePage = () => {
                                     onBlur={handleBlur}
                                     className="min-h-24 w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-amber-700 focus:ring-4 focus:ring-amber-900/10"
                                   />
-                                  {touched.addressLine && errors.addressLine ? <span className="cursor-pointer mt-1 block text-xs text-red-600">{String(errors.addressLine)}</span> : null}
+                                  {touched.addressLine && errors.addressLine ? <span className="mt-1 block text-xs text-red-600">{String(errors.addressLine)}</span> : null}
                                 </label>
                               </div>
                             )}
@@ -487,7 +543,7 @@ export const ProfilePage = () => {
 
             {activeTab === 'security' && (
               <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-                <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                <div className="rounded-3xl border border-stone-200 bg-white p-4 shadow-sm sm:p-6">
                   <div className="mb-2 flex items-center gap-3">
                     <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#0d2b1f] text-[#f5862e]">
                       <FiLock />
@@ -500,11 +556,14 @@ export const ProfilePage = () => {
                   <div className="mt-6 space-y-4">
                     <div className="flex flex-col gap-3 rounded-2xl border border-stone-100 bg-stone-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-stone-800">Password</p>
+                        <p className="flex items-center gap-2 text-sm font-semibold text-stone-800">
+                          Password <DemoTag />
+                        </p>
                         <p className="mt-1 text-xs text-stone-500">Password changes are planned for a future backend integration.</p>
                       </div>
                       <button
                         type="button"
+                        onClick={() => toast('Available once a real backend is connected', { icon: '🔒' })}
                         className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-600 transition hover:bg-stone-50"
                       >
                         Change Password
@@ -512,11 +571,14 @@ export const ProfilePage = () => {
                     </div>
                     <div className="flex flex-col gap-3 rounded-2xl border border-stone-100 bg-stone-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-stone-800">Two-Factor Authentication</p>
+                        <p className="flex items-center gap-2 text-sm font-semibold text-stone-800">
+                          Two-Factor Authentication <DemoTag />
+                        </p>
                         <p className="mt-1 text-xs text-stone-500">Add an extra layer of security when real auth is connected.</p>
                       </div>
                       <button
                         type="button"
+                        onClick={() => toast('Two-factor auth is coming soon', { icon: '🛡️' })}
                         className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-full bg-[#f0532d] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#d8431f]"
                       >
                         Enable
@@ -524,11 +586,14 @@ export const ProfilePage = () => {
                     </div>
                     <div className="flex flex-col gap-3 rounded-2xl border border-stone-100 bg-stone-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-stone-800">Active Sessions</p>
+                        <p className="flex items-center gap-2 text-sm font-semibold text-stone-800">
+                          Active Sessions <DemoTag />
+                        </p>
                         <p className="mt-1 text-xs text-stone-500">Current demo session is stored locally through Zustand persist.</p>
                       </div>
                       <button
                         type="button"
+                        onClick={() => toast('Session management is coming soon', { icon: '💻' })}
                         className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                       >
                         Logout All
@@ -559,7 +624,7 @@ export const ProfilePage = () => {
 
             {activeTab === 'orders' && (
               <div className="space-y-6">
-                <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                <div className="rounded-3xl border border-stone-200 bg-white p-4 shadow-sm sm:p-6">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Order Center</p>
@@ -621,16 +686,16 @@ export const ProfilePage = () => {
                   </div>
                 ) : (
                   customerOrders.map((order) => (
-                    <article key={order.id} className="cursor-pointer overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm">
+                    <article key={order.id} className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm">
                       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 bg-stone-50/70 px-5 py-3.5">
                         <div>
                           <p className="text-xs text-stone-500">
-                            Order <span className="cursor-pointer font-mono font-semibold text-stone-700">#{order.id.slice(-10)}</span> · Placed on{' '}
+                            Order <span className="font-mono font-semibold text-stone-700">#{order.id.slice(-10)}</span> · Placed on{' '}
                             {formatDate(order.createdAt)}
                           </p>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="cursor-pointer text-sm font-bold text-[#16243d]">{formatCurrency(order.totalAmount)}</span>
+                          <span className="text-sm font-bold text-[#16243d]">{formatCurrency(order.totalAmount)}</span>
                           <OrderStatusBadge status={order.status} />
                         </div>
                       </header>
@@ -655,19 +720,55 @@ export const ProfilePage = () => {
                               </div>
                             </div>
                             <div className="shrink-0 text-right">
-                              <span className="cursor-pointer text-base font-extrabold text-[#16243d]">{formatCurrency(item.subtotal)}</span>
+                              <span className="text-base font-extrabold text-[#16243d]">{formatCurrency(item.subtotal)}</span>
                             </div>
                           </li>
                         ))}
                       </ul>
 
-                      <footer className="flex items-start gap-2 border-t border-stone-100 bg-stone-50/70 px-5 py-3 text-xs text-stone-600">
-                        <FiMapPin className="mt-0.5 shrink-0 text-[#f0532d]" />
-                        <span>
-                          <span className="cursor-pointer font-semibold">{order.shippingAddress.fullName}</span> · {order.shippingAddress.addressLine},{' '}
-                          {order.shippingAddress.city}, {order.shippingAddress.state} — {order.shippingAddress.pincode} ·{' '}
-                          {order.shippingAddress.mobileNumber}
-                        </span>
+                      <footer className="flex flex-wrap items-start justify-between gap-3 border-t border-stone-100 bg-stone-50/70 px-5 py-3 text-xs text-stone-600">
+                        <div className="flex min-w-0 items-start gap-2">
+                          <FiMapPin className="mt-0.5 shrink-0 text-[#f0532d]" />
+                          <span>
+                            <span className="font-semibold">{order.shippingAddress.fullName}</span> · {order.shippingAddress.addressLine},{' '}
+                            {order.shippingAddress.city}, {order.shippingAddress.state} — {order.shippingAddress.pincode} ·{' '}
+                            {order.shippingAddress.mobileNumber}
+                          </span>
+                        </div>
+
+                        {isOrderCancellableByCustomer(order.status) && (
+                          <div className="shrink-0">
+                            {confirmCancelId === order.id ? (
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-stone-600">Cancel this order?</span>
+                                <button
+                                  type="button"
+                                  disabled={cancelOrder.isPending}
+                                  onClick={() => handleCancelOrder(order.id)}
+                                  className="cursor-pointer rounded-full bg-red-600 px-3 py-1.5 font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+                                >
+                                  {cancelOrder.isPending ? 'Cancelling…' : 'Yes, cancel'}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={cancelOrder.isPending}
+                                  onClick={() => setConfirmCancelId(null)}
+                                  className="cursor-pointer rounded-full border border-stone-200 bg-white px-3 py-1.5 font-semibold text-stone-600 transition hover:bg-stone-50"
+                                >
+                                  Keep order
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setConfirmCancelId(order.id)}
+                                className="cursor-pointer inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-bold text-red-600 transition hover:bg-red-50"
+                              >
+                                <FiXCircle /> Cancel order
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </footer>
                     </article>
                   ))

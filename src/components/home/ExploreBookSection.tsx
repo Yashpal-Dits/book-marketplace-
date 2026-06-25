@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FiChevronDown, FiSearch, FiX, FiFilter, FiCheck } from 'react-icons/fi'
 import { BookCard } from '@/components/books/BookCard'
 import { Button } from '@/components/common/Button'
@@ -45,6 +45,8 @@ export const ExploreBooksSection = () => {
   const [searchInput, setSearchInput] = useState(search)
   const debouncedSearch = useDebounce(searchInput, 400)
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+  const [isSortOpen, setIsSortOpen] = useState(false)
+  const sortRef = useRef<HTMLDivElement>(null)
 
   const [prevStoreSearch, setPrevStoreSearch] = useState(search)
   if (search !== prevStoreSearch) {
@@ -55,6 +57,35 @@ export const ExploreBooksSection = () => {
   useEffect(() => {
     if (debouncedSearch !== search) setSearch(debouncedSearch)
   }, [debouncedSearch, search, setSearch])
+
+  // Close the custom sort dropdown on outside click or Escape.
+  useEffect(() => {
+    if (!isSortOpen) return
+    const handlePointer = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false)
+      }
+    }
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsSortOpen(false)
+    }
+    document.addEventListener('mousedown', handlePointer)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handlePointer)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [isSortOpen])
+
+  // Lock background scroll while the mobile filter drawer is open.
+  useEffect(() => {
+    if (!isMobileFilterOpen) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [isMobileFilterOpen])
 
   const { data: allBooks = [] } = useApprovedBooks()
   const categories = [...new Set(allBooks.map((b) => b.category).filter(Boolean))] as string[]
@@ -91,7 +122,7 @@ export const ExploreBooksSection = () => {
   }
 
   return (
-    <section id={EXPLORE_BOOKS_SECTION_ID} className="scroll-mt-20 bg-stone-50 py-12">
+    <section id={EXPLORE_BOOKS_SECTION_ID} className="scroll-mt-20 bg-stone-50 pb-12">
       <div className="mx-auto max-w-8xl px-4 py-12 sm:px-8 lg:px-20">
         
         {/* Mobile Filter Toggle & Search Toolbar */}
@@ -127,20 +158,58 @@ export const ExploreBooksSection = () => {
               <FiFilter className="text-[#f0532d]" /> Filters {hasActiveFilters && <span className="h-2 w-2 rounded-full bg-[#f0532d]" />}
             </button>
 
-            <div className="relative min-w-[220px]">
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as BookSort)}
+            <div ref={sortRef} className="relative min-w-[220px]">
+              <button
+                type="button"
+                onClick={() => setIsSortOpen((open) => !open)}
+                aria-haspopup="listbox"
+                aria-expanded={isSortOpen}
                 aria-label="Sort books"
-                className="h-12 w-full cursor-pointer appearance-none rounded-full border border-stone-200 bg-white pl-5 pr-10 text-sm font-bold text-[#16243d] shadow-sm outline-none transition focus:border-[#f0532d]"
+                className={cn(
+                  'flex h-12 w-full cursor-pointer items-center justify-between rounded-full border bg-white pl-5 pr-4 text-sm font-bold text-[#16243d] shadow-sm outline-none transition',
+                  isSortOpen ? 'border-[#f0532d] ring-4 ring-orange-500/10' : 'border-stone-200 hover:bg-stone-50',
+                )}
               >
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <FiChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-stone-500" size={16} />
+                <span className="truncate">
+                  {SORT_OPTIONS.find((option) => option.value === sort)?.label ?? 'Sort'}
+                </span>
+                <FiChevronDown
+                  className={cn('shrink-0 text-stone-500 transition-transform', isSortOpen && 'rotate-180')}
+                  size={16}
+                />
+              </button>
+
+              {isSortOpen && (
+                <ul
+                  role="listbox"
+                  aria-label="Sort options"
+                  className="custom-scrollbar absolute right-0 z-30 mt-2 max-h-72 w-full min-w-[220px] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-1.5 shadow-xl"
+                >
+                  {SORT_OPTIONS.map((option) => {
+                    const isActive = option.value === sort
+                    return (
+                      <li key={option.value} role="option" aria-selected={isActive}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSort(option.value)
+                            setIsSortOpen(false)
+                          }}
+                          className={cn(
+                            'flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm font-semibold transition',
+                            isActive
+                              ? 'bg-[#0d2b1f] text-[#f5862e]'
+                              : 'text-stone-600 hover:bg-stone-50 hover:text-[#16243d]',
+                          )}
+                        >
+                          {option.label}
+                          {isActive && <FiCheck size={15} strokeWidth={3} />}
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
             </div>
           </div>
         </div>
@@ -190,22 +259,49 @@ export const ExploreBooksSection = () => {
         </div>
 
         {/* Two Column Layout: Left Sidebar + Right Book Grid */}
-        <div className="mt-8 grid gap-8 lg:grid-cols-[280px_1fr]">
+        <div className="mt-8 grid items-start gap-8 lg:grid-cols-[280px_1fr]">
           
-          {/* Desktop Filter Sidebar */}
-          <aside className={cn(
-            'h-fit rounded-3xl border border-stone-200 bg-white p-6 shadow-sm space-y-8 text-left transition lg:block',
-            !isMobileFilterOpen && 'hidden'
-          )}>
+          {/* Mobile drawer backdrop */}
+          <div
+            aria-hidden="true"
+            onClick={() => setIsMobileFilterOpen(false)}
+            className={cn(
+              'fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden',
+              isMobileFilterOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
+            )}
+          />
+
+          {/* Filter Sidebar — sticky column on desktop, slide-in drawer on mobile */}
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Filters"
+            className={cn(
+              // Mobile: fixed slide-in drawer from the left
+              'fixed left-0 top-0 z-50 flex h-dvh w-[86vw] max-w-sm flex-col overflow-y-auto bg-white p-6 shadow-2xl transition-transform duration-300 text-left custom-scrollbar',
+              isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full',
+              // Desktop: reset drawer styles back to a sticky in-column sidebar
+              'lg:z-auto lg:h-fit lg:w-auto lg:max-w-none lg:translate-x-0 lg:rounded-3xl lg:border lg:border-stone-200 lg:p-6 lg:shadow-sm lg:transition',
+              'lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:block',
+              'space-y-8',
+            )}
+          >
             <div className="flex items-center justify-between lg:hidden border-b border-stone-100 pb-4">
               <h3 className="font-display text-lg font-bold text-[#16243d]">Filters</h3>
-              <button type="button" onClick={() => setIsMobileFilterOpen(false)} className="cursor-pointer p-1"><FiX size={20} /></button>
+              <button
+                type="button"
+                aria-label="Close filters"
+                onClick={() => setIsMobileFilterOpen(false)}
+                className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-600 transition hover:bg-stone-100"
+              >
+                <FiX size={20} />
+              </button>
             </div>
 
             {/* Department / Categories */}
             <div>
               <h3 className="font-display text-xs font-extrabold uppercase tracking-wider text-[#16243d]">Departments / Categories</h3>
-              <div className="mt-3 space-y-1 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+              <div className="mt-3 space-y-1">
                 <button
                   type="button"
                   onClick={() => setCategory('')}
@@ -327,6 +423,17 @@ export const ExploreBooksSection = () => {
                 </Button>
               </div>
             ) : null}
+
+            {/* Mobile-only: apply & close the drawer */}
+            <div className="lg:hidden sticky bottom-0 -mx-6 -mb-6 mt-2 border-t border-stone-100 bg-white px-6 py-4">
+              <Button
+                type="button"
+                onClick={() => setIsMobileFilterOpen(false)}
+                className="w-full justify-center"
+              >
+                Show {data?.total ?? 0} {(data?.total ?? 0) === 1 ? 'result' : 'results'}
+              </Button>
+            </div>
           </aside>
 
           {/* Product Book Grid */}

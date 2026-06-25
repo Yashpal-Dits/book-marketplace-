@@ -17,4 +17,5 @@ export interface HomeAuthorSummary {
   rating: number
   initials: string
   colorClass: string
+  image?: string
 }

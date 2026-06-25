@@ -1,17 +1,26 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiMapPin, FiShoppingBag } from 'react-icons/fi'
+import { FiMapPin, FiShoppingBag, FiXCircle } from 'react-icons/fi'
 import { FaStore } from 'react-icons/fa'
 import { BookCover } from '@/components/common/BookCover'
+import { Button } from '@/components/common/Button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Loader } from '@/components/common/Loader'
 import { OrderStatusBadge } from '@/components/orders/OrderStatusBadge'
 import { OrderStatusTracker } from '@/components/orders/OrderStatusTracker'
-import { useOrders } from '@/hooks/useOrders'
+import { useCancelOrder, useOrders } from '@/hooks/useOrders'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { formatDate } from '@/utils/formatDate'
+import { isOrderCancellableByCustomer } from '@/utils/orderStatus'
 
 export const OrdersPage = () => {
   const { data: orders = [], isLoading, isError } = useOrders()
+  const cancelOrder = useCancelOrder()
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+
+  const handleCancel = (orderId: string) => {
+    cancelOrder.mutate(orderId, { onSettled: () => setConfirmId(null) })
+  }
 
   return (
     <section className="mx-auto max-w-8xl px-4 py-10 sm:px-6 lg:px-8">
@@ -82,14 +91,50 @@ export const OrdersPage = () => {
                 ))}
               </ul>
 
-              {/* shipping address */}
-              <footer className="flex items-start gap-2 border-t border-stone-100 bg-stone-50/70 px-5 py-3 text-xs text-stone-600">
-                <FiMapPin className="mt-0.5 shrink-0 text-[#f0532d]" />
-                <span>
-                  <span className="font-semibold">{order.shippingAddress.fullName}</span> · {order.shippingAddress.addressLine},{' '}
-                  {order.shippingAddress.city}, {order.shippingAddress.state} — {order.shippingAddress.pincode} ·{' '}
-                  {order.shippingAddress.mobileNumber}
-                </span>
+              {/* shipping address + cancel action */}
+              <footer className="flex flex-wrap items-start justify-between gap-3 border-t border-stone-100 bg-stone-50/70 px-5 py-3 text-xs text-stone-600">
+                <div className="flex items-start gap-2 min-w-0">
+                  <FiMapPin className="mt-0.5 shrink-0 text-[#f0532d]" />
+                  <span>
+                    <span className="font-semibold">{order.shippingAddress.fullName}</span> · {order.shippingAddress.addressLine},{' '}
+                    {order.shippingAddress.city}, {order.shippingAddress.state} — {order.shippingAddress.pincode} ·{' '}
+                    {order.shippingAddress.mobileNumber}
+                  </span>
+                </div>
+
+                {isOrderCancellableByCustomer(order.status) && (
+                  <div className="shrink-0">
+                    {confirmId === order.id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-stone-600">Cancel this order?</span>
+                        <Button
+                          variant="danger"
+                          className="h-8 px-3 text-xs"
+                          disabled={cancelOrder.isPending}
+                          onClick={() => handleCancel(order.id)}
+                        >
+                          {cancelOrder.isPending ? 'Cancelling…' : 'Yes, cancel'}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          className="h-8 px-3 text-xs"
+                          disabled={cancelOrder.isPending}
+                          onClick={() => setConfirmId(null)}
+                        >
+                          Keep order
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        className="h-8 gap-1.5 px-3 text-xs text-red-600 hover:bg-red-50"
+                        onClick={() => setConfirmId(order.id)}
+                      >
+                        <FiXCircle /> Cancel order
+                      </Button>
+                    )}
+                  </div>
+                )}
               </footer>
             </article>
           ))

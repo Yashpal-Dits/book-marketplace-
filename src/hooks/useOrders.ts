@@ -14,6 +14,25 @@ export const useOrders = () => {
   })
 }
 
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient()
+  const customerId = useCustomerId()
+
+  return useMutation({
+    mutationFn: (orderId: string) => {
+      if (!customerId) throw new Error('Please login as a customer to cancel an order')
+      return ordersApi.cancelOrder(orderId, customerId)
+    },
+    onSuccess: () => {
+      toast.success('Order cancelled successfully')
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders(customerId ?? '') })
+      queryClient.invalidateQueries({ queryKey: ['books'] }) // stock restored
+      queryClient.invalidateQueries({ queryKey: ['listings'] })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}
+
 export const usePlaceOrder = () => {
   const queryClient = useQueryClient()
   const customerId = useCustomerId()

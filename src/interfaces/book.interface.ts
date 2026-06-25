@@ -5,6 +5,7 @@ export interface IBook {
   isbn: string
   title: string
   author: string
+  authorImage?: string
   publisher?: string
   description: string
   coverImage: string

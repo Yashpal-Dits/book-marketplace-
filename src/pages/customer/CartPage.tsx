@@ -34,7 +34,7 @@ export const CartPage = () => {
   const [addressMode, setAddressMode] = useState<'saved' | 'new'>('new')
   const [cartFeedback, setCartFeedback] = useState('')
 
-  // Scroll lock fix for accessibility & UX
+  
   useEffect(() => {
     if (!isCheckoutOpen) return
     const originalStyle = window.getComputedStyle(document.body).overflow
@@ -45,6 +45,12 @@ export const CartPage = () => {
   }, [isCheckoutOpen])
 
   const total = items.reduce((sum, item) => sum + item.listing.price * item.quantity, 0)
+  const mrpTotal = items.reduce(
+    (sum, item) => sum + (item.listing.mrp > item.listing.price ? item.listing.mrp : item.listing.price) * item.quantity,
+    0,
+  )
+  const discountTotal = Math.max(0, mrpTotal - total)
+  const discountPercent = mrpTotal > 0 ? Math.round((discountTotal / mrpTotal) * 100) : 0
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
   const savedAddress: IShippingAddress | null =
     customerProfile?.mobileNumber &&
@@ -196,8 +202,13 @@ export const CartPage = () => {
                       </button>
                     </div>
 
-                    <div className="flex flex-1 items-baseline justify-end gap-2 pr-2">
-                      <p className="text-base font-black text-[#16243d]">{formatCurrency(item.listing.price * item.quantity)}</p>
+                    <div className="flex flex-1 flex-col items-end justify-center gap-0.5 pr-2">
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-base font-black text-[#16243d]">{formatCurrency(item.listing.price * item.quantity)}</p>
+                        {item.listing.mrp > item.listing.price ? (
+                          <p className="text-[11px] text-stone-400 line-through">{formatCurrency(item.listing.mrp * item.quantity)}</p>
+                        ) : null}
+                      </div>
                       <p className="hidden text-[10px] text-stone-400 sm:block">{formatCurrency(item.listing.price)} each</p>
                     </div>
 
@@ -221,9 +232,15 @@ export const CartPage = () => {
             <h2 className="font-display text-lg font-extrabold uppercase tracking-tight sm:text-xl">Order Summary</h2>
             <dl className="mt-5 space-y-3.5 text-sm">
               <div className="flex justify-between text-white/60">
-                <dt className="font-medium">Items ({totalQuantity})</dt>
-                <dd className="font-bold">{formatCurrency(total)}</dd>
+                <dt className="font-medium">Total MRP ({totalQuantity})</dt>
+                <dd className="font-bold">{formatCurrency(mrpTotal)}</dd>
               </div>
+              {discountTotal > 0 ? (
+                <div className="flex justify-between text-emerald-400">
+                  <dt className="font-medium">Discount {discountPercent > 0 ? `(${discountPercent}%)` : ''}</dt>
+                  <dd className="font-bold">− {formatCurrency(discountTotal)}</dd>
+                </div>
+              ) : null}
               <div className="flex justify-between text-white/60">
                 <dt className="font-medium">Delivery</dt>
                 <dd className="font-bold text-emerald-400">Free</dd>
@@ -233,6 +250,11 @@ export const CartPage = () => {
                 <dd className="text-xl text-[#f5862e]">{formatCurrency(total)}</dd>
               </div>
             </dl>
+            {discountTotal > 0 ? (
+              <p className="mt-3 rounded-xl bg-emerald-500/10 px-3 py-2 text-center text-xs font-bold text-emerald-300">
+                You save {formatCurrency(discountTotal)} on this order 🎉
+              </p>
+            ) : null}
             <button
               type="button"
               onClick={handleOpenCheckout}
@@ -359,18 +381,35 @@ export const CartPage = () => {
                 />
               </div>
 
-              <div className="mt-4 flex items-center justify-between rounded-2xl bg-[#16243d] px-5 py-4 text-white">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Total Amount</p>
-                  <p className="text-xl font-extrabold">{formatCurrency(total)}</p>
+              <div className="mt-4 rounded-2xl bg-[#16243d] px-5 py-4 text-white">
+                <dl className="space-y-1.5 border-b border-white/10 pb-3 text-xs">
+                  <div className="flex justify-between text-white/50">
+                    <dt>Total MRP</dt>
+                    <dd className={discountTotal > 0 ? 'line-through' : 'font-semibold'}>{formatCurrency(mrpTotal)}</dd>
+                  </div>
+                  {discountTotal > 0 ? (
+                    <div className="flex justify-between text-emerald-400">
+                      <dt>Discount {discountPercent > 0 ? `(${discountPercent}%)` : ''}</dt>
+                      <dd className="font-semibold">− {formatCurrency(discountTotal)}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+                <div className="mt-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Total Amount</p>
+                    <p className="text-xl font-extrabold">{formatCurrency(total)}</p>
+                    {discountTotal > 0 ? (
+                      <p className="text-[10px] font-semibold text-emerald-400">You save {formatCurrency(discountTotal)}</p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={placeOrder.isPending}
+                    className="cursor-pointer inline-flex h-11 items-center justify-center rounded-xl bg-[#f0532d] px-6 text-xs font-black uppercase tracking-widest text-white shadow-lg transition hover:bg-[#d8431f] disabled:opacity-60"
+                  >
+                    {placeOrder.isPending ? 'Placing...' : 'Place Order'}
+                  </button>
                 </div>
-                <button
-                  type="submit"
-                  disabled={placeOrder.isPending}
-                  className="cursor-pointer inline-flex h-11 items-center justify-center rounded-xl bg-[#f0532d] px-6 text-xs font-black uppercase tracking-widest text-white shadow-lg transition hover:bg-[#d8431f] disabled:opacity-60"
-                >
-                  {placeOrder.isPending ? 'Placing...' : 'Place Order'}
-                </button>
               </div>
             </form>
           </div>

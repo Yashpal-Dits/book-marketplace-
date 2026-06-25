@@ -229,14 +229,25 @@ export const BookCard = ({ book }: BookCardProps) => {
             <p className="text-xs font-medium text-stone-400">No listings yet</p>
           )}
 
-          {hasPrice && !isOutOfStock ? (
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="cursor-pointer rounded-xl bg-[#f0532d] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#d8431f] active:scale-95 disabled:pointer-events-none disabled:opacity-50"
-            >
-              Add to cart
-            </button>
+          {hasPrice ? (
+            isOutOfStock ? (
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="cursor-not-allowed rounded-xl bg-stone-200 px-3.5 py-2 text-xs font-bold text-stone-500"
+              >
+                Out of Stock
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="cursor-pointer rounded-xl bg-[#f0532d] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#d8431f] active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+              >
+                Add to cart
+              </button>
+            )
           ) : null}
         </div>
       </div>

@@ -69,18 +69,18 @@ export const Header = () => {
   return (
     <>
       <header className="sticky top-0 z-40 left-0 right-0 bg-secondary text-white shadow-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8 lg:grid lg:grid-cols-[1fr_auto_1fr]">
-          <div className="flex items-center gap-4">
+        <div className="flex h-16 w-full items-center justify-between gap-4 px-6 sm:px-8 lg:px-12">
+          <div className="flex flex-1 items-center gap-4">
             <button type="button" onClick={toggleSidebar} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-white/10 lg:hidden">
               <FiMenu size={20} />
             </button>
-            <Link to="/" className="flex items-center gap-2 whitespace-nowrap">
-              <FaBookOpen className="text-accent shrink-0" size={18} />
-              <span className="font-display text-base font-bold tracking-tight text-emerald-300">Bseller</span>
+            <Link to="/" className="flex items-center gap-2.5 whitespace-nowrap">
+              <FaBookOpen className="text-accent shrink-0" size={24} />
+              <span className="font-display text-xl font-extrabold tracking-tight text-emerald-300 sm:text-2xl">Bseller</span>
             </Link>
           </div>
 
-          <nav className="hidden items-center gap-8 lg:flex lg:justify-self-center">
+          <nav className="hidden items-center gap-8 lg:flex">
             {navLinks.map((link) => (
               <NavLink key={link.to} to={link.to} className={linkClass} end={link.to === '/'}>
                 {link.label}
@@ -88,7 +88,7 @@ export const Header = () => {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 lg:justify-self-end">
+          <div className="flex flex-1 items-center justify-end gap-3">
             {shouldShowCart && (
               <Link to="/cart" className="relative inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/10">
                 <FiShoppingCart size={18} />
