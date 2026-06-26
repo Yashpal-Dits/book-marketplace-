@@ -3,6 +3,7 @@ export const routePaths = {
   login: '/login',
   register: '/register',
   sellerRegister: '/seller-register',
+  forgotPassword: '/forgot-password',
   books: '/books',
   cart: '/cart',
   orders: '/orders',

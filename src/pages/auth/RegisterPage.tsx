@@ -13,9 +13,9 @@ export const RegisterPage = () => {
 
   const mutation = useMutation({
     mutationFn: authApi.registerCustomer,
-    onSuccess: () => {
-      toast.success('Registration successful! Please log in to continue.')
-      navigate('/login')
+    onSuccess: (session, variables) => {
+      toast.success(`Registration successful! Verify your email to continue (demo code: ${session.devOtp})`, { duration: 6000 })
+      navigate('/verify-email', { state: { email: variables.email } })
     },
     onError: (error) => toast.error(error.message),
   })
@@ -33,9 +33,10 @@ export const RegisterPage = () => {
 
   return (
     <AuthShell mode="register">
-      <div>
-        <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
-          Create Your Bseller Account
+      <div className="text-center lg:text-left">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Join Bseller</p>
+        <h1 className="font-display mt-2 text-3xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-4xl">
+          Create Your <span className="text-[#f0532d]">Account</span>
         </h1>
         <p className="mt-2 text-sm text-stone-500 sm:mt-3">
           Register as a customer and start buying books.

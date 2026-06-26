@@ -15,6 +15,12 @@ const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then((m) => 
 const SellerRegisterPage = lazy(() =>
   import('@/pages/auth/SellerRegisterPage').then((m) => ({ default: m.SellerRegisterPage })),
 )
+const ForgotPasswordPage = lazy(() =>
+  import('@/pages/auth/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })),
+)
+const VerifyEmailPage = lazy(() =>
+  import('@/pages/auth/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })),
+)
 const UnauthorizedPage = lazy(() =>
   import('@/pages/auth/UnauthorizedPage').then((m) => ({ default: m.UnauthorizedPage })),
 )
@@ -131,6 +137,8 @@ export const AppRoutes = () => {
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="seller-register" element={<SellerRegisterPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="verify-email" element={<VerifyEmailPage />} />
         </Route>
 
         <Route

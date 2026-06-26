@@ -27,7 +27,7 @@
       "firstName": "Rohan",
       "lastName": "Mehta",
       "email": "sellerA@bookbazaar.com",
-      "password": "seller123",
+      "password": "@6Ix9ine",
       "role": "SELLER",
       "createdAt": "2026-06-11T00:00:00.000Z"
     },
@@ -76,6 +76,33 @@
       "password": "customer123",
       "role": "CUSTOMER",
       "image": "https://i.pravatar.cc/150?img=12"
+    },
+    {
+      "id": "user-1782466403962-jm651v",
+      "firstName": "Rahul",
+      "lastName": "Kumar",
+      "email": "rahur@gmail.com",
+      "password": "Rahul@123",
+      "role": "CUSTOMER",
+      "createdAt": "2026-06-26T09:33:23.962Z"
+    },
+    {
+      "id": "user-1782467314456-1shr1t",
+      "firstName": "pappu",
+      "lastName": "don",
+      "email": "pappu@gmail.com",
+      "password": "@Asdf123",
+      "role": "CUSTOMER",
+      "createdAt": "2026-06-26T09:48:34.456Z"
+    },
+    {
+      "id": "user-1782469104079-aaui83",
+      "firstName": "Harshil",
+      "lastName": "Bhardwaj",
+      "email": "harshil@gmail.com",
+      "password": "Harshil@123",
+      "role": "CUSTOMER",
+      "createdAt": "2026-06-26T10:18:24.079Z"
     }
   ],
   "customers": [
@@ -110,6 +137,33 @@
       "createdAt": "2026-06-12T12:41:28.954Z",
       "status": "INACTIVE",
       "updatedAt": "2026-06-16T05:08:02.885Z"
+    },
+    {
+      "id": "customer-1782466403962-cx4po4",
+      "userId": "user-1782466403962-jm651v",
+      "firstName": "Rahul",
+      "lastName": "Kumar",
+      "email": "rahur@gmail.com",
+      "status": "ACTIVE",
+      "createdAt": "2026-06-26T09:33:23.962Z"
+    },
+    {
+      "id": "customer-1782467314456-bx87v7",
+      "userId": "user-1782467314456-1shr1t",
+      "firstName": "pappu",
+      "lastName": "don",
+      "email": "pappu@gmail.com",
+      "status": "ACTIVE",
+      "createdAt": "2026-06-26T09:48:34.456Z"
+    },
+    {
+      "id": "customer-1782469104079-9iqe7o",
+      "userId": "user-1782469104079-aaui83",
+      "firstName": "Harshil",
+      "lastName": "Bhardwaj",
+      "email": "harshil@gmail.com",
+      "status": "ACTIVE",
+      "createdAt": "2026-06-26T10:18:24.079Z"
     }
   ],
   "sellers": [
@@ -1230,6 +1284,21 @@
       "id": "cart-1781268088976-sfu082",
       "customerId": "customer-1781268088954-4g63of",
       "createdAt": "2026-06-12T12:41:28.954Z"
+    },
+    {
+      "id": "cart-1782466403990-vk1tj9",
+      "customerId": "customer-1782466403962-cx4po4",
+      "createdAt": "2026-06-26T09:33:23.962Z"
+    },
+    {
+      "id": "cart-1782467314483-to1oey",
+      "customerId": "customer-1782467314456-bx87v7",
+      "createdAt": "2026-06-26T09:48:34.456Z"
+    },
+    {
+      "id": "cart-1782469104107-9xinfn",
+      "customerId": "customer-1782469104079-9iqe7o",
+      "createdAt": "2026-06-26T10:18:24.079Z"
     }
   ],
   "cartItems": [

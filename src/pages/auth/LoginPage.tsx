@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
-import { authApi } from '@/api/auth.api'
+import { authApi, EmailNotVerifiedError } from '@/api/auth.api'
 import { AuthShell } from '@/components/common/AuthShell'
 import { FormInput } from '@/components/common/FormInput'
 import { PasswordInput } from '@/components/common/PasswordInput'
@@ -22,7 +22,7 @@ export const LoginPage = () => {
       setSession(session)
       toast.success('Login successful')
 
-     
+      // Always route to the role's home (ignore any previously-visited page).
       if (session.role === Role.ADMIN) {
         return navigate('/admin/dashboard', { replace: true })
       }
@@ -35,7 +35,21 @@ export const LoginPage = () => {
 
       return navigate('/', { replace: true })
     },
-    onError: (error) => toast.error(error.message),
+    onError: async (error) => {
+      // Unverified customer → take them to the email verification screen and
+      // (best practice) resend a fresh OTP so they can finish in one step.
+      if (error instanceof EmailNotVerifiedError) {
+        toast.error(error.message)
+        try {
+          const res = await authApi.sendOtp(error.email)
+          toast.success(`Verification code sent (demo code: ${res.devOtp})`, { duration: 6000 })
+        } catch {
+          // ignore resend failure; user can resend from the verify screen
+        }
+        return navigate('/verify-email', { state: { email: error.email } })
+      }
+      toast.error(error.message)
+    },
   })
 
   const formik = useFormik({
@@ -50,11 +64,12 @@ export const LoginPage = () => {
 
   return (
     <AuthShell mode="login">
-      <div>
-      <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
-          Welcome Back to Bseller!
+      <div className="text-center lg:text-left">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0532d]">Welcome back</p>
+        <h1 className="font-display mt-2 text-3xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-4xl">
+          Sign in to <span className="text-[#f0532d]">Bseller</span>
         </h1>
-        <p className="mt-2 text-sm text-stone-500 sm:mt-3">Sign in to your account</p>
+        <p className="mt-2 text-sm text-stone-500 sm:mt-3">Enter your details to continue shopping.</p>
       </div>
 
       <form onSubmit={formik.handleSubmit} noValidate className="mt-8 space-y-5 sm:mt-10">
@@ -93,9 +108,9 @@ export const LoginPage = () => {
             Remember Me
           </label>
 
-          <button type="button" className="transition hover:text-[#f0532d]">
+          <Link to="/forgot-password" className="font-medium transition hover:text-[#f0532d]">
             Forgot Password?
-          </button>
+          </Link>
         </div>
 
         <div className="pt-1 pb-1 text-center text-xs text-stone-400 font-medium">

@@ -27,12 +27,14 @@ import {
 const PAGE_SIZE = 10
 
 const statusClass: Record<CustomerStatus, string> = {
+    [CustomerStatus.PENDING]: 'bg-amber-100 text-amber-800',
     [CustomerStatus.ACTIVE]: 'bg-emerald-100 text-emerald-800',
     [CustomerStatus.INACTIVE]: 'bg-stone-200 text-stone-700',
     [CustomerStatus.BLOCKED]: 'bg-red-100 text-red-700',
 }
 
 const statusLabel: Record<CustomerStatus, string> = {
+    [CustomerStatus.PENDING]: 'Pending',
     [CustomerStatus.ACTIVE]: 'Active',
     [CustomerStatus.INACTIVE]: 'Inactive',
     [CustomerStatus.BLOCKED]: 'Blocked',

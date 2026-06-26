@@ -66,6 +66,17 @@ export const customerRegisterSchema = Yup.object({
   password: passwordValidation,
 })
 
+export const forgotPasswordSchema = Yup.object({
+  email: emailValidation,
+})
+
+export const resetPasswordSchema = Yup.object({
+  password: passwordValidation,
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password')], 'Passwords do not match')
+    .required('Please confirm your password'),
+})
+
 export const sellerRegisterSchema = Yup.object({
   businessName: Yup.string()
     .trim()

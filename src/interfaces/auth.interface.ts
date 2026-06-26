@@ -26,4 +26,6 @@ export interface AuthSession {
   role: Role
   profileId?: string
   sellerStatus?: string
+  /** MOCK-only: demo OTP returned by registration while backend is mocked. */
+  devOtp?: string
 }
