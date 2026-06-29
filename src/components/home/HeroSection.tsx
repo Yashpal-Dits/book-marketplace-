@@ -9,16 +9,16 @@ import type { HomeHeroSearchValues } from '@/interfaces'
 
 // Clean positioning configurations
 const leftPositions = [
-  { top: '8%', left: '8%', rotate: '-rotate-6' },
+  { top: '8%', left: '25%', rotate: '-rotate-6' },
   { top: '30%', left: '52%', rotate: 'rotate-6' },
-  { top: '52%', left: '8%', rotate: '-rotate-3' },
+  { top: '52%', left: '25%', rotate: '-rotate-3' },
   { top: '74%', left: '52%', rotate: 'rotate-12' },
 ]
 
 const rightPositions = [
-  { top: '10%', right: '10%', rotate: 'rotate-6' },
+  { top: '10%', right: '25%', rotate: 'rotate-6' },
   { top: '31%', right: '50%', rotate: '-rotate-6' },
-  { top: '52%', right: '10%', rotate: 'rotate-3' },
+  { top: '52%', right: '25%', rotate: 'rotate-3' },
   { top: '73%', right: '50%', rotate: '-rotate-12' },
 ]
 

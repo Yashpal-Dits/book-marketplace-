@@ -649,7 +649,7 @@
       "rating": 4.7,
       "minPrice": 249,
       "mrp": 399,
-      "totalStock": 40
+      "totalStock": 38
     },
     {
       "id": "book-26",
@@ -1179,10 +1179,10 @@
       "bookId": "book-25",
       "sellerId": "seller-2",
       "price": 249,
-      "stock": 40,
+      "stock": 38,
       "isActive": true,
       "createdAt": "2026-06-17T00:00:00.000Z",
-      "updatedAt": "2026-06-17T00:00:00.000Z",
+      "updatedAt": "2026-06-28T17:20:58.368Z",
       "mrp": 399
     },
     {
@@ -1343,13 +1343,6 @@
       "listingId": "listing-26",
       "quantity": 1,
       "createdAt": "2026-06-12T12:52:09.874Z"
-    },
-    {
-      "id": "cart-item-1782303678944-36a4wu",
-      "cartId": "cart-1",
-      "listingId": "listing-new-25",
-      "quantity": 2,
-      "createdAt": "2026-06-24T12:21:18.944Z"
     }
   ],
   "orders": [
@@ -1517,6 +1510,21 @@
       "totalAmount": 1514,
       "status": "CREATED",
       "createdAt": "2026-06-23T12:56:27.721Z"
+    },
+    {
+      "id": "order-1782667258368-95iuw9",
+      "customerId": "customer-1",
+      "shippingAddress": {
+        "fullName": "Aarav verma",
+        "mobileNumber": "9845436272",
+        "addressLine": "1324 , sector 80, mohali, punjab, 149004",
+        "city": "mohali",
+        "state": "punjab",
+        "pincode": "149004"
+      },
+      "totalAmount": 498,
+      "status": "CREATED",
+      "createdAt": "2026-06-28T17:20:58.368Z"
     }
   ],
   "orderItems": [
@@ -1832,6 +1840,21 @@
       "status": "CREATED",
       "createdAt": "2026-06-23T12:56:27.721Z",
       "coverImage": "https://covers.openlibrary.org/b/isbn/9781847941831-L.jpg"
+    },
+    {
+      "id": "order-item-1782667258400-2vx86j",
+      "orderId": "order-1782667258368-95iuw9",
+      "listingId": "listing-new-25",
+      "bookId": "book-25",
+      "sellerId": "seller-2",
+      "bookTitle": "Think and Grow Rich",
+      "sellerName": "Chapter House",
+      "priceAtPurchase": 249,
+      "quantity": 2,
+      "subtotal": 498,
+      "status": "CREATED",
+      "createdAt": "2026-06-28T17:20:58.368Z",
+      "coverImage": "https://images.weserv.nl/?url=covers.openlibrary.org%2Fb%2Fid%2F15175095-L.jpg&w=400&output=webp&q=80"
     }
   ],
   "deal": {
