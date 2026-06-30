@@ -157,8 +157,19 @@ const getArrayFromResponse = <T>(response: T[] | BackendPaginated<T>): T[] => {
 
 const isObjectId = (value: string) => /^[a-f\d]{24}$/i.test(value)
 
+const getApiOrigin = () => API_BASE_URL.replace(/\/api\/v\d+\/?$/, '')
+
+const getAssetUrl = (value?: string): string => {
+  if (!value) return ''
+  if (/^https?:\/\//i.test(value)) return value
+  if (value.startsWith('data:')) return value
+
+  const origin = getApiOrigin()
+  return `${origin}${value.startsWith('/') ? value : `/${value}`}`
+}
+
 const getBookImageUrl = (bookId: string, book: BackendBook): string => {
-  if (book.coverImage) return book.coverImage
+  if (book.coverImage) return getAssetUrl(book.coverImage)
 
   if (Array.isArray(book.images) && book.images.length > 0) {
     return `${API_BASE_URL}/books/${bookId}/images/0`
@@ -166,6 +177,7 @@ const getBookImageUrl = (bookId: string, book: BackendBook): string => {
 
   return ''
 }
+
 
 const normalizeBook = (book: BackendBook): IBook => {
   const id = getId(book)
@@ -413,36 +425,37 @@ export const sellerApi = {
   },
 
   async createBookRequest(payload: CreateBookRequestPayload): Promise<IBook> {
-    /**
-     * Backend route:
-     * POST /seller/books
-     *
-     * Backend category is ObjectId. Your current form accepts text.
-     * So we send category only when it looks like Mongo ObjectId.
-     */
-    const category = payload.category?.trim()
+  const formData = new FormData()
 
-    const body: Record<string, string> = {
-      isbn: payload.isbn.trim(),
-      title: payload.title.trim(),
-      author: payload.author.trim(),
-      publisher: payload.publisher.trim(),
-      description: payload.description.trim(),
-    }
+  formData.append('isbn', payload.isbn.trim())
+  formData.append('title', payload.title.trim())
+  formData.append('author', payload.author.trim())
+  formData.append('publisher', payload.publisher.trim())
+  formData.append('description', payload.description.trim())
 
-    if (payload.coverImage?.trim()) {
-      body.coverImage = payload.coverImage.trim()
-    }
+  /**
+   * Current form uses text category.
+   * Backend only accepts ObjectId category.
+   * We send it anyway; backend will ignore if not ObjectId.
+   */
+  if (payload.category?.trim()) {
+    formData.append('category', payload.category.trim())
+  }
 
-    if (category && isObjectId(category)) {
-      body.category = category
-    }
+  if (payload.coverImageFile) {
+    formData.append('coverImage', payload.coverImageFile)
+  } else if (payload.coverImage?.trim()) {
+    formData.append('coverImage', payload.coverImage.trim())
+  }
 
-    const { data } = await axiosInstance.post<BackendBook>('/seller/books', body)
+  const { data } = await axiosInstance.post<BackendBook>('/seller/books', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
 
-    return normalizeBook(data)
-  },
-
+  return normalizeBook(data)
+},
   async updateListing(payload: UpdateListingPayload): Promise<IListing> {
     /**
      * Backend route:

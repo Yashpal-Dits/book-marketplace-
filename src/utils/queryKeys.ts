@@ -10,6 +10,8 @@ export const queryKeys =
 
   bestSellers: (limit: number) => ['books', 'best-sellers', limit] as const,
 
+  categories: ['categories'] as const,
+
   dealOfTheWeek: ['deal-of-the-week'] as const,
 
   bookDetails: (id: string) => ['books', id] as const,

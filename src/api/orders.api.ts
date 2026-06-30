@@ -1,158 +1,146 @@
 import { axiosInstance } from './axiosInstance'
-import { cartApi } from './cart.api'
-import { OrderStatus } from '@/enums/order-status.enum'
-import { generateId } from '@/utils/generateId'
-import { syncBookAggregates } from '@/utils/syncBookAggregates'
-import type { IListing } from '@/interfaces/listing.interface'
-import type { IOrder, IOrderDetailed, IOrderItem } from '@/interfaces/order.interface'
-import type { PlaceOrderPayload } from '@/interfaces/orders-api.interface'
+import type { IOrderDetailed, IOrderItem, IShippingAddress } from '@/interfaces/order.interface'
+import type { OrderStatus } from '@/enums/order-status.enum'
+
+type BackendOrderStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'PROCESSING'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'CANCELLED'
+
+interface BackendBook {
+  _id?: string
+  id?: string
+  title?: string
+  coverImage?: string
+  author?: string
+}
+
+interface BackendOrderItem {
+  _id?: string
+  id?: string
+  orderId?: string
+  listingId?: string
+  sellerId?: string
+  quantity?: number
+  priceAtPurchase?: number
+  subtotal?: number
+  status?: BackendOrderStatus
+  createdAt?: string
+  listing?: {
+    _id?: string
+    id?: string
+    price?: number
+    sellerId?: string | { _id?: string; id?: string; name?: string }
+    bookId?: string | BackendBook
+  } | null
+  book?: BackendBook | null
+}
+
+interface BackendOrder {
+  _id?: string
+  id?: string
+  customerId?: string
+  shippingAddress?: IShippingAddress
+  totalAmount?: number
+  status?: BackendOrderStatus
+  createdAt?: string
+  items?: BackendOrderItem[]
+}
+
+const getId = (value: unknown): string => {
+  if (!value) return ''
+
+  if (typeof value === 'string') return value
+
+  if (typeof value === 'object') {
+    const candidate = value as { _id?: string; id?: string }
+    return candidate._id || candidate.id || ''
+  }
+
+  return ''
+}
+
+const getApiOrigin = () =>
+  (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1').replace(/\/api\/v\d+\/?$/, '')
+
+const getAssetUrl = (value?: string): string => {
+  if (!value) return ''
+  if (/^https?:\/\//i.test(value)) return value
+  if (value.startsWith('data:')) return value
+
+  const origin = getApiOrigin()
+  return `${origin}${value.startsWith('/') ? value : `/${value}`}`
+}
+
+const normalizeOrderItem = (item: BackendOrderItem): IOrderItem => {
+  const listingBook =
+    item.listing && typeof item.listing.bookId === 'object'
+      ? item.listing.bookId
+      : null
+
+  const book = item.book || listingBook
+
+  const sellerId =
+    typeof item.listing?.sellerId === 'string'
+      ? item.listing.sellerId
+      : getId(item.listing?.sellerId)
+
+  return {
+    id: item._id || item.id || '',
+    orderId: item.orderId || '',
+    listingId: item.listingId || getId(item.listing) || '',
+    bookId: getId(book),
+    sellerId,
+    bookTitle: book?.title || 'Book',
+    sellerName: '',
+    priceAtPurchase: item.priceAtPurchase ?? item.listing?.price ?? 0,
+    quantity: item.quantity ?? 1,
+    subtotal:
+      item.subtotal ??
+      (item.priceAtPurchase ?? item.listing?.price ?? 0) * (item.quantity ?? 1),
+    status: (item.status as OrderStatus) || 'PENDING',
+    createdAt: item.createdAt || '',
+    coverImage: getAssetUrl(book?.coverImage),
+  }
+}
+
+const normalizeOrder = (order: BackendOrder): IOrderDetailed => {
+  const items = Array.isArray(order.items) ? order.items.map(normalizeOrderItem) : []
+
+  return {
+    id: order._id || order.id || '',
+    customerId: order.customerId || '',
+    shippingAddress: order.shippingAddress || {
+      fullName: '',
+      mobileNumber: '',
+      addressLine: '',
+      city: '',
+      state: '',
+      pincode: '',
+    },
+    totalAmount: order.totalAmount ?? items.reduce((sum, item) => sum + item.subtotal, 0),
+    status: (order.status as OrderStatus) || 'PENDING',
+    createdAt: order.createdAt || '',
+    items,
+  }
+}
 
 export const ordersApi = {
-
-  async placeOrder({ customerId, shippingAddress }: PlaceOrderPayload): Promise<IOrder> {
-    const cartItems = await cartApi.getCartItems(customerId)
-    if (cartItems.length === 0) throw new Error('Your cart is empty')
-
-    // Step 1 — strict stock validation against fresh listing data
-    for (const item of cartItems) {
-      const { data: listing } = await axiosInstance.get<IListing>(`/listings/${item.listingId}`)
-      if (!listing.isActive) {
-        throw new Error(`"${item.book.title}" is no longer available from ${item.seller.businessName}`)
-      }
-      if (item.quantity > listing.stock) {
-        throw new Error(
-          `Only ${listing.stock} of "${item.book.title}" left with ${item.seller.businessName}. Please update your cart.`,
-        )
-      }
-    }
-
-    const now = new Date().toISOString()
-    const totalAmount = cartItems.reduce((sum, item) => sum + item.listing.price * item.quantity, 0)
-
-    // Step 2 — create the order
-    const order: IOrder = {
-      id: generateId('order'),
-      customerId,
-      shippingAddress,
-      totalAmount,
-      status: OrderStatus.CREATED,
-      createdAt: now,
-    }
-    await axiosInstance.post('/orders', order)
-
-    // Steps 3 & 4 — order items + stock decrement
-    for (const item of cartItems) {
-      const orderItem: IOrderItem = {
-        id: generateId('order-item'),
-        orderId: order.id,
-        listingId: item.listingId,
-        bookId: item.book.id,
-        sellerId: item.seller.id,
-        bookTitle: item.book.title,
-        sellerName: item.seller.businessName,
-        priceAtPurchase: item.listing.price,
-        quantity: item.quantity,
-        subtotal: item.listing.price * item.quantity,
-        status: OrderStatus.CREATED,
-        createdAt: now,
-        coverImage: item.book.coverImage,
-      }
-      await axiosInstance.post('/orderItems', orderItem)
-
-      const { data: listing } = await axiosInstance.get<IListing>(`/listings/${item.listingId}`)
-      await axiosInstance.patch(`/listings/${item.listingId}`, {
-        stock: Math.max(0, listing.stock - item.quantity),
-        updatedAt: now,
-      })
-      await syncBookAggregates(item.book.id)
-    }
-
-    // Step 5 — clear exactly the purchased cart items.
-    // Deleting the captured item ids is more reliable than re-reading the cart after order writes.
-    await Promise.all(cartItems.map((item) => axiosInstance.delete(`/cartItems/${item.id}`)))
-
-    return order
+  async getOrders(): Promise<IOrderDetailed[]> {
+    const response = await axiosInstance.get<BackendOrder[]>('/customer/orders')
+    return (response.data || []).map(normalizeOrder)
   },
 
-  /**
-   * Cancel an order on behalf of the customer who owns it.
-   *
-   * Allowed only while the order has not yet been shipped — i.e. the status is
-   * still CREATED or ACCEPTED. Cancelling marks the order and every one of its
-   * items as CANCELLED and restocks the seller listings so inventory reflects
-   * the reversal (mirroring the decrement applied at placement time).
-   */
-  async cancelOrder(orderId: string, customerId: string): Promise<IOrder> {
-    const { data: order } = await axiosInstance.get<IOrder>(`/orders/${orderId}`)
-    if (order.customerId !== customerId) {
-      throw new Error("You cannot cancel another customer's order")
-    }
-    if (order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) {
-      throw new Error('This order has already been shipped and can no longer be cancelled')
-    }
-    if (order.status === OrderStatus.CANCELLED) {
-      throw new Error('This order is already cancelled')
-    }
-
-    const now = new Date().toISOString()
-    const { data: items } = await axiosInstance.get<IOrderItem[]>('/orderItems', {
-      params: { orderId },
-    })
-
-    // Cancel each still-active item and restock its listing.
-    const affectedBookIds = new Set<string>()
-    for (const item of items) {
-      if (item.status === OrderStatus.CANCELLED) continue
-
-      await axiosInstance.patch(`/orderItems/${item.id}`, { status: OrderStatus.CANCELLED })
-
-      try {
-        const { data: listing } = await axiosInstance.get<IListing>(`/listings/${item.listingId}`)
-        await axiosInstance.patch(`/listings/${item.listingId}`, {
-          stock: listing.stock + item.quantity,
-          updatedAt: now,
-        })
-        affectedBookIds.add(item.bookId)
-      } catch {
-        // Listing may have been removed; skip restock but still cancel the item.
-      }
-    }
-
-    const { data: updatedOrder } = await axiosInstance.patch<IOrder>(`/orders/${orderId}`, {
-      status: OrderStatus.CANCELLED,
-    })
-
-    await Promise.all([...affectedBookIds].map((bookId) => syncBookAggregates(bookId)))
-
-    return updatedOrder
+  async placeOrder(payload: { shippingAddress: IShippingAddress }): Promise<IOrderDetailed> {
+    const response = await axiosInstance.post<BackendOrder>('/customer/orders', payload)
+    return normalizeOrder(response.data)
   },
 
-  /** Order history for a customer, newest first, with items joined. */
-  async getOrdersByCustomerId(customerId: string): Promise<IOrderDetailed[]> {
-    const { data: orders } = await axiosInstance.get<IOrder[]>('/orders', {
-      params: { customerId, _sort: 'createdAt', _order: 'desc' },
-    })
-    if (orders.length === 0) return []
-
-    const withItems = await Promise.all(
-      orders.map(async (order) => {
-        const { data: items } = await axiosInstance.get<IOrderItem[]>('/orderItems', {
-          params: { orderId: order.id },
-        })
-        const itemsWithCovers = await Promise.all(
-          items.map(async (item) => {
-            if (item.coverImage) return item
-            try {
-              const { data: book } = await axiosInstance.get(`/books/${item.bookId}`)
-              return { ...item, coverImage: book.coverImage }
-            } catch {
-              return item
-            }
-          }),
-        )
-        return { ...order, items: itemsWithCovers }
-      }),
-    )
-    return withItems
+  async cancelOrder(orderId: string): Promise<IOrderDetailed> {
+    const response = await axiosInstance.patch<BackendOrder>(`/customer/orders/${orderId}/cancel`)
+    return normalizeOrder(response.data)
   },
 }

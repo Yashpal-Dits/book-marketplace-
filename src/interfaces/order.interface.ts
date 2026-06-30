@@ -37,5 +37,3 @@ export interface IOrderItem {
 export interface IOrderDetailed extends IOrder {
   items: IOrderItem[]
 }
-
-

@@ -68,6 +68,8 @@ export interface CreateBookRequestPayload {
   author: string
   publisher: string
   description: string
-  coverImage?: string
   category: string
+  coverImageFile?: File | null
+  // Kept only for backward compatibility.
+  coverImage?: string
 }

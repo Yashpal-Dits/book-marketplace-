@@ -117,8 +117,19 @@ const getCategoryName = (value: CategoryLike): string | undefined => {
   return value.name || value.id || value._id
 }
 
+const getApiOrigin = () => API_BASE_URL.replace(/\/api\/v\d+\/?$/, '')
+
+const getAssetUrl = (value?: string): string => {
+  if (!value) return ''
+  if (/^https?:\/\//i.test(value)) return value
+  if (value.startsWith('data:')) return value
+
+  const origin = getApiOrigin()
+  return `${origin}${value.startsWith('/') ? value : `/${value}`}`
+}
+
 const getBookImageUrl = (bookId: string, book: BackendBook): string => {
-  if (book.coverImage) return book.coverImage
+  if (book.coverImage) return getAssetUrl(book.coverImage)
 
   if (Array.isArray(book.images) && book.images.length > 0) {
     return `${API_BASE_URL}/books/${bookId}/images/0`
