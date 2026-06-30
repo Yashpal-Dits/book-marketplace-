@@ -13,8 +13,8 @@ export const RegisterPage = () => {
 
   const mutation = useMutation({
     mutationFn: authApi.registerCustomer,
-    onSuccess: (session, variables) => {
-      toast.success(`Registration successful! Verify your email to continue (demo code: ${session.devOtp})`, { duration: 6000 })
+    onSuccess: (_session, variables) => {
+     toast.success('Registration successful! Please check your email for the OTP.', { duration: 6000 })
       navigate('/verify-email', { state: { email: variables.email } })
     },
     onError: (error) => toast.error(error.message),

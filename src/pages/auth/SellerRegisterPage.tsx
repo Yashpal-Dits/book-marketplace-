@@ -13,9 +13,17 @@ export const SellerRegisterPage = () => {
 
   const mutation = useMutation({
     mutationFn: authApi.registerSeller,
-    onSuccess: () => {
-      toast.success('Seller registration submitted! Please log in once your account is approved.')
-      navigate('/login')
+    onSuccess: (_session, variables) => {
+      toast.success('Seller registration submitted! Please verify your email using the OTP sent to your inbox.', {
+        duration: 6000,
+      })
+
+      navigate('/verify-email', {
+        state: {
+          email: variables.email,
+          source: 'seller-register',
+        },
+      })
     },
     onError: (error) => toast.error(error.message),
   })
@@ -35,17 +43,21 @@ export const SellerRegisterPage = () => {
   return (
     <AuthShell mode="seller">
       <div>
-       <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
+        <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
           Register Your Bookstore
         </h1>
         <p className="mt-2 text-sm text-stone-500 sm:mt-3">
-          Seller status will be pending until admin approval.
+          Verify your email first. After verification, your seller account will wait for admin approval.
         </p>
       </div>
 
       <form onSubmit={formik.handleSubmit} noValidate className="mt-7 space-y-4 sm:mt-8">
         <FormInput
-          label={<>Business Name <span className="text-[#f0532d] font-bold">*</span></>}
+          label={
+            <>
+              Business Name <span className="text-[#f0532d] font-bold">*</span>
+            </>
+          }
           name="businessName"
           autoComplete="organization"
           maxLength={80}
@@ -56,7 +68,11 @@ export const SellerRegisterPage = () => {
         />
 
         <FormInput
-          label={<>Contact Person <span className="text-[#f0532d] font-bold">*</span></>}
+          label={
+            <>
+              Contact Person <span className="text-[#f0532d] font-bold">*</span>
+            </>
+          }
           name="contactPerson"
           autoComplete="name"
           maxLength={20}
@@ -68,7 +84,11 @@ export const SellerRegisterPage = () => {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormInput
-            label={<>Email <span className="text-[#f0532d] font-bold">*</span></>}
+            label={
+              <>
+                Email <span className="text-[#f0532d] font-bold">*</span>
+              </>
+            }
             name="email"
             type="email"
             autoComplete="email"
@@ -80,7 +100,11 @@ export const SellerRegisterPage = () => {
           />
 
           <FormInput
-            label={<>Mobile Number <span className="text-[#f0532d] font-bold">*</span></>}
+            label={
+              <>
+                Mobile Number <span className="text-[#f0532d] font-bold">*</span>
+              </>
+            }
             name="mobileNumber"
             inputMode="numeric"
             autoComplete="tel"
@@ -93,7 +117,11 @@ export const SellerRegisterPage = () => {
         </div>
 
         <PasswordInput
-          label={<>Password <span className="text-[#f0532d] font-bold">*</span></>}
+          label={
+            <>
+              Password <span className="text-[#f0532d] font-bold">*</span>
+            </>
+          }
           name="password"
           autoComplete="new-password"
           maxLength={15}

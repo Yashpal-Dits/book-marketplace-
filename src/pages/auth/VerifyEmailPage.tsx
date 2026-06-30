@@ -10,47 +10,67 @@ import { OtpInput } from '@/components/common/OtpInput'
 const OTP_LENGTH = 6
 const RESEND_SECONDS = 30
 
-/**
- * Email verification via OTP. The email is passed through navigation state
- * (from registration or an unverified login attempt). Verifying flips the
- * customer's status to ACTIVE on the backend, then routes to Login.
- */
+type VerifyEmailState = {
+  email?: string
+  source?: 'customer-register' | 'seller-register' | string
+}
+
 export const VerifyEmailPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const email = (location.state as { email?: string } | null)?.email ?? ''
+
+  const state = (location.state as VerifyEmailState | null) || {}
+  const email = state.email || ''
+  const isSellerVerification = state.source === 'seller-register'
 
   const [otp, setOtp] = useState('')
   const [otpError, setOtpError] = useState<string | undefined>()
   const [resendIn, setResendIn] = useState(RESEND_SECONDS)
 
-  // No email in state → nothing to verify; send the user to register.
   useEffect(() => {
     if (!email) navigate('/register', { replace: true })
   }, [email, navigate])
 
   useEffect(() => {
     if (resendIn <= 0) return
-    const t = setInterval(() => setResendIn((s) => s - 1), 1000)
-    return () => clearInterval(t)
+
+    const timer = setInterval(() => {
+      setResendIn((seconds) => seconds - 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
   }, [resendIn])
 
   const verifyMutation = useMutation({
     mutationFn: () => authApi.verifyOtp(email, otp),
     onSuccess: () => {
-      toast.success('Email verified successfully! You can now log in.')
+      if (isSellerVerification) {
+        toast.success('Email verified successfully! Your seller account is now pending admin approval.', {
+          duration: 6000,
+        })
+      } else {
+        toast.success('Email verified successfully! You can now log in.', {
+          duration: 6000,
+        })
+      }
+
       navigate('/login', { replace: true })
     },
-    onError: (error: Error) => setOtpError(error.message),
+    onError: (error: Error) => {
+      setOtpError(error.message)
+    },
   })
 
   const resendMutation = useMutation({
     mutationFn: () => authApi.sendOtp(email),
-    onSuccess: (res) => {
+    onSuccess: () => {
       setResendIn(RESEND_SECONDS)
       setOtp('')
       setOtpError(undefined)
-      toast.success(`OTP resent to ${email} (demo code: ${res.devOtp})`, { duration: 6000 })
+
+      toast.success(`OTP resent to ${email}.`, {
+        duration: 6000,
+      })
     },
     onError: (error: Error) => toast.error(error.message),
   })
@@ -58,26 +78,45 @@ export const VerifyEmailPage = () => {
   if (!email) return null
 
   return (
-    <AuthShell mode="register">
+    <AuthShell mode={isSellerVerification ? 'seller' : 'register'}>
       <div>
         <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-[#0b1235] sm:text-3xl lg:text-4xl">
           Verify Your Email
         </h1>
+
         <p className="mt-2 text-sm text-stone-500 sm:mt-3">
           Enter the 6-digit code we sent to{' '}
-          <span className="font-semibold text-stone-700">{email}</span> to activate your account.
+          <span className="font-semibold text-stone-700">{email}</span>.
         </p>
+
+        {isSellerVerification ? (
+          <p className="mt-2 text-xs font-medium text-stone-500">
+            After email verification, your seller account will remain pending until admin approval.
+          </p>
+        ) : null}
       </div>
 
       <form
-        onSubmit={(e) => {
-          e.preventDefault()
+        onSubmit={(event) => {
+          event.preventDefault()
           if (otp.length === OTP_LENGTH) verifyMutation.mutate()
         }}
         className="mt-8 space-y-5 sm:mt-10"
       >
-        <OtpInput value={otp} onChange={setOtp} length={OTP_LENGTH} hasError={Boolean(otpError)} disabled={verifyMutation.isPending} />
-        {otpError ? <p className="text-center text-xs font-medium text-red-600">{otpError}</p> : null}
+        <OtpInput
+          value={otp}
+          onChange={(value) => {
+            setOtp(value)
+            setOtpError(undefined)
+          }}
+          length={OTP_LENGTH}
+          hasError={Boolean(otpError)}
+          disabled={verifyMutation.isPending}
+        />
+
+        {otpError ? (
+          <p className="text-center text-xs font-medium text-red-600">{otpError}</p>
+        ) : null}
 
         <button
           type="submit"

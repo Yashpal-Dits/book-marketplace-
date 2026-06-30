@@ -15,7 +15,7 @@ export const useCustomerId = () => {
   return isAuthenticated && user?.role === Role.CUSTOMER ? profileId : undefined
 }
 
-export const useCart = () => {
+export const useCart = (undefined: undefined, p0: { enabled: boolean }) => {
   const customerId = useCustomerId()
   return useQuery({
     queryKey: queryKeys.cart(customerId ?? ''),

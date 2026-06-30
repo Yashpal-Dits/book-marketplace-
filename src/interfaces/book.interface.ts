@@ -13,6 +13,7 @@ export interface IBook {
   status: BookStatus
   createdBySellerId?: string
   createdAt: string
+  updatedAt?: string
   rating?: number
   minPrice?: number | null
   mrp?: number | null

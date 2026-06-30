@@ -1,15 +1,19 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { FaBookOpen } from 'react-icons/fa'
 import { Role } from '@/enums/role.enum'
+import { SellerStatus } from '@/enums/seller-status.enum'
 import { useAuthStore } from '@/store/auth.store'
 import { useUiStore } from '@/store/ui.store'
 import { cn } from '@/utils/cn'
 import {
   FiBookOpen,
+  FiClock,
   FiDatabase,
   FiGrid,
   FiHome,
   FiLogIn,
+  FiLogOut,
   FiPackage,
   FiPercent,
   FiShoppingBag,
@@ -17,9 +21,8 @@ import {
   FiStar,
   FiTrendingUp,
   FiUser,
-  FiX
+  FiX,
 } from 'react-icons/fi'
-
 
 const customerLinks = [
   { to: '/', label: 'Home', icon: FiHome },
@@ -40,6 +43,11 @@ const sellerLinks = [
   { to: '/', label: 'Preview Store', icon: FiHome },
 ]
 
+const pendingSellerLinks = [
+  { to: '/', label: 'Home', icon: FiHome },
+  { to: '/seller/pending-approval', label: 'Approval Pending', icon: FiClock },
+]
+
 const adminLinks = [
   { to: '/admin/dashboard', label: 'Admin Dashboard', icon: FiGrid },
   { to: '/admin/sellers', label: 'Seller Approval', icon: FiPackage },
@@ -51,12 +59,32 @@ const adminLinks = [
 ]
 
 export const SidebarDrawer = () => {
+  const navigate = useNavigate()
   const { isSidebarOpen, closeSidebar } = useUiStore()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, sellerStatus, logout } = useAuthStore()
 
-  const links = user?.role === Role.ADMIN ? adminLinks : user?.role === Role.SELLER ? sellerLinks : customerLinks
-  const profilePath = user?.role === Role.ADMIN ? '/admin/profile' : user?.role === Role.SELLER ? '/seller/profile' : '/customer/profile'
-  const displayName = user?.firstName ? `${user.firstName} ${user.lastName ?? ''}`.trim() : user?.email
+  const isPendingSeller = user?.role === Role.SELLER && sellerStatus === SellerStatus.PENDING
+
+  const links =
+    user?.role === Role.ADMIN
+      ? adminLinks
+      : isPendingSeller
+        ? pendingSellerLinks
+        : user?.role === Role.SELLER
+          ? sellerLinks
+          : customerLinks
+
+  const profilePath =
+    user?.role === Role.ADMIN
+      ? '/admin/profile'
+      : user?.role === Role.SELLER
+        ? '/seller/profile'
+        : '/customer/profile'
+
+  const displayName = user?.firstName
+    ? `${user.firstName} ${user.lastName ?? ''}`.trim()
+    : user?.email
+
   const initials = displayName
     ?.split(' ')
     .filter(Boolean)
@@ -64,6 +92,13 @@ export const SidebarDrawer = () => {
     .map((part) => part[0])
     .join('')
     .toUpperCase()
+
+  const handleLogout = () => {
+    logout()
+    closeSidebar()
+    toast.success('Logged out successfully')
+    navigate('/login', { replace: true })
+  }
 
   return (
     <>
@@ -86,10 +121,15 @@ export const SidebarDrawer = () => {
         )}
       >
         <header className="flex items-center justify-between bg-[#0d2b1f] px-5 py-4 text-white">
-          <Link to="/" onClick={closeSidebar} className="flex items-center gap-2 text-lg font-bold text-emerald-300">
+          <Link
+            to="/"
+            onClick={closeSidebar}
+            className="flex items-center gap-2 text-lg font-bold text-emerald-300"
+          >
             <FaBookOpen className="text-[#f5862e]" />
             <span className="font-display tracking-wide">Bseller</span>
           </Link>
+
           <button
             type="button"
             aria-label="Close menu"
@@ -102,27 +142,75 @@ export const SidebarDrawer = () => {
 
         <div className="border-b border-stone-100 bg-[#faf7ef] p-5">
           {isAuthenticated ? (
-            <Link to={profilePath} onClick={closeSidebar} className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm transition hover:bg-orange-50">
-              <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-amber-100 text-sm font-bold text-amber-800">
-                {user?.profileImage ? <img src={user.profileImage} alt="Profile" className="h-full w-full object-cover" /> : initials || <FiUser />}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-bold text-[#16243d]">Hello, {displayName}</span>
-                <span className="block truncate text-xs text-stone-500">{user?.email}</span>
-              </span>
-            </Link>
+            isPendingSeller ? (
+              <div className="rounded-2xl bg-white p-3 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-amber-100 text-sm font-bold text-amber-800">
+                    {user?.profileImage ? (
+                      <img src={user.profileImage} alt="Profile" className="h-full w-full object-cover" />
+                    ) : (
+                      initials || <FiUser />
+                    )}
+                  </span>
+
+                  <span className="min-w-0">
+                    <span className="block text-sm font-bold text-[#16243d]">
+                      Hello, {displayName}
+                    </span>
+                    <span className="block truncate text-xs text-stone-500">
+                      {user?.email}
+                    </span>
+                  </span>
+                </div>
+
+                <div className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium leading-5 text-amber-800">
+                  Your seller account is pending admin approval.
+                </div>
+              </div>
+            ) : (
+              <Link
+                to={profilePath}
+                onClick={closeSidebar}
+                className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm transition hover:bg-orange-50"
+              >
+                <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-amber-100 text-sm font-bold text-amber-800">
+                  {user?.profileImage ? (
+                    <img src={user.profileImage} alt="Profile" className="h-full w-full object-cover" />
+                  ) : (
+                    initials || <FiUser />
+                  )}
+                </span>
+
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold text-[#16243d]">
+                    Hello, {displayName}
+                  </span>
+                  <span className="block truncate text-xs text-stone-500">
+                    {user?.email}
+                  </span>
+                </span>
+              </Link>
+            )
           ) : (
-            <Link to="/login" onClick={closeSidebar} className="flex items-center justify-center gap-2 rounded-full bg-[#f0532d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#d8431f]">
+            <Link
+              to="/login"
+              onClick={closeSidebar}
+              className="flex items-center justify-center gap-2 rounded-full bg-[#f0532d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#d8431f]"
+            >
               <FiLogIn /> Login / Register
             </Link>
           )}
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4">
-          <p className="px-3 text-xs font-bold uppercase tracking-[0.18em] text-stone-400">Menu</p>
+          <p className="px-3 text-xs font-bold uppercase tracking-[0.18em] text-stone-400">
+            Menu
+          </p>
+
           <div className="mt-3 space-y-1">
             {links.map((link) => {
               const Icon = link.icon
+
               return (
                 <NavLink
                   key={link.to}
@@ -141,11 +229,24 @@ export const SidebarDrawer = () => {
                 </NavLink>
               )
             })}
+
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
+              >
+                <FiLogOut />
+                Logout
+              </button>
+            ) : null}
           </div>
         </nav>
 
         <footer className="border-t border-stone-100 p-4 text-xs leading-5 text-stone-500">
-          Books are shown only when approved and actively listed by approved sellers.
+          {isPendingSeller
+            ? 'You can access seller features once admin approves your seller account.'
+            : 'Books are shown only when approved and actively listed by approved sellers.'}
         </footer>
       </aside>
     </>
