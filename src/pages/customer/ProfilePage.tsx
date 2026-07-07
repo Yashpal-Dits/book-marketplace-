@@ -30,7 +30,7 @@ import { FormInput } from '@/components/common/FormInput'
 import { OrderStatusBadge } from '@/components/orders/OrderStatusBadge'
 import { OrderStatusTracker } from '@/components/orders/OrderStatusTracker'
 import { OrderStatus } from '@/enums/order-status.enum'
-import { useCustomerProfile, useUpdateCustomerProfile } from '@/hooks/useProfile'
+import { useCustomerProfile, useUpdateCustomerProfile } from '@/hooks/useCustomerProfile'
 import { useCancelOrder, useOrders } from '@/hooks/useOrders'
 import { isOrderCancellableByCustomer } from '@/utils/orderStatus'
 import { customerProfileSchema } from '@/schemas/profile.schema'
@@ -671,7 +671,7 @@ export const ProfilePage = () => {
                 {ordersLoading ? (
                   <Loader />
                 ) : ordersError ? (
-                  <EmptyState title="Could not load orders" description="Make sure the JSON server is running on port 4000." />
+                  <EmptyState title="Could not load orders" description="Please make sure your backend is running and you are logged in as a customer." />
                 ) : customerOrders.length === 0 ? (
                   <div className="rounded-3xl border border-stone-200 bg-white p-10 shadow-sm">
                     <EmptyState title="No orders yet" description="Your placed orders and their tracking status will appear here." />

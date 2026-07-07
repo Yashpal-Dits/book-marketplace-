@@ -1,13 +1,66 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { sellerApi} from '../api/seller.api'
- import type {CreateBookRequestPayload, CreateListingPayload,SellerListParams,SellerOrdersParams,UpdateListingPayload } from '@/interfaces/seller-api.interface'
+import { axiosInstance } from '@/api/axiosInstance'
+import { sellerApi } from '../api/seller.api'
+import type { ISeller, UpdateSellerProfilePayload } from '@/interfaces/seller.interface'
+import type {
+  CreateBookRequestPayload,
+  CreateListingPayload,
+  SellerListParams,
+  SellerOrdersParams,
+  SellerRequestedBooksParams,
+  UpdateListingPayload,
+} from '@/interfaces/seller-api.interface'
 import { OrderStatus } from '@/enums/order-status.enum'
 import { useAuthStore } from '@/store/auth.store'
 import { queryKeys } from '@/utils/queryKeys'
 
 export const useSellerId = () =>
   useAuthStore((state) => state.impersonatedSellerId ?? state.profileId)
+
+export const useSellerProfile = () => {
+  const sellerId = useSellerId()
+
+  return useQuery({
+    queryKey: queryKeys.sellerProfile(sellerId ?? 'me'),
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<ISeller>('/seller/profile')
+      return data
+    },
+    enabled: Boolean(sellerId),
+  })
+}
+
+export const useUpdateSellerProfile = () => {
+  const queryClient = useQueryClient()
+  const sellerId = useSellerId()
+  const updateUser = useAuthStore((state) => state.updateUser)
+
+  return useMutation({
+    mutationFn: async (payload: UpdateSellerProfilePayload) => {
+      const { data } = await axiosInstance.patch<ISeller>('/seller/profile', {
+        businessName: payload.businessName.trim(),
+        contactPerson: payload.contactPerson.trim(),
+        mobileNumber: payload.mobileNumber.trim(),
+        businessAddress: payload.businessAddress.trim(),
+        city: payload.city.trim(),
+        state: payload.state.trim(),
+        pincode: payload.pincode.trim(),
+        storeLogo: payload.storeLogo?.trim() || '',
+      })
+      return data
+    },
+    onSuccess: (profile) => {
+      toast.success('Seller profile updated')
+      const [firstName = profile.contactPerson, ...rest] = profile.contactPerson.split(' ')
+      updateUser({ firstName, lastName: rest.join(' '), profileImage: profile.storeLogo })
+      queryClient.invalidateQueries({ queryKey: queryKeys.sellerProfile(sellerId ?? 'me') })
+      queryClient.invalidateQueries({ queryKey: ['seller'] })
+      queryClient.invalidateQueries({ queryKey: ['admin'] })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}
 
 export const useSellerDashboard = () => {
   const sellerId = useSellerId()
@@ -29,6 +82,16 @@ export const useSellerListings = (params: Omit<SellerListParams, 'sellerId'>) =>
   return useQuery({
     queryKey: queryKeys.sellerListings({ sellerId: sellerId ?? '', ...params }),
     queryFn: () => sellerApi.getListings({ sellerId: sellerId as string, ...params }),
+    enabled: Boolean(sellerId),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export const useSellerRequestedBooks = (params: Omit<SellerRequestedBooksParams, 'sellerId'>) => {
+  const sellerId = useSellerId()
+  return useQuery({
+    queryKey: queryKeys.sellerRequestedBooks({ sellerId: sellerId ?? '', ...params }),
+    queryFn: () => sellerApi.getRequestedBooks({ sellerId: sellerId as string, ...params }),
     enabled: Boolean(sellerId),
     placeholderData: keepPreviousData,
   })

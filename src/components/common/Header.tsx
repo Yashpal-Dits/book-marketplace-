@@ -57,10 +57,8 @@ export const Header = () => {
    * Only customer users should query cart.
    * Pending sellers/admins should not call customer cart API.
    */
-  const shouldUseCart = !isAuthenticated || user?.role === Role.CUSTOMER || isImpersonatingCustomer
-  const { data: cartItems = [] } = useCart(undefined, {
-    enabled: shouldUseCart,
-  })
+ const shouldUseCart = isAuthenticated && (user?.role === Role.CUSTOMER || isImpersonatingCustomer)
+const { data: cartItems = [] } = useCart()
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false)
 

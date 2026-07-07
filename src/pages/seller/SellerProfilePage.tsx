@@ -27,7 +27,7 @@ import { EmptyState } from '@/components/common/EmptyState'
 import { FormInput } from '@/components/common/FormInput'
 import { Loader } from '@/components/common/Loader'
 import { SellerStatus } from '@/enums/seller-status.enum'
-import { useSellerProfile, useUpdateSellerProfile } from '@/hooks/useProfile'
+import { useSellerProfile, useUpdateSellerProfile } from '@/hooks/useSeller'
 import { useSellerDashboard } from '@/hooks/useSeller'
 import { sellerProfileSchema } from '@/schemas/profile.schema'
 import { formatCurrency } from '@/utils/formatCurrency'
@@ -133,7 +133,7 @@ export const SellerProfilePage = () => {
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map((part) => part[0])
+    .map((part: string) => part[0])
     .join('')
     .toUpperCase()
   const memberSince = formatDate(profile.createdAt)
@@ -251,7 +251,7 @@ export const SellerProfilePage = () => {
                 <p className="mt-1 truncate text-xs text-white/60">{profile.email}</p>
               </div>
             </div>
-            <Badge className={cn('mt-4', statusClass[profile.status])}>{profile.status}</Badge>
+            <Badge className={cn('mt-4', statusClass[profile.status as SellerStatus])}>{profile.status}</Badge>
           </div>
 
           <nav className="mt-5 space-y-1.5">
@@ -304,7 +304,7 @@ export const SellerProfilePage = () => {
                   .split(' ')
                   .filter(Boolean)
                   .slice(0, 2)
-                  .map((part) => part[0])
+                  .map((part: string) => part[0])
                   .join('')
                   .toUpperCase()
 
@@ -488,7 +488,7 @@ export const SellerProfilePage = () => {
                   <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Approval Status</p>
                     <div className="mt-3 flex items-center gap-3">
-                      <Badge className={statusClass[profile.status]}>{profile.status}</Badge>
+                      <Badge className={statusClass[profile.status as SellerStatus]}>{profile.status}</Badge>
                       <span className="text-xs text-stone-500">Controlled by admin</span>
                     </div>
                   </div>

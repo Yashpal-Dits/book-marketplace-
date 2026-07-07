@@ -15,6 +15,8 @@ import type {
   SellerListingDetailed,
   SellerOrderItemDetailed,
   SellerOrdersParams,
+  SellerRequestedBookDetailed,
+  SellerRequestedBooksParams,
   CreateBookRequestPayload,
   CreateListingPayload,
   UpdateListingPayload,
@@ -155,8 +157,6 @@ const getArrayFromResponse = <T>(response: T[] | BackendPaginated<T>): T[] => {
   return Array.isArray(response.data) ? response.data : []
 }
 
-const isObjectId = (value: string) => /^[a-f\d]{24}$/i.test(value)
-
 const getApiOrigin = () => API_BASE_URL.replace(/\/api\/v\d+\/?$/, '')
 
 const getAssetUrl = (value?: string): string => {
@@ -177,7 +177,6 @@ const getBookImageUrl = (bookId: string, book: BackendBook): string => {
 
   return ''
 }
-
 
 const normalizeBook = (book: BackendBook): IBook => {
   const id = getId(book)
@@ -328,22 +327,16 @@ const sortListings = (rows: SellerListingDetailed[], sort = SellerListingSort.NE
     switch (sort) {
       case SellerListingSort.TITLE_ASC:
         return a.book.title.localeCompare(b.book.title)
-
       case SellerListingSort.TITLE_DESC:
         return b.book.title.localeCompare(a.book.title)
-
       case SellerListingSort.PRICE_LOW_TO_HIGH:
         return a.price - b.price
-
       case SellerListingSort.PRICE_HIGH_TO_LOW:
         return b.price - a.price
-
       case SellerListingSort.STOCK_LOW_TO_HIGH:
         return a.stock - b.stock
-
       case SellerListingSort.STOCK_HIGH_TO_LOW:
         return b.stock - a.stock
-
       default:
         return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     }
@@ -359,13 +352,10 @@ const sortOrders = (rows: SellerOrderItemDetailed[], sort = SellerOrderSort.NEWE
     switch (sort) {
       case SellerOrderSort.OLDEST:
         return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
-
       case SellerOrderSort.AMOUNT_HIGH_TO_LOW:
         return b.subtotal - a.subtotal
-
       case SellerOrderSort.AMOUNT_LOW_TO_HIGH:
         return a.subtotal - b.subtotal
-
       default:
         return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     }
@@ -383,17 +373,27 @@ export const sellerApi = {
       .sort((a, b) => a.title.localeCompare(b.title))
   },
 
+  async getRequestedBooks(params: SellerRequestedBooksParams): Promise<PaginatedResult<SellerRequestedBookDetailed>> {
+    const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/seller/books')
+
+    const books = getArrayFromResponse(data).map(normalizeBook)
+    const term = params.search?.trim().toLowerCase() ?? ''
+
+    const filtered = term
+      ? books.filter((book) =>
+          [book.title, book.author, book.isbn, book.category, book.status]
+            .filter(Boolean)
+            .some((value) => String(value).toLowerCase().includes(term)),
+        )
+      : books
+
+    return paginate(filtered, params.page, params.limit)
+  },
+
   async getListings(params: SellerListParams): Promise<PaginatedResult<SellerListingDetailed>> {
-    /**
-     * Backend route:
-     * GET /seller/listings
-     *
-     * Seller identity comes from JWT token.
-     */
     const { data } = await axiosInstance.get<BackendListing[] | BackendPaginated<BackendListing>>('/seller/listings')
 
     const joined = getArrayFromResponse(data).map(normalizeListingDetailed)
-
     const term = params.search?.trim().toLowerCase() ?? ''
 
     const filtered = term
@@ -408,12 +408,6 @@ export const sellerApi = {
   },
 
   async createListing(payload: CreateListingPayload): Promise<IListing> {
-    /**
-     * Backend route:
-     * POST /seller/listings
-     *
-     * Do not send sellerId. Backend uses JWT user.
-     */
     const { data } = await axiosInstance.post<BackendListing>('/seller/listings', {
       bookId: payload.bookId,
       price: Number(payload.price),
@@ -425,42 +419,34 @@ export const sellerApi = {
   },
 
   async createBookRequest(payload: CreateBookRequestPayload): Promise<IBook> {
-  const formData = new FormData()
+    const formData = new FormData()
 
-  formData.append('isbn', payload.isbn.trim())
-  formData.append('title', payload.title.trim())
-  formData.append('author', payload.author.trim())
-  formData.append('publisher', payload.publisher.trim())
-  formData.append('description', payload.description.trim())
+    formData.append('isbn', payload.isbn.trim())
+    formData.append('title', payload.title.trim())
+    formData.append('author', payload.author.trim())
+    formData.append('publisher', payload.publisher.trim())
+    formData.append('description', payload.description.trim())
 
-  /**
-   * Current form uses text category.
-   * Backend only accepts ObjectId category.
-   * We send it anyway; backend will ignore if not ObjectId.
-   */
-  if (payload.category?.trim()) {
-    formData.append('category', payload.category.trim())
-  }
+    if (payload.category?.trim()) {
+      formData.append('category', payload.category.trim())
+    }
 
-  if (payload.coverImageFile) {
-    formData.append('coverImage', payload.coverImageFile)
-  } else if (payload.coverImage?.trim()) {
-    formData.append('coverImage', payload.coverImage.trim())
-  }
+    if (payload.coverImageFile) {
+      formData.append('coverImage', payload.coverImageFile)
+    } else if (payload.coverImage?.trim()) {
+      formData.append('coverImage', payload.coverImage.trim())
+    }
 
-  const { data } = await axiosInstance.post<BackendBook>('/seller/books', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+    const { data } = await axiosInstance.post<BackendBook>('/seller/books', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
 
-  return normalizeBook(data)
-},
+    return normalizeBook(data)
+  },
+
   async updateListing(payload: UpdateListingPayload): Promise<IListing> {
-    /**
-     * Backend route:
-     * PATCH /seller/listings/:id
-     */
     const { data } = await axiosInstance.patch<BackendListing>(`/seller/listings/${payload.listingId}`, {
       price: Number(payload.price),
       mrp: Number(payload.mrp),
@@ -472,19 +458,13 @@ export const sellerApi = {
   },
 
   async getOrders(params: SellerOrdersParams): Promise<PaginatedResult<SellerOrderItemDetailed>> {
-    /**
-     * Backend route:
-     * GET /seller/orders
-     */
     const { data } = await axiosInstance.get<BackendOrderItem[] | BackendPaginated<BackendOrderItem>>('/seller/orders')
 
     const rows = getArrayFromResponse(data).map(normalizeSellerOrderItem)
-
     const term = params.search?.trim().toLowerCase() ?? ''
 
     const filtered = rows.filter((row) => {
       const matchesStatus = params.status ? row.status === params.status : true
-
       const matchesSearch = term
         ? [
             row.bookTitle,
@@ -505,12 +485,6 @@ export const sellerApi = {
   },
 
   async updateOrderItemStatus(_sellerId: string, orderItemId: string, status: OrderStatus): Promise<IOrderItem> {
-    /**
-     * Backend route:
-     * PATCH /seller/orders/:id/status
-     *
-     * Seller identity comes from JWT.
-     */
     const { data } = await axiosInstance.patch<BackendOrderItem>(`/seller/orders/${orderItemId}/status`, {
       status,
     })
@@ -519,7 +493,7 @@ export const sellerApi = {
   },
 
   async getDashboardSummary(_sellerId: string): Promise<SellerDashboardSummary> {
-    const [listingsResult, ordersResult] = await Promise.all([
+    const [listingsResult, ordersResult, requestedBooksResult] = await Promise.all([
       this.getListings({
         sellerId: '',
         page: 1,
@@ -532,10 +506,16 @@ export const sellerApi = {
         limit: 1000,
         sort: SellerOrderSort.NEWEST,
       }),
+      this.getRequestedBooks({
+        sellerId: '',
+        page: 1,
+        limit: 1000,
+      }),
     ])
 
     const listings = listingsResult.data
     const orderItems = ordersResult.data
+    const requestedBooks = requestedBooksResult.data
 
     const deliveredRevenue = orderItems
       .filter((item) => item.status === OrderStatus.DELIVERED)
@@ -546,13 +526,7 @@ export const sellerApi = {
       activeListings: listings.filter((listing) => listing.isActive).length,
       totalStock: listings.reduce((sum, listing) => sum + listing.stock, 0),
       lowStockCount: listings.filter((listing) => listing.stock > 0 && listing.stock <= 5).length,
-
-      /**
-       * Backend does not currently expose "my pending requested books".
-       * We keep this as 0 until a GET /seller/books endpoint is added.
-       */
-      pendingBooks: 0,
-
+      pendingBooks: requestedBooks.filter((book) => book.status === BookStatus.PENDING).length,
       totalOrders: orderItems.length,
       createdOrders: orderItems.filter((item) => item.status === OrderStatus.CREATED).length,
       revenue: deliveredRevenue,

@@ -1,6 +1,6 @@
 import type { AdminBookParams, AdminCustomerParams, AdminSellerParams } from '@/interfaces/admin-api.interface'
 import type { GetBooksParams } from '@/interfaces/books-api.interface'
-import type { SellerListParams, SellerOrdersParams } from "../interfaces/seller-api.interface"
+import type { SellerListParams, SellerOrdersParams, SellerRequestedBooksParams } from '../interfaces/seller-api.interface'
 
 export const queryKeys = 
 {
@@ -33,6 +33,8 @@ export const queryKeys =
   sellerApprovedBooks: ['seller', 'approved-books'] as const,
 
   sellerListings: (params: Partial<SellerListParams>) => ['seller', 'listings', params] as const,
+
+  sellerRequestedBooks: (params: Partial<SellerRequestedBooksParams>) => ['seller', 'requested-books', params] as const,
 
   sellerOrders: (params: Partial<SellerOrdersParams>) => ['seller', 'orders', params] as const,
 

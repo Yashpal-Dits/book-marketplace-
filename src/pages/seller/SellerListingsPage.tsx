@@ -1,7 +1,7 @@
 import { useEffect, useState, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { Form, Formik } from 'formik'
 import toast from 'react-hot-toast'
-import { FiEdit3, FiPlus, FiRefreshCw, FiSearch, FiLayers, FiX } from 'react-icons/fi'
+import { FiEdit3, FiPlus, FiRefreshCw, FiSearch, FiLayers, FiX, FiClock } from 'react-icons/fi'
 import { Badge } from '@/components/common/Badge'
 import { BookCover } from '@/components/common/BookCover'
 import { Button } from '@/components/common/Button'
@@ -22,6 +22,7 @@ import {
   useCreateSellerListing,
   useSellerApprovedBooks,
   useSellerListings,
+  useSellerRequestedBooks,
   useUpdateSellerListing,
 } from '@/hooks/useSeller'
 import type { SellerListingDetailed } from '@/api/seller.api'
@@ -30,7 +31,6 @@ import {
   sellerListingSchema,
   sellerListingUpdateSchema,
 } from '@/schemas/seller.schema'
-
 
 const PAGE_SIZE = 8
 
@@ -216,6 +216,17 @@ export const SellerListingsPage = () => {
     sort,
   })
 
+  const {
+    data: requestedBooksData,
+    isLoading: isRequestedBooksLoading,
+    isError: isRequestedBooksError,
+  } = useSellerRequestedBooks({
+    page: 1,
+    limit: 1000,
+    search: debouncedSearch,
+  })
+
+  const requestedBooks = requestedBooksData?.data ?? []
   const { data: approvedBooks = [] } = useSellerApprovedBooks()
   const { data: categories = [], isLoading: isCategoriesLoading } = useCategories()
   const createListing = useCreateSellerListing()
@@ -248,7 +259,7 @@ export const SellerListingsPage = () => {
               Inventory <span className="text-accent">Management</span>
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
-              Create seller-specific book offers and update only your own price, stock, and active status.
+              Create seller-specific book offers and track both your live listings and your requested books.
             </p>
           </div>
         </div>
@@ -322,123 +333,196 @@ export const SellerListingsPage = () => {
           </select>
         </div>
 
-        <div>
-          {isLoading ? (
-            <div className="py-16 text-center">
-              <Loader />
+        <div className="space-y-10">
+          <div>
+            <div className="mb-4 flex items-center gap-2">
+              <FiLayers className="text-primary" />
+              <h2 className="font-display text-xl font-extrabold uppercase text-heading">Live Listings</h2>
             </div>
-          ) : isError ? (
-            <EmptyState title="Could not load listings" />
-          ) : !data?.data.length ? (
-            <EmptyState
-              title="No listings found"
-              description="Click 'Add Approved Book' at the top to create your first listing."
-            />
-          ) : (
-            <div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 text-left">
-                {data.data.map((listing) => {
-                  const isOutOfStock = listing.stock <= 0
 
-                  return (
-                    <article
-                      key={listing.id}
-                      className="flex flex-col justify-between overflow-hidden rounded-3xl border border-stone-200 transition shadow-sm hover:shadow-md bg-white hover:border-stone-300"
-                    >
-                      <div className="relative bg-gradient-to-b from-stone-100 to-stone-200/60 p-6 flex flex-col items-center">
-                        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
-                          <Badge className={cn('text-[10px] uppercase font-black', statusStyle[listing.book.status])}>
-                            {listing.book.status}
-                          </Badge>
-                          {!listing.isActive ? (
-                            <Badge className="bg-stone-300 text-stone-800 text-[10px] font-extrabold">
-                              Inactive
+            {isLoading ? (
+              <div className="py-16 text-center">
+                <Loader />
+              </div>
+            ) : isError ? (
+              <EmptyState title="Could not load listings" />
+            ) : !data?.data.length ? (
+              <EmptyState
+                title="No listings found"
+                description="Click 'Add Approved Book' at the top to create your first listing."
+              />
+            ) : (
+              <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 text-left">
+                  {data.data.map((listing) => {
+                    const isOutOfStock = listing.stock <= 0
+
+                    return (
+                      <article
+                        key={listing.id}
+                        className="flex flex-col justify-between overflow-hidden rounded-3xl border border-stone-200 transition shadow-sm hover:shadow-md bg-white hover:border-stone-300"
+                      >
+                        <div className="relative bg-gradient-to-b from-stone-100 to-stone-200/60 p-6 flex flex-col items-center">
+                          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+                            <Badge className={cn('text-[10px] uppercase font-black', statusStyle[listing.book.status])}>
+                              {listing.book.status}
                             </Badge>
-                          ) : null}
-                          {isOutOfStock ? (
-                            <Badge className="bg-red-100 text-red-700 text-[10px] font-black">
-                              Sold Out
-                            </Badge>
-                          ) : null}
-                        </div>
-
-                        <BookCover
-                          src={listing.book.coverImage}
-                          title={listing.book.title}
-                          className="aspect-[3/4.2] w-full max-w-[140px] rounded-xl shadow-[0_18px_30px_-10px_rgba(0,0,0,0.4)] transition hover:scale-105 duration-300 object-cover mt-4"
-                        />
-                      </div>
-
-                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                        <div>
-                          <RatingStars rating={listing.book.rating} className="mb-1" />
-                          <h3 className="font-display text-base font-black text-heading line-clamp-2 leading-snug">
-                            {listing.book.title}
-                          </h3>
-                          <p className="mt-1 text-xs font-bold text-stone-500 line-clamp-1">
-                            By {listing.book.author}
-                          </p>
-                          <p className="mt-1 font-mono text-[11px] text-stone-400">
-                            ISBN: {listing.book.isbn}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-stone-100 bg-stone-50/60 -mx-5 px-5 py-3 rounded-2xl">
-                          <div>
-                            <p className="text-[10px] uppercase font-bold text-stone-400">Selling Price</p>
-                            <p className="text-base font-black text-heading mt-0.5">
-                              {formatCurrency(listing.price)}
-                            </p>
-                            {listing.mrp > listing.price ? (
-                              <p className="text-[10px] text-stone-400 line-through font-semibold">
-                                {formatCurrency(listing.mrp)}
-                              </p>
+                            {!listing.isActive ? (
+                              <Badge className="bg-stone-300 text-stone-800 text-[10px] font-extrabold">
+                                Inactive
+                              </Badge>
+                            ) : null}
+                            {isOutOfStock ? (
+                              <Badge className="bg-red-100 text-red-700 text-[10px] font-black">
+                                Sold Out
+                              </Badge>
                             ) : null}
                           </div>
 
+                          <BookCover
+                            src={listing.book.coverImage}
+                            title={listing.book.title}
+                            className="aspect-[3/4.2] w-full max-w-[140px] rounded-xl shadow-[0_18px_30px_-10px_rgba(0,0,0,0.4)] transition hover:scale-105 duration-300 object-cover mt-4"
+                          />
+                        </div>
+
+                        <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                           <div>
-                            <p className="text-[10px] uppercase font-bold text-stone-400">Stock Qty</p>
-                            <p
-                              className={cn(
-                                'text-base font-black mt-0.5',
-                                isOutOfStock ? 'text-red-600' : 'text-emerald-700',
-                              )}
-                            >
-                              {listing.stock}{' '}
-                              <span className="text-xs font-semibold">
-                                {isOutOfStock ? 'Empty' : 'Units'}
-                              </span>
+                            <RatingStars rating={listing.book.rating} className="mb-1" />
+                            <h3 className="font-display text-base font-black text-heading line-clamp-2 leading-snug">
+                              {listing.book.title}
+                            </h3>
+                            <p className="mt-1 text-xs font-bold text-stone-500 line-clamp-1">
+                              By {listing.book.author}
+                            </p>
+                            <p className="mt-1 font-mono text-[11px] text-stone-400">
+                              ISBN: {listing.book.isbn}
                             </p>
                           </div>
-                        </div>
 
-                        <div className="pt-2">
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => setEditingId(listing.id)}
-                            className="w-full gap-2 text-xs py-2.5 h-11 font-black transition hover:border-primary hover:text-primary active:scale-95"
-                          >
-                            <FiEdit3 className="text-primary text-base shrink-0" /> Adjust Price & Stock
-                          </Button>
+                          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-stone-100 bg-stone-50/60 -mx-5 px-5 py-3 rounded-2xl">
+                            <div>
+                              <p className="text-[10px] uppercase font-bold text-stone-400">Selling Price</p>
+                              <p className="text-base font-black text-heading mt-0.5">
+                                {formatCurrency(listing.price)}
+                              </p>
+                              {listing.mrp > listing.price ? (
+                                <p className="text-[10px] text-stone-400 line-through font-semibold">
+                                  {formatCurrency(listing.mrp)}
+                                </p>
+                              ) : null}
+                            </div>
+
+                            <div>
+                              <p className="text-[10px] uppercase font-bold text-stone-400">Stock Qty</p>
+                              <p
+                                className={cn(
+                                  'text-base font-black mt-0.5',
+                                  isOutOfStock ? 'text-red-600' : 'text-emerald-700',
+                                )}
+                              >
+                                {listing.stock}{' '}
+                                <span className="text-xs font-semibold">
+                                  {isOutOfStock ? 'Empty' : 'Units'}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="pt-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={() => setEditingId(listing.id)}
+                              className="w-full gap-2 text-xs py-2.5 h-11 font-black transition hover:border-primary hover:text-primary active:scale-95"
+                            >
+                              <FiEdit3 className="text-primary text-base shrink-0" /> Adjust Price & Stock
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  )
-                })}
+                      </article>
+                    )
+                  })}
+                </div>
+
+                {editingId && data.data.some((listing) => listing.id === editingId) ? (
+                  <EditListingModal
+                    listing={data.data.find((listing) => listing.id === editingId)!}
+                    onClose={() => setEditingId(null)}
+                  />
+                ) : null}
               </div>
+            )}
 
-              {editingId && data.data.some((listing) => listing.id === editingId) ? (
-                <EditListingModal
-                  listing={data.data.find((listing) => listing.id === editingId)!}
-                  onClose={() => setEditingId(null)}
-                />
-              ) : null}
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-10" />
+          </div>
+
+          <div className="border-t border-stone-100 pt-8">
+            <div className="mb-4 flex items-center gap-2">
+              <FiClock className="text-primary" />
+              <h2 className="font-display text-xl font-extrabold uppercase text-heading">Requested Books</h2>
             </div>
-          )}
-        </div>
 
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-10" />
+            {isRequestedBooksLoading ? (
+              <div className="py-12 text-center">
+                <Loader />
+              </div>
+            ) : isRequestedBooksError ? (
+              <EmptyState title="Could not load requested books" />
+            ) : requestedBooks.length === 0 ? (
+              <EmptyState
+                title="No requested books found"
+                description="Books you submit for admin approval will appear here with their status."
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {requestedBooks.map((book) => (
+                  <article
+                    key={book.id}
+                    className="flex gap-4 rounded-3xl border border-stone-200 bg-stone-50/50 p-4 shadow-sm"
+                  >
+                    <BookCover
+                      src={book.coverImage}
+                      title={book.title}
+                      className="h-28 w-20 shrink-0 rounded-xl object-cover shadow-sm"
+                    />
+
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="line-clamp-2 font-display text-base font-black text-heading">
+                            {book.title}
+                          </h3>
+                          <p className="text-xs font-semibold text-stone-500">By {book.author}</p>
+                        </div>
+                        <Badge className={cn('text-[10px] uppercase font-black', statusStyle[book.status])}>
+                          {book.status}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-1 text-xs text-stone-500 sm:grid-cols-2">
+                        <p><span className="font-semibold text-stone-700">ISBN:</span> {book.isbn}</p>
+                        <p><span className="font-semibold text-stone-700">Category:</span> {book.category || '—'}</p>
+                        <p><span className="font-semibold text-stone-700">Publisher:</span> {book.publisher || '—'}</p>
+                        <p><span className="font-semibold text-stone-700">Stock:</span> {book.totalStock ?? 0}</p>
+                      </div>
+
+                      <p className="line-clamp-2 text-sm text-stone-600">{book.description}</p>
+
+                      <p className="text-[11px] font-medium text-stone-400">
+                        {book.status === BookStatus.PENDING
+                          ? 'Waiting for admin approval before it can be listed.'
+                          : book.status === BookStatus.APPROVED
+                            ? 'This book is approved. You can now create a listing for it from the approved books tab.'
+                            : 'This request was rejected by admin.'}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {activeTab === 'create-listing' && (
@@ -688,10 +772,7 @@ export const SellerListingsPage = () => {
 
                     {values.coverImageFile ? (
                       <p className="mt-2 text-xs text-stone-500">
-                        Selected:{' '}
-                        <span className="font-semibold text-stone-700">
-                          {values.coverImageFile.name}
-                        </span>
+                        Selected: <span className="font-semibold text-stone-700">{values.coverImageFile.name}</span>
                       </p>
                     ) : (
                       <p className="mt-2 text-xs text-stone-400">

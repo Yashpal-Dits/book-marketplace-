@@ -9,6 +9,8 @@ export interface SellerListingDetailed extends IListing {
   book: IBook
 }
 
+export interface SellerRequestedBookDetailed extends IBook {}
+
 export interface SellerOrderItemDetailed extends IOrderItem {
   order: IOrder
   customer?: ICustomer
@@ -33,6 +35,13 @@ export interface SellerListParams {
   limit?: number
   search?: string
   sort?: SellerListingSort
+}
+
+export interface SellerRequestedBooksParams {
+  sellerId: string
+  page?: number
+  limit?: number
+  search?: string
 }
 
 export interface SellerOrdersParams {
@@ -70,6 +79,5 @@ export interface CreateBookRequestPayload {
   description: string
   category: string
   coverImageFile?: File | null
-  // Kept only for backward compatibility.
   coverImage?: string
 }
