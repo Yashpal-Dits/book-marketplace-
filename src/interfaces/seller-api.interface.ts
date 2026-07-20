@@ -35,6 +35,7 @@ export interface SellerListParams {
   limit?: number
   search?: string
   sort?: SellerListingSort
+  status?: 'active' | 'inactive' | ''
 }
 
 export interface SellerRequestedBooksParams {

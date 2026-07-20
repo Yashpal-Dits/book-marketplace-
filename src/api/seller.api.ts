@@ -374,37 +374,51 @@ export const sellerApi = {
   },
 
   async getRequestedBooks(params: SellerRequestedBooksParams): Promise<PaginatedResult<SellerRequestedBookDetailed>> {
-    const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/seller/books')
+    const { page = 1, limit = 8, search = '' } = params
 
-    const books = getArrayFromResponse(data).map(normalizeBook)
-    const term = params.search?.trim().toLowerCase() ?? ''
+    const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/seller/books', {
+      params: {
+        page,
+        limit,
+        search: search.trim() || undefined,
+      },
+    })
 
-    const filtered = term
-      ? books.filter((book) =>
-          [book.title, book.author, book.isbn, book.category, book.status]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(term)),
-        )
-      : books
-
-    return paginate(filtered, params.page, params.limit)
+    // Backend returns { data: [...], meta: { total, page, limit } } when paginated.
+    const payload: any = data
+    const rows = Array.isArray(payload) ? payload : payload?.data ?? []
+    const normalized = rows.map(normalizeBook)
+    return {
+      data: normalized,
+      total: payload?.meta?.total ?? normalized.length,
+      page: payload?.meta?.page ?? page,
+      limit: payload?.meta?.limit ?? limit,
+    }
   },
 
   async getListings(params: SellerListParams): Promise<PaginatedResult<SellerListingDetailed>> {
-    const { data } = await axiosInstance.get<BackendListing[] | BackendPaginated<BackendListing>>('/seller/listings')
+    const { page = 1, limit = 8, search = '', sort = SellerListingSort.NEWEST, status } = params
 
-    const joined = getArrayFromResponse(data).map(normalizeListingDetailed)
-    const term = params.search?.trim().toLowerCase() ?? ''
+    const { data } = await axiosInstance.get<BackendListing[] | BackendPaginated<BackendListing>>('/seller/listings', {
+      params: {
+        page,
+        limit,
+        search: search.trim() || undefined,
+        sort,
+        status: status || undefined,
+      },
+    })
 
-    const filtered = term
-      ? joined.filter((row) =>
-          [row.book.title, row.book.author, row.book.isbn, row.book.category, row.book.status]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(term)),
-        )
-      : joined
-
-    return paginate(sortListings(filtered, params.sort), params.page, params.limit)
+    // Backend returns { data: [...], meta: { total, page, limit } } when paginated.
+    const payload: any = data
+    const rows = Array.isArray(payload) ? payload : payload?.data ?? []
+    const normalized = rows.map(normalizeListingDetailed)
+    return {
+      data: normalized,
+      total: payload?.meta?.total ?? normalized.length,
+      page: payload?.meta?.page ?? page,
+      limit: payload?.meta?.limit ?? limit,
+    }
   },
 
   async createListing(payload: CreateListingPayload): Promise<IListing> {
@@ -458,30 +472,27 @@ export const sellerApi = {
   },
 
   async getOrders(params: SellerOrdersParams): Promise<PaginatedResult<SellerOrderItemDetailed>> {
-    const { data } = await axiosInstance.get<BackendOrderItem[] | BackendPaginated<BackendOrderItem>>('/seller/orders')
+    const { page = 1, limit = 10, search = '', status } = params
 
-    const rows = getArrayFromResponse(data).map(normalizeSellerOrderItem)
-    const term = params.search?.trim().toLowerCase() ?? ''
-
-    const filtered = rows.filter((row) => {
-      const matchesStatus = params.status ? row.status === params.status : true
-      const matchesSearch = term
-        ? [
-            row.bookTitle,
-            row.orderId,
-            row.id,
-            row.customer?.firstName,
-            row.customer?.lastName,
-            row.order.shippingAddress.fullName,
-          ]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(term))
-        : true
-
-      return matchesStatus && matchesSearch
+    const { data } = await axiosInstance.get<BackendOrderItem[] | BackendPaginated<BackendOrderItem>>('/seller/orders', {
+      params: {
+        page,
+        limit,
+        search: search.trim() || undefined,
+        status: status || undefined,
+      },
     })
 
-    return paginate(sortOrders(filtered, params.sort), params.page, params.limit)
+    // Backend returns { data: [...], meta: { total, page, limit } } when paginated.
+    const payload: any = data
+    const rows = Array.isArray(payload) ? payload : payload?.data ?? []
+    const normalized = rows.map(normalizeSellerOrderItem)
+    return {
+      data: normalized,
+      total: payload?.meta?.total ?? normalized.length,
+      page: payload?.meta?.page ?? page,
+      limit: payload?.meta?.limit ?? limit,
+    }
   },
 
   async updateOrderItemStatus(_sellerId: string, orderItemId: string, status: OrderStatus): Promise<IOrderItem> {

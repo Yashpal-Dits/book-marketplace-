@@ -16,6 +16,7 @@ export interface IOrder {
   totalAmount: number
   status: OrderStatus
   createdAt: string
+  updatedAt?: string
 }
 
 export interface IOrderItem {
