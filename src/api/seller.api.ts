@@ -2,7 +2,6 @@ import { axiosInstance } from './axiosInstance'
 import { API_BASE_URL } from '@/utils/constants'
 import { BookStatus } from '@/enums/book-status.enum'
 import { OrderStatus } from '@/enums/order-status.enum'
-import { SellerStatus } from '@/enums/seller-status.enum'
 import { SellerListingSort, SellerOrderSort } from '@/enums/seller-sort.enum'
 import type { IBook } from '@/interfaces/book.interface'
 import type { ICustomer } from '@/interfaces/customer.interface'
@@ -24,163 +23,86 @@ import type {
 
 export type { SellerListingDetailed } from '@/interfaces/seller-api.interface'
 
-type IdLike =
-  | string
-  | {
-      _id?: string
-      id?: string
-    }
-  | null
-  | undefined
-
-type CategoryLike =
-  | string
-  | {
-      _id?: string
-      id?: string
-      name?: string
-    }
-  | null
-  | undefined
+type IdLike = string | { _id?: string; id?: string } | null | undefined
+type CategoryLike = string | { _id?: string; id?: string; name?: string } | null | undefined
 
 interface BackendPaginated<T> {
   data: T[]
-  meta?: {
-    total?: number
-    page?: number
-    limit?: number
-    totalPages?: number
-  }
+  meta?: { total?: number; page?: number; limit?: number; totalPages?: number }
 }
 
 interface BackendBook {
-  _id?: string
-  id?: string
-  isbn?: string
-  title?: string
-  author?: string
-  authorImage?: string
-  publisher?: string
-  description?: string
-  coverImage?: string
-  images?: unknown[]
-  category?: CategoryLike
-  status?: BookStatus
-  createdBySellerId?: IdLike
-  createdAt?: string
-  updatedAt?: string
-  rating?: number
-  minPrice?: number | null
-  mrp?: number | null
-  totalStock?: number
+  _id?: string; id?: string; isbn?: string; title?: string; author?: string;
+  authorImage?: string; publisher?: string; description?: string;
+  coverImage?: string; images?: unknown[]; category?: CategoryLike;
+  status?: BookStatus; createdBySellerId?: IdLike; createdAt?: string; updatedAt?: string;
+  rating?: number; minPrice?: number | null; mrp?: number | null; totalStock?: number
 }
 
 interface BackendListing {
-  _id?: string
-  id?: string
-  bookId?: IdLike | BackendBook
-  sellerId?: IdLike
-  price?: number
-  stock?: number
-  mrp?: number
-  isActive?: boolean
-  createdAt?: string
-  updatedAt?: string
+  _id?: string; id?: string; bookId?: IdLike | BackendBook; sellerId?: IdLike;
+  price?: number; stock?: number; mrp?: number; isActive?: boolean;
+  createdAt?: string; updatedAt?: string;
 }
 
 interface BackendCustomer {
-  _id?: string
-  id?: string
-  userId?: IdLike
-  firstName?: string
-  lastName?: string
-  email?: string
-  mobileNumber?: string
-  addressLine?: string
-  city?: string
-  state?: string
-  pincode?: string
-  profileImage?: string
-  status?: string
-  createdAt?: string
-  updatedAt?: string
+  _id?: string; id?: string; userId?: IdLike; firstName?: string; lastName?: string;
+  email?: string; mobileNumber?: string; addressLine?: string; city?: string;
+  state?: string; pincode?: string; profileImage?: string; status?: string;
+  createdAt?: string; updatedAt?: string;
 }
 
 interface BackendOrder {
-  _id?: string
-  id?: string
-  customerId?: IdLike
-  shippingAddress?: Partial<IShippingAddress>
-  totalAmount?: number
-  status?: OrderStatus
-  createdAt?: string
-  updatedAt?: string
+  _id?: string; id?: string; customerId?: IdLike;
+  shippingAddress?: Partial<IShippingAddress>; totalAmount?: number;
+  status?: OrderStatus; createdAt?: string; updatedAt?: string;
 }
 
 interface BackendOrderItem {
-  _id?: string
-  id?: string
-  orderId?: IdLike | BackendOrder
-  listingId?: IdLike
-  bookId?: IdLike
-  sellerId?: IdLike
-  bookTitle?: string
-  sellerName?: string
-  priceAtPurchase?: number
-  quantity?: number
-  subtotal?: number
-  status?: OrderStatus
-  coverImage?: string
-  createdAt?: string
-  updatedAt?: string
-  order?: BackendOrder
-  customer?: BackendCustomer
+  _id?: string; id?: string; orderId?: IdLike | BackendOrder;
+  listingId?: IdLike; bookId?: IdLike; sellerId?: IdLike;
+  bookTitle?: string; sellerName?: string; priceAtPurchase?: number;
+  quantity?: number; subtotal?: number; status?: OrderStatus;
+  coverImage?: string; createdAt?: string; updatedAt?: string;
+  order?: BackendOrder; customer?: BackendCustomer;
 }
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  Boolean(value) && typeof value === 'object'
-
+const isObject = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object'
 const getId = (value: IdLike | BackendBook | BackendListing | BackendOrder | BackendOrderItem): string => {
   if (!value) return ''
   if (typeof value === 'string') return value
-  return value.id || value._id || ''
+  return (value as any).id || (value as any)._id || ''
 }
-
 const getCategoryName = (value: CategoryLike): string | undefined => {
   if (!value) return undefined
   if (typeof value === 'string') return value
   return value.name || value.id || value._id
 }
-
-const getArrayFromResponse = <T>(response: T[] | BackendPaginated<T>): T[] => {
+const getArrayFromResponse = <T>(response: T[] | BackendPaginated<T> | { data: T[]; meta?: any }): T[] => {
   if (Array.isArray(response)) return response
-  return Array.isArray(response.data) ? response.data : []
+  if (response && typeof (response as any).data !== 'undefined') {
+    const inner = (response as any).data
+    if (Array.isArray(inner)) return inner
+    // Handle nested { data: { data: [...] } } from old interceptor
+    if (inner && Array.isArray(inner.data)) return inner.data
+  }
+  return Array.isArray((response as any).data) ? (response as any).data : []
 }
-
 const getApiOrigin = () => API_BASE_URL.replace(/\/api\/v\d+\/?$/, '')
-
 const getAssetUrl = (value?: string): string => {
   if (!value) return ''
   if (/^https?:\/\//i.test(value)) return value
   if (value.startsWith('data:')) return value
-
   const origin = getApiOrigin()
   return `${origin}${value.startsWith('/') ? value : `/${value}`}`
 }
-
 const getBookImageUrl = (bookId: string, book: BackendBook): string => {
   if (book.coverImage) return getAssetUrl(book.coverImage)
-
-  if (Array.isArray(book.images) && book.images.length > 0) {
-    return `${API_BASE_URL}/books/${bookId}/images/0`
-  }
-
+  if (Array.isArray(book.images) && book.images.length > 0) return `${API_BASE_URL}/books/${bookId}/images/0`
   return ''
 }
-
 const normalizeBook = (book: BackendBook): IBook => {
   const id = getId(book)
-
   return {
     id,
     isbn: book.isbn || '',
@@ -201,209 +123,111 @@ const normalizeBook = (book: BackendBook): IBook => {
     totalStock: typeof book.totalStock === 'number' ? book.totalStock : 0,
   }
 }
-
-const normalizeListing = (listing: BackendListing): IListing => {
-  return {
-    id: getId(listing),
-    bookId: getId(listing.bookId as IdLike | BackendBook),
-    sellerId: getId(listing.sellerId),
-    price: Number(listing.price || 0),
-    stock: Number(listing.stock || 0),
-    mrp: Number(listing.mrp || listing.price || 0),
-    isActive: listing.isActive !== false,
-    createdAt: listing.createdAt || '',
-    updatedAt: listing.updatedAt || '',
-  }
-}
-
+const normalizeListing = (listing: BackendListing): IListing => ({
+  id: getId(listing),
+  bookId: getId(listing.bookId as IdLike),
+  sellerId: getId(listing.sellerId),
+  price: Number(listing.price || 0),
+  stock: Number(listing.stock || 0),
+  mrp: Number(listing.mrp || listing.price || 0),
+  isActive: listing.isActive !== false,
+  createdAt: listing.createdAt || '',
+  updatedAt: listing.updatedAt || '',
+})
 const normalizeListingDetailed = (listing: BackendListing): SellerListingDetailed => {
-  const book =
-    isObject(listing.bookId) && ('title' in listing.bookId || 'isbn' in listing.bookId)
-      ? normalizeBook(listing.bookId as BackendBook)
-      : normalizeBook({
-          _id: getId(listing.bookId as IdLike),
-          title: 'Book',
-          author: '',
-          isbn: '',
-          description: '',
-          status: BookStatus.APPROVED,
-        })
-
-  return {
-    ...normalizeListing(listing),
-    book,
-  }
+  const book = isObject(listing.bookId) && ('title' in listing.bookId || 'isbn' in listing.bookId)
+    ? normalizeBook(listing.bookId as BackendBook)
+    : normalizeBook({ _id: getId(listing.bookId as IdLike), title: 'Book', author: '', isbn: '', description: '', status: BookStatus.APPROVED })
+  return { ...normalizeListing(listing), book }
 }
-
 const normalizeCustomer = (customer?: BackendCustomer): ICustomer | undefined => {
   if (!customer) return undefined
-
   return {
-    id: getId(customer),
-    userId: getId(customer.userId),
-    firstName: customer.firstName || '',
-    lastName: customer.lastName || '',
-    email: customer.email || '',
-    mobileNumber: customer.mobileNumber,
-    addressLine: customer.addressLine,
-    city: customer.city,
-    state: customer.state,
-    pincode: customer.pincode,
-    profileImage: customer.profileImage,
+    id: getId(customer), userId: getId(customer.userId),
+    firstName: customer.firstName || '', lastName: customer.lastName || '',
+    email: customer.email || '', mobileNumber: customer.mobileNumber,
+    addressLine: customer.addressLine, city: customer.city, state: customer.state,
+    pincode: customer.pincode, profileImage: customer.profileImage,
     status: (customer.status as ICustomer['status']) || 'ACTIVE',
-    createdAt: customer.createdAt || '',
-    updatedAt: customer.updatedAt,
+    createdAt: customer.createdAt || '', updatedAt: customer.updatedAt,
   }
 }
-
 const emptyShippingAddress = (): IShippingAddress => ({
-  fullName: '',
-  mobileNumber: '',
-  addressLine: '',
-  city: '',
-  state: '',
-  pincode: '',
+  fullName: '', mobileNumber: '', addressLine: '', city: '', state: '', pincode: '',
 })
-
-const normalizeOrder = (order?: BackendOrder): IOrder => {
-  return {
-    id: getId(order),
-    customerId: getId(order?.customerId),
-    shippingAddress: {
-      ...emptyShippingAddress(),
-      ...(order?.shippingAddress || {}),
-    },
-    totalAmount: Number(order?.totalAmount || 0),
-    status: order?.status || OrderStatus.CREATED,
-    createdAt: order?.createdAt || '',
-  }
-}
-
-const normalizeOrderItem = (item: BackendOrderItem): IOrderItem => {
-  return {
-    id: getId(item),
-    orderId: getId(item.orderId),
-    listingId: getId(item.listingId),
-    bookId: getId(item.bookId),
-    sellerId: getId(item.sellerId),
-    bookTitle: item.bookTitle || 'Book',
-    sellerName: item.sellerName || 'Seller',
-    priceAtPurchase: Number(item.priceAtPurchase || 0),
-    quantity: Number(item.quantity || 0),
-    subtotal: Number(item.subtotal || 0),
-    status: item.status || OrderStatus.CREATED,
-    createdAt: item.createdAt || '',
-    coverImage: item.coverImage,
-  }
-}
-
+const normalizeOrder = (order?: BackendOrder): IOrder => ({
+  id: getId(order), customerId: getId(order?.customerId),
+  shippingAddress: { ...emptyShippingAddress(), ...(order?.shippingAddress || {}) },
+  totalAmount: Number(order?.totalAmount || 0),
+  status: order?.status || OrderStatus.CREATED,
+  createdAt: order?.createdAt || '',
+})
+const normalizeOrderItem = (item: BackendOrderItem): IOrderItem => ({
+  id: getId(item), orderId: getId(item.orderId), listingId: getId(item.listingId),
+  bookId: getId(item.bookId), sellerId: getId(item.sellerId),
+  bookTitle: item.bookTitle || 'Book', sellerName: item.sellerName || 'Seller',
+  priceAtPurchase: Number(item.priceAtPurchase || 0),
+  quantity: Number(item.quantity || 0),
+  subtotal: Number(item.subtotal || 0),
+  status: item.status || OrderStatus.CREATED,
+  createdAt: item.createdAt || '', coverImage: item.coverImage,
+})
 const normalizeSellerOrderItem = (item: BackendOrderItem): SellerOrderItemDetailed => {
-  const orderFromOrderId =
-    isObject(item.orderId) && ('shippingAddress' in item.orderId || 'totalAmount' in item.orderId)
-      ? (item.orderId as BackendOrder)
-      : undefined
-
-  return {
-    ...normalizeOrderItem(item),
-    order: normalizeOrder(item.order || orderFromOrderId),
-    customer: normalizeCustomer(item.customer),
-  }
+  const orderFromOrderId = isObject(item.orderId) && ('shippingAddress' in item.orderId || 'totalAmount' in item.orderId)
+    ? (item.orderId as BackendOrder) : undefined
+  return { ...normalizeOrderItem(item), order: normalizeOrder(item.order || orderFromOrderId), customer: normalizeCustomer(item.customer) }
 }
-
 const paginate = <T>(rows: T[], page = 1, limit = 8): PaginatedResult<T> => {
   const start = (page - 1) * limit
-  return {
-    data: rows.slice(start, start + limit),
-    total: rows.length,
-    page,
-    limit,
-  }
+  return { data: rows.slice(start, start + limit), total: rows.length, page, limit }
 }
-
 const sortListings = (rows: SellerListingDetailed[], sort = SellerListingSort.NEWEST) => {
   const sorted = [...rows]
-
   sorted.sort((a, b) => {
     switch (sort) {
-      case SellerListingSort.TITLE_ASC:
-        return a.book.title.localeCompare(b.book.title)
-      case SellerListingSort.TITLE_DESC:
-        return b.book.title.localeCompare(a.book.title)
-      case SellerListingSort.PRICE_LOW_TO_HIGH:
-        return a.price - b.price
-      case SellerListingSort.PRICE_HIGH_TO_LOW:
-        return b.price - a.price
-      case SellerListingSort.STOCK_LOW_TO_HIGH:
-        return a.stock - b.stock
-      case SellerListingSort.STOCK_HIGH_TO_LOW:
-        return b.stock - a.stock
-      default:
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+      case SellerListingSort.TITLE_ASC: return a.book.title.localeCompare(b.book.title)
+      case SellerListingSort.TITLE_DESC: return b.book.title.localeCompare(a.book.title)
+      case SellerListingSort.PRICE_LOW_TO_HIGH: return a.price - b.price
+      case SellerListingSort.PRICE_HIGH_TO_LOW: return b.price - a.price
+      case SellerListingSort.STOCK_LOW_TO_HIGH: return a.stock - b.stock
+      case SellerListingSort.STOCK_HIGH_TO_LOW: return b.stock - a.stock
+      default: return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     }
   })
-
   return sorted
 }
-
 const sortOrders = (rows: SellerOrderItemDetailed[], sort = SellerOrderSort.NEWEST) => {
   const sorted = [...rows]
-
   sorted.sort((a, b) => {
     switch (sort) {
-      case SellerOrderSort.OLDEST:
-        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
-      case SellerOrderSort.AMOUNT_HIGH_TO_LOW:
-        return b.subtotal - a.subtotal
-      case SellerOrderSort.AMOUNT_LOW_TO_HIGH:
-        return a.subtotal - b.subtotal
-      default:
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+      case SellerOrderSort.OLDEST: return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+      case SellerOrderSort.AMOUNT_HIGH_TO_LOW: return b.subtotal - a.subtotal
+      case SellerOrderSort.AMOUNT_LOW_TO_HIGH: return a.subtotal - b.subtotal
+      default: return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     }
   })
-
   return sorted
 }
 
 export const sellerApi = {
   async getApprovedBooks(): Promise<IBook[]> {
     const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/books/approved')
-
-    return getArrayFromResponse(data)
-      .map(normalizeBook)
-      .sort((a, b) => a.title.localeCompare(b.title))
+    return getArrayFromResponse(data).map(normalizeBook).sort((a, b) => a.title.localeCompare(b.title))
   },
 
   async getRequestedBooks(params: SellerRequestedBooksParams): Promise<PaginatedResult<SellerRequestedBookDetailed>> {
     const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/seller/books')
-
     const books = getArrayFromResponse(data).map(normalizeBook)
     const term = params.search?.trim().toLowerCase() ?? ''
-
-    const filtered = term
-      ? books.filter((book) =>
-          [book.title, book.author, book.isbn, book.category, book.status]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(term)),
-        )
-      : books
-
+    const filtered = term ? books.filter((book) => [book.title, book.author, book.isbn, book.category, book.status].filter(Boolean).some((value) => String(value).toLowerCase().includes(term))) : books
     return paginate(filtered, params.page, params.limit)
   },
 
   async getListings(params: SellerListParams): Promise<PaginatedResult<SellerListingDetailed>> {
     const { data } = await axiosInstance.get<BackendListing[] | BackendPaginated<BackendListing>>('/seller/listings')
-
     const joined = getArrayFromResponse(data).map(normalizeListingDetailed)
     const term = params.search?.trim().toLowerCase() ?? ''
-
-    const filtered = term
-      ? joined.filter((row) =>
-          [row.book.title, row.book.author, row.book.isbn, row.book.category, row.book.status]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(term)),
-        )
-      : joined
-
+    const filtered = term ? joined.filter((row) => [row.book.title, row.book.author, row.book.isbn, row.book.category, row.book.status].filter(Boolean).some((value) => String(value).toLowerCase().includes(term))) : joined
     return paginate(sortListings(filtered, params.sort), params.page, params.limit)
   },
 
@@ -414,35 +238,20 @@ export const sellerApi = {
       mrp: Number(payload.mrp),
       stock: Number(payload.stock),
     })
-
     return normalizeListing(data)
   },
 
   async createBookRequest(payload: CreateBookRequestPayload): Promise<IBook> {
     const formData = new FormData()
-
     formData.append('isbn', payload.isbn.trim())
     formData.append('title', payload.title.trim())
     formData.append('author', payload.author.trim())
     formData.append('publisher', payload.publisher.trim())
     formData.append('description', payload.description.trim())
-
-    if (payload.category?.trim()) {
-      formData.append('category', payload.category.trim())
-    }
-
-    if (payload.coverImageFile) {
-      formData.append('coverImage', payload.coverImageFile)
-    } else if (payload.coverImage?.trim()) {
-      formData.append('coverImage', payload.coverImage.trim())
-    }
-
-    const { data } = await axiosInstance.post<BackendBook>('/seller/books', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-
+    if (payload.category?.trim()) formData.append('category', payload.category.trim())
+    if (payload.coverImageFile) formData.append('coverImage', payload.coverImageFile)
+    else if (payload.coverImage?.trim()) formData.append('coverImage', payload.coverImage.trim())
+    const { data } = await axiosInstance.post<BackendBook>('/seller/books', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
     return normalizeBook(data)
   },
 
@@ -453,74 +262,80 @@ export const sellerApi = {
       stock: Number(payload.stock),
       isActive: payload.isActive,
     })
-
-    return normalizeListing(data)
+    // Backend now returns populated listing with bookId populated, so normalize detailed then strip
+    const detailed = normalizeListingDetailed(data as any)
+    return normalizeListing(detailed)
   },
 
   async getOrders(params: SellerOrdersParams): Promise<PaginatedResult<SellerOrderItemDetailed>> {
     const { data } = await axiosInstance.get<BackendOrderItem[] | BackendPaginated<BackendOrderItem>>('/seller/orders')
-
     const rows = getArrayFromResponse(data).map(normalizeSellerOrderItem)
     const term = params.search?.trim().toLowerCase() ?? ''
-
     const filtered = rows.filter((row) => {
       const matchesStatus = params.status ? row.status === params.status : true
-      const matchesSearch = term
-        ? [
-            row.bookTitle,
-            row.orderId,
-            row.id,
-            row.customer?.firstName,
-            row.customer?.lastName,
-            row.order.shippingAddress.fullName,
-          ]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(term))
-        : true
-
+      const matchesSearch = term ? [row.bookTitle, row.orderId, row.id, row.customer?.firstName, row.customer?.lastName, row.order.shippingAddress.fullName].filter(Boolean).some((value) => String(value).toLowerCase().includes(term)) : true
       return matchesStatus && matchesSearch
     })
-
     return paginate(sortOrders(filtered, params.sort), params.page, params.limit)
   },
 
   async updateOrderItemStatus(_sellerId: string, orderItemId: string, status: OrderStatus): Promise<IOrderItem> {
-    const { data } = await axiosInstance.patch<BackendOrderItem>(`/seller/orders/${orderItemId}/status`, {
-      status,
-    })
-
+    const { data } = await axiosInstance.patch<BackendOrderItem>(`/seller/orders/${orderItemId}/status`, { status })
     return normalizeOrderItem(data)
   },
 
+  // OPTIMIZED: Try backend dashboard first, fallback to client aggregation
   async getDashboardSummary(_sellerId: string): Promise<SellerDashboardSummary> {
-    const [listingsResult, ordersResult, requestedBooksResult] = await Promise.all([
-      this.getListings({
-        sellerId: '',
-        page: 1,
-        limit: 1000,
-        sort: SellerListingSort.NEWEST,
-      }),
-      this.getOrders({
-        sellerId: '',
-        page: 1,
-        limit: 1000,
-        sort: SellerOrderSort.NEWEST,
-      }),
-      this.getRequestedBooks({
-        sellerId: '',
-        page: 1,
-        limit: 1000,
-      }),
-    ])
+    try {
+      const { data } = await axiosInstance.get('/seller/dashboard')
+      // Backend returns { success, message, data: { totalListings, activeListings, ... } }
+      const dashboardData = (data as any)?.data || data
 
+      // Normalize if backend already returns correct shape
+      if (dashboardData && typeof dashboardData.totalListings === 'number') {
+        // Ensure recentOrders and lowStockListings are normalized
+        const normalizedRecentOrders = (dashboardData.recentOrders || []).map((item: any) => {
+          // If already normalized shape from backend, try normalize again safely
+          try {
+            return normalizeSellerOrderItem(item)
+          } catch {
+            return item
+          }
+        })
+        const normalizedLowStock = (dashboardData.lowStockListings || []).map((listing: any) => {
+          try {
+            return normalizeListingDetailed(listing)
+          } catch {
+            return listing
+          }
+        })
+        return {
+          totalListings: dashboardData.totalListings,
+          activeListings: dashboardData.activeListings,
+          totalStock: dashboardData.totalStock,
+          lowStockCount: dashboardData.lowStockCount,
+          pendingBooks: dashboardData.pendingBooks,
+          totalOrders: dashboardData.totalOrders,
+          createdOrders: dashboardData.createdOrders,
+          revenue: dashboardData.revenue,
+          recentOrders: normalizedRecentOrders,
+          lowStockListings: normalizedLowStock,
+        }
+      }
+    } catch (e) {
+      console.warn('Seller dashboard backend endpoint failed, falling back to client aggregation', e)
+    }
+
+    // Fallback: client aggregation (old logic)
+    const [listingsResult, ordersResult, requestedBooksResult] = await Promise.all([
+      this.getListings({ sellerId: '', page: 1, limit: 1000, sort: SellerListingSort.NEWEST }),
+      this.getOrders({ sellerId: '', page: 1, limit: 1000, sort: SellerOrderSort.NEWEST }),
+      this.getRequestedBooks({ sellerId: '', page: 1, limit: 1000 }),
+    ])
     const listings = listingsResult.data
     const orderItems = ordersResult.data
     const requestedBooks = requestedBooksResult.data
-
-    const deliveredRevenue = orderItems
-      .filter((item) => item.status === OrderStatus.DELIVERED)
-      .reduce((sum, item) => sum + item.subtotal, 0)
-
+    const deliveredRevenue = orderItems.filter((item) => item.status === OrderStatus.DELIVERED).reduce((sum, item) => sum + item.subtotal, 0)
     return {
       totalListings: listings.length,
       activeListings: listings.filter((listing) => listing.isActive).length,
@@ -531,10 +346,7 @@ export const sellerApi = {
       createdOrders: orderItems.filter((item) => item.status === OrderStatus.CREATED).length,
       revenue: deliveredRevenue,
       recentOrders: sortOrders(orderItems, SellerOrderSort.NEWEST).slice(0, 5),
-      lowStockListings: sortListings(
-        listings.filter((listing) => listing.stock <= 5),
-        SellerListingSort.STOCK_LOW_TO_HIGH,
-      ).slice(0, 5),
+      lowStockListings: sortListings(listings.filter((listing) => listing.stock <= 5), SellerListingSort.STOCK_LOW_TO_HIGH).slice(0, 5),
     }
   },
 }
