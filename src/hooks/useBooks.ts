@@ -16,13 +16,23 @@ export const useApprovedBooks = () =>
   useQuery({
     queryKey: queryKeys.approvedBooks,
     queryFn: () => booksApi.getApprovedBooks(),
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
+export const useListedBooks = () =>
+  useQuery({
+    queryKey: ['books','listed'] as const,
+    queryFn: () => booksApi.getListedBooks(),
+    staleTime: 0,
+  })
 
 export const useBestSellers = (limit = 8) =>
   useQuery({
     queryKey: queryKeys.bestSellers(limit),
     queryFn: () => booksApi.getBestSellers(limit),
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
 
@@ -30,4 +40,5 @@ export const useDealOfTheWeek = () =>
   useQuery({
     queryKey: queryKeys.dealOfTheWeek,
     queryFn: () => booksApi.getDealOfTheWeek(),
+    staleTime: 0,
   })
