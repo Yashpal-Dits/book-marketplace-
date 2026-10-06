@@ -9,7 +9,7 @@ export interface SellerListingDetailed extends IListing {
   book: IBook
 }
 
-export interface SellerRequestedBookDetailed extends IBook {}
+export type SellerRequestedBookDetailed = IBook
 
 export interface SellerOrderItemDetailed extends IOrderItem {
   order: IOrder

@@ -33,7 +33,7 @@ export const OrdersPage = () => {
         {isLoading ? (
           <Loader />
         ) : isError ? (
-          <EmptyState title="Could not load orders" description="Make sure the JSON server is running on port 4000." />
+          <EmptyState title="Could not load orders" description="The marketplace API is unavailable. Please try again." />
         ) : orders.length === 0 ? (
           <>
             <EmptyState title="No orders yet" description="Your placed orders and their tracking status will appear here." />

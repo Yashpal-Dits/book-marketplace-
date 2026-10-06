@@ -92,7 +92,7 @@ export const SellerApprovalPage = () => {
           {isLoading ? (
             <Loader />
           ) : isError ? (
-            <EmptyState title="Could not load sellers" description="Make sure JSON Server is running." />
+            <EmptyState title="Could not load sellers" description="The marketplace API is unavailable. Please try again." />
           ) : !data?.data.length ? (
             <EmptyState title="No sellers found" description="Try changing the search or filter." />
           ) : (

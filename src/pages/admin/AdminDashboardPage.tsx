@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FiBookOpen, FiCheckCircle, FiClock, FiPackage, FiShoppingBag, FiUsers, FiXCircle } from 'react-icons/fi'
+import { FiBookOpen, FiClock, FiPackage, FiUsers } from 'react-icons/fi'
 import { Badge } from '@/components/common/Badge'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Loader } from '@/components/common/Loader'
@@ -46,7 +46,7 @@ export const AdminDashboardPage = () => {
   const { data, isLoading, isError } = useAdminDashboard()
 
   if (isLoading) return <Loader />
-  if (isError || !data) return <EmptyState title="Could not load admin dashboard" description="Make sure JSON Server is running on port 4000." />
+  if (isError || !data) return <EmptyState title="Could not load admin dashboard" description="The marketplace API is unavailable. Please try again." />
 
   return (
     <div className="w-full min-w-0 space-y-6">

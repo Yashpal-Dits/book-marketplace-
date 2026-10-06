@@ -52,7 +52,7 @@ export const useUpdateCartQuantity = () => {
 
   return useMutation({
     mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) =>
-      cartApi.updateQuantity(itemId, quantity),
+      cartApi.updateQuantity(itemId, quantity, customerId),
 
     onMutate: async ({ itemId, quantity }) => {
       await queryClient.cancelQueries({ queryKey: cartKey })
@@ -83,7 +83,7 @@ export const useRemoveCartItem = () => {
   const cartKey = queryKeys.cart(customerId ?? '')
 
   return useMutation({
-    mutationFn: (itemId: string) => cartApi.removeItem(itemId),
+    mutationFn: (itemId: string) => cartApi.removeItem(itemId, customerId),
 
     onMutate: async (itemId) => {
       await queryClient.cancelQueries({ queryKey: cartKey })

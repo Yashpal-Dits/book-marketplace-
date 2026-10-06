@@ -314,7 +314,7 @@ export const CatalogManagementPage = () => {
         </div>
       ) : isError ? (
         <div className="rounded-3xl border border-stone-200 bg-white p-10 shadow-sm">
-          <EmptyState title="Could not load books" description="Make sure JSON Server is running." />
+          <EmptyState title="Could not load books" description="The marketplace API is unavailable. Please try again." />
         </div>
       ) : !data?.data.length ? (
         <div className="rounded-3xl border border-stone-200 bg-white p-10 shadow-sm">

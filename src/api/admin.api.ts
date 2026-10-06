@@ -6,10 +6,10 @@ import { OrderStatus } from '@/enums/order-status.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
 import type { IBook } from '@/interfaces/book.interface'
 import type { ICustomer } from '@/interfaces/customer.interface'
-import type { IListing } from '@/interfaces/listing.interface'
 import type { IOrder } from '@/interfaces/order.interface'
 import type { PaginatedResult } from '@/interfaces/pagination.interface'
 import type { ISeller } from '@/interfaces/seller.interface'
+import type { SafeUser } from '@/interfaces/user.interface'
 import type {
   AdminBookDetailed,
   AdminBookParams,
@@ -66,6 +66,7 @@ interface BackendCustomer {
   status?: CustomerStatus
   createdAt?: string
   updatedAt?: string
+  ordersCount?: number
 }
 
 interface BackendBook {
@@ -105,6 +106,48 @@ interface BackendOrder {
   status?: OrderStatus
   createdAt?: string
   updatedAt?: string
+}
+
+interface BackendAdminUser {
+  _id?: string
+  id?: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  role?: SafeUser['role']
+  mobileNumber?: string
+  profileImage?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+interface BackendDashboardSummary {
+  totalSellers?: number
+  pendingSellers?: number
+  approvedSellers?: number
+  rejectedSellers?: number
+  totalCustomers?: number
+  totalBooks?: number
+  pendingBooks?: number
+  approvedBooks?: number
+  rejectedBooks?: number
+  totalOrders?: number
+  deliveredOrders?: number
+  cancelledOrders?: number
+  marketplaceRevenue?: number
+  totalListings?: number
+  activeListings?: number
+  outOfStockListings?: number
+  recentSellers?: BackendSeller[]
+  recentBooks?: BackendBook[]
+  recentOrders?: BackendOrder[]
+}
+
+export interface AdminProfilePayload {
+  firstName: string
+  lastName: string
+  mobileNumber?: string
+  profileImage?: string
 }
 
 const getId = (value: IdLike | BackendSeller | BackendCustomer | BackendBook): string => {
@@ -152,7 +195,7 @@ const normalizeSeller = (seller?: BackendSeller): ISeller => {
     city: seller?.city,
     state: seller?.state,
     pincode: seller?.pincode,
-    storeLogo: seller?.storeLogo,
+    storeLogo: seller?.storeLogo ? getAssetUrl(seller.storeLogo) : undefined,
     createdAt: seller?.createdAt || '',
     updatedAt: seller?.updatedAt,
   }
@@ -170,7 +213,7 @@ const normalizeCustomer = (customer?: BackendCustomer): ICustomer => {
     city: customer?.city,
     state: customer?.state,
     pincode: customer?.pincode,
-    profileImage: customer?.profileImage,
+    profileImage: customer?.profileImage ? getAssetUrl(customer.profileImage) : undefined,
     status: (customer?.status as ICustomer['status']) || 'ACTIVE',
     createdAt: customer?.createdAt || '',
     updatedAt: customer?.updatedAt,
@@ -188,6 +231,14 @@ const normalizeBook = (book: BackendBook): IBook => {
     description: book.description || '',
     coverImage: getBookImageUrl(id, book),
     category: getCategoryName(book.category),
+    categoryDetails:
+      book.category && typeof book.category === 'object'
+        ? {
+            id: getId(book.category),
+            name: book.category.name || 'Unnamed Category',
+            isActive: true,
+          }
+        : undefined,
     status: book.status || BookStatus.APPROVED,
     createdBySellerId: getId(book.createdBySellerId) || undefined,
     createdAt: book.createdAt || '',
@@ -200,7 +251,6 @@ const normalizeBook = (book: BackendBook): IBook => {
 }
 
 const normalizeBookWithSeller = (book: BackendBook): AdminBookDetailed => {
-  const id = getId(book)
   const normalized = normalizeBook(book)
 
   // createdBySellerId may be populated with the full seller document.
@@ -232,6 +282,18 @@ const normalizeOrder = (order: BackendOrder): IOrder => {
   }
 }
 
+const normalizeAdminUser = (user: BackendAdminUser): SafeUser => ({
+  id: getId(user),
+  firstName: user.firstName || '',
+  lastName: user.lastName || '',
+  email: user.email || '',
+  role: user.role!,
+  mobileNumber: user.mobileNumber,
+  profileImage: user.profileImage ? getAssetUrl(user.profileImage) : undefined,
+  createdAt: user.createdAt || '',
+  updatedAt: user.updatedAt,
+})
+
 /**
  * The response interceptor unwraps the backend envelope.
  * For paginated endpoints the interceptor turns the body into:
@@ -240,70 +302,58 @@ const normalizeOrder = (order: BackendOrder): IOrder => {
  */
 const extractArray = <T>(payload: unknown): T[] => {
   if (Array.isArray(payload)) return payload as T[]
-  if (payload && typeof payload === 'object' && Array.isArray((payload as any).data)) {
-    return (payload as any).data as T[]
+  if (payload && typeof payload === 'object') {
+    const candidate = payload as { data?: unknown }
+    if (Array.isArray(candidate.data)) return candidate.data as T[]
   }
   return []
 }
 
 const extractMetaTotal = (payload: unknown, fallback: number): number => {
-  if (payload && typeof payload === 'object' && (payload as any).meta?.total != null) {
-    return Number((payload as any).meta.total)
+  if (payload && typeof payload === 'object') {
+    const candidate = payload as { meta?: { total?: unknown } }
+    if (candidate.meta?.total != null) return Number(candidate.meta.total)
   }
   return fallback
 }
 
-const sellerSortMap: Record<AdminSellerSort, { sort: string; order: 'asc' | 'desc' }> = {
-  [AdminSellerSort.NEWEST]: { sort: 'createdAt', order: 'desc' },
-  [AdminSellerSort.BUSINESS_ASC]: { sort: 'businessName', order: 'asc' },
-  [AdminSellerSort.BUSINESS_DESC]: { sort: 'businessName', order: 'desc' },
-  [AdminSellerSort.STATUS_ASC]: { sort: 'status', order: 'asc' },
-}
-
-const bookSortMap: Record<AdminBookSort, { sort: string; order: 'asc' | 'desc' }> = {
-  [AdminBookSort.NEWEST]: { sort: 'createdAt', order: 'desc' },
-  [AdminBookSort.TITLE_ASC]: { sort: 'title', order: 'asc' },
-  [AdminBookSort.TITLE_DESC]: { sort: 'title', order: 'desc' },
-  [AdminBookSort.STATUS_ASC]: { sort: 'status', order: 'asc' },
-}
-
 export const adminApi = {
   async getDashboardSummary(): Promise<AdminDashboardSummary> {
-    const { data } = await axiosInstance.get<AdminDashboardSummary>('/admin/dashboard')
+    const { data } = await axiosInstance.get<BackendDashboardSummary>('/admin/dashboard')
 
-    const normalizeList = <T, R>(raw: unknown, normalize: (item: any) => R): R[] =>
+    const normalizeList = <T, R>(raw: unknown, normalize: (item: T) => R): R[] =>
       extractArray<T>(raw).map(normalize)
 
     const recentSellers = normalizeList<BackendSeller, ISeller>(
-      (data as any).recentSellers,
+      data.recentSellers,
       normalizeSeller,
     )
     const recentBooks = normalizeList<BackendBook, AdminBookDetailed>(
-      (data as any).recentBooks,
+      data.recentBooks,
       normalizeBookWithSeller,
     )
     const recentOrders = normalizeList<BackendOrder, IOrder>(
-      (data as any).recentOrders,
+      data.recentOrders,
       normalizeOrder,
     )
 
     return {
-      totalSellers: (data as any).totalSellers ?? 0,
-      pendingSellers: (data as any).pendingSellers ?? 0,
-      approvedSellers: (data as any).approvedSellers ?? 0,
-      rejectedSellers: (data as any).rejectedSellers ?? 0,
-      totalCustomers: (data as any).totalCustomers ?? 0,
-      totalBooks: (data as any).totalBooks ?? 0,
-      pendingBooks: (data as any).pendingBooks ?? 0,
-      approvedBooks: (data as any).approvedBooks ?? 0,
-      rejectedBooks: (data as any).rejectedBooks ?? 0,
-      totalOrders: (data as any).totalOrders ?? 0,
-      deliveredOrders: (data as any).deliveredOrders ?? 0,
-      cancelledOrders: (data as any).cancelledOrders ?? 0,
-      marketplaceRevenue: (data as any).marketplaceRevenue ?? 0,
-      totalListings: (data as any).totalListings ?? 0,
-      activeListings: (data as any).activeListings ?? 0,
-      outOfStockListings: (data as any).outOfStockListings ?? 0,
+      totalSellers: data.totalSellers ?? 0,
+      pendingSellers: data.pendingSellers ?? 0,
+      approvedSellers: data.approvedSellers ?? 0,
+      rejectedSellers: data.rejectedSellers ?? 0,
+      totalCustomers: data.totalCustomers ?? 0,
+      totalBooks: data.totalBooks ?? 0,
+      pendingBooks: data.pendingBooks ?? 0,
+      approvedBooks: data.approvedBooks ?? 0,
+      rejectedBooks: data.rejectedBooks ?? 0,
+      totalOrders: data.totalOrders ?? 0,
+      deliveredOrders: data.deliveredOrders ?? 0,
+      cancelledOrders: data.cancelledOrders ?? 0,
+      marketplaceRevenue: data.marketplaceRevenue ?? 0,
+      totalListings: data.totalListings ?? 0,
+      activeListings: data.activeListings ?? 0,
+      outOfStockListings: data.outOfStockListings ?? 0,
       recentSellers,
       recentBooks,
       recentOrders,
@@ -317,10 +367,10 @@ export const adminApi = {
     sort = AdminSellerSort.NEWEST,
     status,
   }: AdminSellerParams = {}): Promise<PaginatedResult<ISeller>> {
-    const { sort: _sort, order: _order } = sellerSortMap[sort]
     const params: Record<string, string | number> = { page, limit }
     if (search.trim()) params.search = search.trim()
     if (status) params.status = status
+    params.sort = sort
 
     const { data } = await axiosInstance.get<ISeller[]>('/admin/sellers', { params })
     const rows = extractArray<BackendSeller>(data).map(normalizeSeller)
@@ -344,10 +394,10 @@ export const adminApi = {
     sort = AdminBookSort.NEWEST,
     status,
   }: AdminBookParams = {}): Promise<PaginatedResult<AdminBookDetailed>> {
-    const { sort: _sort, order: _order } = bookSortMap[sort]
     const params: Record<string, string | number> = { page, limit }
     if (search.trim()) params.search = search.trim()
     if (status) params.status = status
+    params.sort = sort
 
     const { data } = await axiosInstance.get<IBook[]>('/admin/books', { params })
     const rows = extractArray<BackendBook>(data).map(normalizeBookWithSeller)
@@ -364,10 +414,10 @@ export const adminApi = {
 
   async updateBookCatalog(bookId: string, payload: UpdateBookCatalogPayload): Promise<IBook> {
     const isbn = payload.isbn.trim()
-    const { data: existing } = await axiosInstance.get<IBook[]>('/admin/books', {
+    const { data: existing } = await axiosInstance.get<BackendBook[]>('/admin/books', {
       params: { isbn },
     })
-    const duplicate = extractArray<IBook>(existing).find((book) => book.id !== bookId)
+    const duplicate = extractArray<BackendBook>(existing).find((book) => getId(book) !== bookId)
     if (duplicate) throw new Error('A book with this ISBN already exists')
 
     const { data } = await axiosInstance.patch<BackendBook>(`/admin/books/${bookId}/catalog`, {
@@ -397,32 +447,31 @@ export const adminApi = {
     if (status) params.status = status
 
     const { data } = await axiosInstance.get<ICustomer[]>('/admin/customers', { params })
-    const rows = extractArray<BackendCustomer>(data).map(normalizeCustomer)
+    const rawRows = extractArray<BackendCustomer>(data)
+    const rows = rawRows.map((customer): AdminCustomerDetailed => ({
+      ...normalizeCustomer(customer),
+      ordersCount: Number(customer.ordersCount || 0),
+    }))
     const total = extractMetaTotal(data, rows.length)
 
-    const { data: ordersRaw } = await axiosInstance.get<IOrder[]>('/orders')
-    const orders = extractArray<BackendOrder>(ordersRaw).map(normalizeOrder)
-    const ordersCountByCustomer = new Map<string, number>()
-    orders.forEach((order) => {
-      ordersCountByCustomer.set(
-        order.customerId,
-        (ordersCountByCustomer.get(order.customerId) ?? 0) + 1,
-      )
-    })
-
-    const data2 = rows.map((customer): AdminCustomerDetailed => ({
-      ...customer,
-      ordersCount: ordersCountByCustomer.get(customer.id) ?? 0,
-    }))
-
-    return { data: data2, total, page, limit }
+    return { data: rows, total, page, limit }
   },
 
   async updateCustomerStatus(customerId: string, status: CustomerStatus): Promise<ICustomer> {
-    const endpoint = status === CustomerStatus.ACTIVE ? 'activate' : 'block'
     const { data } = await axiosInstance.patch<BackendCustomer>(
-      `/admin/customers/${customerId}/${endpoint}`,
+      `/admin/customers/${customerId}/status`,
+      { status },
     )
     return normalizeCustomer(data)
+  },
+
+  async getProfile(): Promise<SafeUser> {
+    const { data } = await axiosInstance.get<BackendAdminUser>('/admin/profile')
+    return normalizeAdminUser(data)
+  },
+
+  async updateProfile(payload: AdminProfilePayload): Promise<SafeUser> {
+    const { data } = await axiosInstance.patch<BackendAdminUser>('/admin/profile', payload)
+    return normalizeAdminUser(data)
   },
 }

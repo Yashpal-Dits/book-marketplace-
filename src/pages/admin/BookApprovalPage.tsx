@@ -79,7 +79,7 @@ export const BookApprovalPage = () => {
           {isLoading ? (
             <Loader />
           ) : isError ? (
-            <EmptyState title="Could not load books" description="Make sure JSON Server is running." />
+            <EmptyState title="Could not load books" description="The marketplace API is unavailable. Please try again." />
           ) : !data?.data.length ? (
             <EmptyState title="No books found" description="Try changing the search or filter." />
           ) : (

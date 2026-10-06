@@ -41,7 +41,7 @@ export const LoginPage = () => {
       if (error instanceof EmailNotVerifiedError) {
         toast.error(error.message)
         try {
-          const res =await authApi.sendOtp(error.email)
+          await authApi.sendOtp(error.email)
           toast.success('Verification code sent to your email.', { duration: 6000 })
         } catch {
           // ignore resend failure; user can resend from the verify screen

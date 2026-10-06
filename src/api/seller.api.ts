@@ -67,26 +67,43 @@ interface BackendOrderItem {
   order?: BackendOrder; customer?: BackendCustomer;
 }
 
+interface BackendSellerDashboard {
+  totalListings: number
+  activeListings: number
+  totalStock: number
+  lowStockCount: number
+  pendingBooks: number
+  totalOrders: number
+  createdOrders: number
+  revenue: number
+  recentOrders?: BackendOrderItem[]
+  lowStockListings?: BackendListing[]
+}
+
 const isObject = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object'
 const getId = (value: IdLike | BackendBook | BackendListing | BackendOrder | BackendOrderItem): string => {
   if (!value) return ''
   if (typeof value === 'string') return value
-  return (value as any).id || (value as any)._id || ''
+  return value.id || value._id || ''
 }
 const getCategoryName = (value: CategoryLike): string | undefined => {
   if (!value) return undefined
   if (typeof value === 'string') return value
   return value.name || value.id || value._id
 }
-const getArrayFromResponse = <T>(response: T[] | BackendPaginated<T> | { data: T[]; meta?: any }): T[] => {
+const getArrayFromResponse = <T>(response: T[] | BackendPaginated<T>): T[] => {
   if (Array.isArray(response)) return response
-  if (response && typeof (response as any).data !== 'undefined') {
-    const inner = (response as any).data
-    if (Array.isArray(inner)) return inner
-    // Handle nested { data: { data: [...] } } from old interceptor
-    if (inner && Array.isArray(inner.data)) return inner.data
+  return Array.isArray(response.data) ? response.data : []
+}
+const getPagination = (response: unknown, page = 1, limit = 8, fallbackTotal = 0) => {
+  const meta = response && typeof response === 'object'
+    ? (response as { meta?: BackendPaginated<unknown>['meta'] }).meta
+    : undefined
+  return {
+    total: Number(meta?.total ?? fallbackTotal),
+    page: Number(meta?.page ?? page),
+    limit: Number(meta?.limit ?? limit),
   }
-  return Array.isArray((response as any).data) ? (response as any).data : []
 }
 const getApiOrigin = () => API_BASE_URL.replace(/\/api\/v\d+\/?$/, '')
 const getAssetUrl = (value?: string): string => {
@@ -216,7 +233,9 @@ export const sellerApi = {
   },
 
   async getRequestedBooks(params: SellerRequestedBooksParams): Promise<PaginatedResult<SellerRequestedBookDetailed>> {
-    const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/seller/books')
+    const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/seller/books', {
+      params: { sellerId: params.sellerId },
+    })
     const books = getArrayFromResponse(data).map(normalizeBook)
     const term = params.search?.trim().toLowerCase() ?? ''
     const filtered = term ? books.filter((book) => [book.title, book.author, book.isbn, book.category, book.status].filter(Boolean).some((value) => String(value).toLowerCase().includes(term))) : books
@@ -224,11 +243,19 @@ export const sellerApi = {
   },
 
   async getListings(params: SellerListParams): Promise<PaginatedResult<SellerListingDetailed>> {
-    const { data } = await axiosInstance.get<BackendListing[] | BackendPaginated<BackendListing>>('/seller/listings')
+    const { data } = await axiosInstance.get<BackendListing[] | BackendPaginated<BackendListing>>('/seller/listings', {
+      params: {
+        sellerId: params.sellerId,
+        page: params.page,
+        limit: params.limit,
+        search: params.search?.trim() || undefined,
+        sort: params.sort,
+        status: params.status || undefined,
+      },
+    })
     const joined = getArrayFromResponse(data).map(normalizeListingDetailed)
-    const term = params.search?.trim().toLowerCase() ?? ''
-    const filtered = term ? joined.filter((row) => [row.book.title, row.book.author, row.book.isbn, row.book.category, row.book.status].filter(Boolean).some((value) => String(value).toLowerCase().includes(term))) : joined
-    return paginate(sortListings(filtered, params.sort), params.page, params.limit)
+    const pagination = getPagination(data, params.page, params.limit, joined.length)
+    return { data: joined, ...pagination }
   },
 
   async createListing(payload: CreateListingPayload): Promise<IListing> {
@@ -237,7 +264,7 @@ export const sellerApi = {
       price: Number(payload.price),
       mrp: Number(payload.mrp),
       stock: Number(payload.stock),
-    })
+    }, { params: { sellerId: payload.sellerId } })
     return normalizeListing(data)
   },
 
@@ -251,7 +278,10 @@ export const sellerApi = {
     if (payload.category?.trim()) formData.append('category', payload.category.trim())
     if (payload.coverImageFile) formData.append('coverImage', payload.coverImageFile)
     else if (payload.coverImage?.trim()) formData.append('coverImage', payload.coverImage.trim())
-    const { data } = await axiosInstance.post<BackendBook>('/seller/books', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+    const { data } = await axiosInstance.post<BackendBook>('/seller/books', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      params: { sellerId: payload.sellerId },
+    })
     return normalizeBook(data)
   },
 
@@ -261,54 +291,47 @@ export const sellerApi = {
       mrp: Number(payload.mrp),
       stock: Number(payload.stock),
       isActive: payload.isActive,
-    })
+    }, { params: { sellerId: payload.sellerId } })
     // Backend now returns populated listing with bookId populated, so normalize detailed then strip
-    const detailed = normalizeListingDetailed(data as any)
+    const detailed = normalizeListingDetailed(data)
     return normalizeListing(detailed)
   },
 
   async getOrders(params: SellerOrdersParams): Promise<PaginatedResult<SellerOrderItemDetailed>> {
-    const { data } = await axiosInstance.get<BackendOrderItem[] | BackendPaginated<BackendOrderItem>>('/seller/orders')
-    const rows = getArrayFromResponse(data).map(normalizeSellerOrderItem)
-    const term = params.search?.trim().toLowerCase() ?? ''
-    const filtered = rows.filter((row) => {
-      const matchesStatus = params.status ? row.status === params.status : true
-      const matchesSearch = term ? [row.bookTitle, row.orderId, row.id, row.customer?.firstName, row.customer?.lastName, row.order.shippingAddress.fullName].filter(Boolean).some((value) => String(value).toLowerCase().includes(term)) : true
-      return matchesStatus && matchesSearch
+    const { data } = await axiosInstance.get<BackendOrderItem[] | BackendPaginated<BackendOrderItem>>('/seller/orders', {
+      params: {
+        sellerId: params.sellerId,
+        page: params.page,
+        limit: params.limit,
+        search: params.search?.trim() || undefined,
+        sort: params.sort,
+        status: params.status || undefined,
+      },
     })
-    return paginate(sortOrders(filtered, params.sort), params.page, params.limit)
+    const rows = getArrayFromResponse(data).map(normalizeSellerOrderItem)
+    const pagination = getPagination(data, params.page, params.limit, rows.length)
+    return { data: rows, ...pagination }
   },
 
   async updateOrderItemStatus(_sellerId: string, orderItemId: string, status: OrderStatus): Promise<IOrderItem> {
-    const { data } = await axiosInstance.patch<BackendOrderItem>(`/seller/orders/${orderItemId}/status`, { status })
+    const { data } = await axiosInstance.patch<BackendOrderItem>(`/seller/orders/${orderItemId}/status`, { status }, {
+      params: { sellerId: _sellerId },
+    })
     return normalizeOrderItem(data)
   },
 
   // OPTIMIZED: Try backend dashboard first, fallback to client aggregation
   async getDashboardSummary(_sellerId: string): Promise<SellerDashboardSummary> {
     try {
-      const { data } = await axiosInstance.get('/seller/dashboard')
-      // Backend returns { success, message, data: { totalListings, activeListings, ... } }
-      const dashboardData = (data as any)?.data || data
+      const { data: dashboardData } = await axiosInstance.get<BackendSellerDashboard>('/seller/dashboard', {
+        params: { sellerId: _sellerId },
+      })
 
       // Normalize if backend already returns correct shape
       if (dashboardData && typeof dashboardData.totalListings === 'number') {
         // Ensure recentOrders and lowStockListings are normalized
-        const normalizedRecentOrders = (dashboardData.recentOrders || []).map((item: any) => {
-          // If already normalized shape from backend, try normalize again safely
-          try {
-            return normalizeSellerOrderItem(item)
-          } catch {
-            return item
-          }
-        })
-        const normalizedLowStock = (dashboardData.lowStockListings || []).map((listing: any) => {
-          try {
-            return normalizeListingDetailed(listing)
-          } catch {
-            return listing
-          }
-        })
+        const normalizedRecentOrders = (dashboardData.recentOrders || []).map(normalizeSellerOrderItem)
+        const normalizedLowStock = (dashboardData.lowStockListings || []).map(normalizeListingDetailed)
         return {
           totalListings: dashboardData.totalListings,
           activeListings: dashboardData.activeListings,

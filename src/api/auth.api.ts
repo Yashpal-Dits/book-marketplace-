@@ -113,7 +113,7 @@ export const authApi = {
         throw new EmailNotVerifiedError(payload.email)
       }
 
-      throw new Error(message)
+      throw new Error(message, { cause: error })
     }
   },
 
@@ -182,6 +182,18 @@ export const authApi = {
     return {
       success: true,
       message: response.data?.message || 'Password reset successful.',
+    }
+  },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    const { data } = await axiosInstance.post<{ success: boolean; message: string }>('/auth/change-password', {
+      currentPassword,
+      newPassword,
+    })
+
+    return {
+      success: true,
+      message: data?.message || 'Password changed successfully.',
     }
   },
 }

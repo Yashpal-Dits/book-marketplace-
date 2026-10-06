@@ -22,7 +22,9 @@ export const useSellerProfile = () => {
   return useQuery({
     queryKey: queryKeys.sellerProfile(sellerId ?? 'me'),
     queryFn: async () => {
-      const { data } = await axiosInstance.get<ISeller>('/seller/profile')
+      const { data } = await axiosInstance.get<ISeller>('/seller/profile', {
+        params: { sellerId },
+      })
       return data
     },
     enabled: Boolean(sellerId),
@@ -44,7 +46,7 @@ export const useUpdateSellerProfile = () => {
         state: payload.state.trim(),
         pincode: payload.pincode.trim(),
         storeLogo: payload.storeLogo?.trim() || '',
-      })
+      }, { params: { sellerId } })
       return data
     },
     onSuccess: (profile) => {
@@ -128,9 +130,6 @@ export const useCreateSellerListing = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.sellerDashboard(sellerId ?? '') })
       queryClient.invalidateQueries({ queryKey: ['books'] })
       queryClient.invalidateQueries({ queryKey: ['listings'] })
-      // Also refetch immediately
-      queryClient.refetchQueries({ queryKey: queryKeys.sellerDashboard(sellerId ?? '') })
-      queryClient.refetchQueries({ queryKey: queryKeys.sellerListings({ sellerId: sellerId ?? '' } as any) })
     },
     onError: (error: Error) => toast.error(error.message),
   })
@@ -168,8 +167,6 @@ export const useUpdateSellerListing = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.sellerDashboard(sellerId ?? '') })
       queryClient.invalidateQueries({ queryKey: ['books'] })
       queryClient.invalidateQueries({ queryKey: ['listings'] })
-      queryClient.refetchQueries({ queryKey: queryKeys.sellerListings({ sellerId: sellerId ?? '' } as any) })
-      queryClient.refetchQueries({ queryKey: queryKeys.sellerDashboard(sellerId ?? '') })
     },
     onError: (error: Error) => toast.error(error.message),
   })
@@ -188,7 +185,6 @@ export const useUpdateSellerOrderStatus = () => {
       queryClient.invalidateQueries({ queryKey: ['seller'] })
       queryClient.invalidateQueries({ queryKey: queryKeys.sellerDashboard(sellerId ?? '') })
       queryClient.invalidateQueries({ queryKey: ['orders'] })
-      queryClient.refetchQueries({ queryKey: queryKeys.sellerOrders({ sellerId: sellerId ?? '' } as any) })
     },
     onError: (error: Error) => toast.error(error.message),
   })

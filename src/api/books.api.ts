@@ -75,14 +75,17 @@ interface BackendListing {
 function getArrayFromResponse<T>(response: unknown): T[] {
   if (Array.isArray(response)) return response as T[]
   if (response && typeof response === 'object') {
-    const obj = response as any
+    const obj = response as { data?: unknown }
     if (Array.isArray(obj.data)) return obj.data as T[]
-    if (obj.data && Array.isArray(obj.data.data)) return obj.data.data as T[]
+    if (obj.data && typeof obj.data === 'object') {
+      const nested = obj.data as { data?: unknown }
+      if (Array.isArray(nested.data)) return nested.data as T[]
+    }
   }
   return []
 }
 
-const getId = (value: any): string => {
+const getId = (value: string | { id?: string; _id?: string } | null | undefined): string => {
   if (!value) return ''
   if (typeof value === 'string') return value
   return value.id || value._id || ''
@@ -132,7 +135,14 @@ const normalizeBook = (book: BackendBook): IBook => {
     description: book.description || '',
     coverImage: getBookImageUrl(id, book),
     category: getCategoryName(book.category),
-    categoryDetails: typeof book.category === 'object' && book.category && 'name' in book.category ? (book.category as any) : undefined,
+    categoryDetails:
+      typeof book.category === 'object' && book.category
+        ? {
+            id: getId(book.category),
+            name: book.category.name || 'Unnamed Category',
+            isActive: true,
+          }
+        : undefined,
     status: book.status || BookStatus.APPROVED,
     createdBySellerId: getId(book.createdBySellerId) || undefined,
     createdAt: book.createdAt || '',
@@ -317,7 +327,7 @@ export const booksApi = {
   },
 
   async getApprovedBooks(): Promise<IBook[]> {
-    const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/books/approved')
+    const { data } = await axiosInstance.get<BackendBook[] | BackendPaginated<BackendBook>>('/books/listed')
     return getArrayFromResponse<BackendBook>(data)
       .map((b) => normalizeBook(b as BackendBook))
       .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())

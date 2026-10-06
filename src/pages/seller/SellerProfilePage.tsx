@@ -22,7 +22,6 @@ import {
 } from 'react-icons/fi'
 import { FaStore } from 'react-icons/fa'
 import { Badge } from '@/components/common/Badge'
-import { Button } from '@/components/common/Button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { FormInput } from '@/components/common/FormInput'
 import { Loader } from '@/components/common/Loader'

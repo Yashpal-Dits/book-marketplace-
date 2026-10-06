@@ -7,7 +7,7 @@ import { newsletterApi } from '@/api/newsletter.api'
 import { newsletterSchema } from '@/schemas/newsletter.schema'
 import { useApprovedBooks } from '@/hooks/useBooks'
 
-/** "Get a 20% discount on your first order" banner with email capture. */
+/** Newsletter signup backed by the marketplace API. */
 export const DiscountBannerSection = () => {
   const { data: books = [] } = useApprovedBooks()
   const covers = books.filter((b) => b.coverImage).slice(0, 4)
@@ -17,7 +17,7 @@ export const DiscountBannerSection = () => {
   const subscribeMutation = useMutation({
     mutationFn: (email: string) => newsletterApi.subscribe(email),
     onSuccess: () => {
-      toast.success('Discount code sent! Check your inbox.')
+      toast.success('You are subscribed to marketplace updates.')
       formik.resetForm()
     },
     onError: (error: Error) => toast.error(error.message),
@@ -66,7 +66,7 @@ export const DiscountBannerSection = () => {
 
         <div className="relative mx-auto max-w-md text-center">
           <h2 className="font-display text-2xl font-extrabold uppercase leading-tight text-[#16243d] sm:text-3xl">
-            Get a <span className="text-[#f0532d]">20% Discount</span> on Your First Order!
+            Get Fresh <span className="text-[#f0532d]">Book Updates</span> in Your Inbox
           </h2>
 
           <form onSubmit={formik.handleSubmit} noValidate className="mx-auto mt-6 max-w-sm">

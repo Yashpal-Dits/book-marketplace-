@@ -16,7 +16,7 @@ export const useCustomerProfile = () => {
 
   return useQuery({
     queryKey: queryKeys.customerProfile(effectiveProfileId ?? 'me'),
-    queryFn: customerApi.getProfile,
+    queryFn: () => customerApi.getProfile(effectiveProfileId),
     enabled:
       (user?.role === Role.CUSTOMER && Boolean(profileId)) ||
       (user?.role === Role.ADMIN && Boolean(impersonatedCustomerId)),
@@ -34,7 +34,7 @@ export const useUpdateCustomerProfile = () => {
 
   return useMutation({
     mutationFn: (payload: UpdateCustomerProfilePayload) =>
-      customerApi.updateProfile(payload),
+      customerApi.updateProfile(payload, effectiveProfileId),
 
     onSuccess: (profile) => {
       toast.success('Profile updated successfully')

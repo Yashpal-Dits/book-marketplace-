@@ -589,7 +589,7 @@ export const ProfilePage = () => {
                         <p className="flex items-center gap-2 text-sm font-semibold text-stone-800">
                           Active Sessions <DemoTag />
                         </p>
-                        <p className="mt-1 text-xs text-stone-500">Current demo session is stored locally through Zustand persist.</p>
+                        <p className="mt-1 text-xs text-stone-500">Your current session is securely validated by the marketplace API.</p>
                       </div>
                       <button
                         type="button"
@@ -615,7 +615,7 @@ export const ProfilePage = () => {
                   <div className="rounded-3xl bg-[#0d2b1f] p-5 text-white shadow-sm">
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">Privacy Note</p>
                     <p className="mt-2 text-sm leading-6 text-white/70">
-                      This demo uses JSON Server and local browser storage. In production, passwords and sessions should be handled by a secure backend.
+                      Password changes are validated by the marketplace API. Signing out removes the current browser session.
                     </p>
                   </div>
                 </aside>

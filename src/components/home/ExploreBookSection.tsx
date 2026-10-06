@@ -443,7 +443,7 @@ export const ExploreBooksSection = () => {
             ) : isError ? (
               <EmptyState
                 title="Could not load catalog"
-                description="Make sure JSON Server is running on port 4000."
+                description="The marketplace API is unavailable. Please try again."
               />
             ) : data && data.data.length === 0 ? (
               <div className="rounded-3xl border border-stone-200 bg-white p-12 text-center shadow-sm">

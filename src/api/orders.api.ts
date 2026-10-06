@@ -29,6 +29,9 @@ interface BackendOrderItem {
   subtotal?: number
   status?: BackendOrderStatus
   createdAt?: string
+  bookTitle?: string
+  sellerName?: string
+  coverImage?: string
   listing?: {
     _id?: string
     id?: string
@@ -94,8 +97,8 @@ const normalizeOrderItem = (item: BackendOrderItem): IOrderItem => {
     listingId: item.listingId || getId(item.listing) || '',
     bookId: getId(book),
     sellerId,
-    bookTitle: book?.title || 'Book',
-    sellerName: '',
+    bookTitle: item.bookTitle || book?.title || 'Book',
+    sellerName: item.sellerName || '',
     priceAtPurchase: item.priceAtPurchase ?? item.listing?.price ?? 0,
     quantity: item.quantity ?? 1,
     subtotal:
@@ -103,7 +106,7 @@ const normalizeOrderItem = (item: BackendOrderItem): IOrderItem => {
       (item.priceAtPurchase ?? item.listing?.price ?? 0) * (item.quantity ?? 1),
     status: (item.status as OrderStatus) || 'PENDING',
     createdAt: item.createdAt || '',
-    coverImage: getAssetUrl(book?.coverImage),
+    coverImage: getAssetUrl(item.coverImage || book?.coverImage),
   }
 }
 
@@ -129,18 +132,25 @@ const normalizeOrder = (order: BackendOrder): IOrderDetailed => {
 }
 
 export const ordersApi = {
-  async getOrders(): Promise<IOrderDetailed[]> {
-    const response = await axiosInstance.get<BackendOrder[]>('/customer/orders')
+  async getOrders(customerId?: string): Promise<IOrderDetailed[]> {
+    const response = await axiosInstance.get<BackendOrder[]>('/customer/orders', {
+      params: { customerId },
+    })
     return (response.data || []).map(normalizeOrder)
   },
 
-  async placeOrder(payload: { shippingAddress: IShippingAddress }): Promise<IOrderDetailed> {
-    const response = await axiosInstance.post<BackendOrder>('/customer/orders', payload)
-    return normalizeOrder(response.data)
+  async placeOrder(payload: { shippingAddress: IShippingAddress }, customerId?: string): Promise<IOrderDetailed> {
+    const response = await axiosInstance.post<BackendOrder | { order: BackendOrder }>('/customer/orders', payload, {
+      params: { customerId },
+    })
+    const order = 'order' in response.data ? response.data.order : response.data
+    return normalizeOrder(order)
   },
 
-  async cancelOrder(orderId: string): Promise<IOrderDetailed> {
-    const response = await axiosInstance.patch<BackendOrder>(`/customer/orders/${orderId}/cancel`)
+  async cancelOrder(orderId: string, customerId?: string): Promise<IOrderDetailed> {
+    const response = await axiosInstance.patch<BackendOrder>(`/customer/orders/${orderId}/cancel`, undefined, {
+      params: { customerId },
+    })
     return normalizeOrder(response.data)
   },
 }

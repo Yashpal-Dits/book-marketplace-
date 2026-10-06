@@ -88,7 +88,7 @@ export const SellerOrdersPage = () => {
           {isLoading ? (
             <Loader />
           ) : isError ? (
-            <EmptyState title="Could not load seller orders" description="Make sure the JSON server is running." />
+            <EmptyState title="Could not load seller orders" description="The marketplace API is unavailable. Please try again." />
           ) : !data?.data.length ? (
             <EmptyState title="No orders found" description="Orders for your seller listings will appear here." />
           ) : (

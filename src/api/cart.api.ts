@@ -191,50 +191,50 @@ const normalizePlainCartItem = (item: BackendCartItem): ICartItem => ({
 })
 
 export const cartApi = {
-  async getCartItems(_customerId: string): Promise<ICartItemDetailed[]> {
-    const { data } = await axiosInstance.get<BackendCartResponse>('/customer/cart')
+  async getCartItems(customerId: string): Promise<ICartItemDetailed[]> {
+    const { data } = await axiosInstance.get<BackendCartResponse>('/customer/cart', {
+      params: { customerId },
+    })
     return (data.items || []).map(normalizeCartItem)
   },
 
-  async addToCart({ listingId, quantity }: AddToCartPayload): Promise<ICartItem> {
-    const { data } = await axiosInstance.post<{ data?: BackendCartResponse | BackendCartItem }>(
+  async addToCart({ customerId, listingId, quantity }: AddToCartPayload): Promise<ICartItem> {
+    const { data } = await axiosInstance.post<BackendCartResponse | BackendCartItem>(
       '/customer/cart/add',
       { listingId, quantity },
+      { params: { customerId } },
     )
 
-    const payload = (data as { data?: BackendCartResponse | BackendCartItem })?.data
-
-    if (payload && 'items' in payload) {
-      const firstItem = payload.items?.[0]
-      return firstItem ? normalizePlainCartItem(firstItem) : { id: '', cartId: '', listingId, quantity, createdAt: '' }
+    if (data && 'items' in data) {
+      const item = data.items?.find((row) => getId(row.listing) === listingId) ?? data.items?.at(-1)
+      return item ? normalizePlainCartItem(item) : { id: '', cartId: '', listingId, quantity, createdAt: '' }
     }
 
-    return normalizePlainCartItem((payload as BackendCartItem) || {})
+    return normalizePlainCartItem((data as BackendCartItem) || {})
   },
 
-  async updateQuantity(itemId: string, quantity: number): Promise<ICartItem> {
+  async updateQuantity(itemId: string, quantity: number, customerId?: string): Promise<ICartItem> {
     if (quantity < 1) throw new Error('Quantity must be at least 1')
 
-    const { data } = await axiosInstance.patch<{ data?: BackendCartResponse | BackendCartItem }>(
+    const { data } = await axiosInstance.patch<BackendCartResponse | BackendCartItem>(
       `/customer/cart/item/${itemId}`,
       { quantity },
+      { params: { customerId } },
     )
 
-    const payload = (data as { data?: BackendCartResponse | BackendCartItem })?.data
-
-    if (payload && 'items' in payload) {
-      const updatedItem = payload.items?.find((item) => getId(item) === itemId)
+    if (data && 'items' in data) {
+      const updatedItem = data.items?.find((item) => getId(item) === itemId)
       return updatedItem ? normalizePlainCartItem(updatedItem) : { id: itemId, cartId: '', listingId: '', quantity, createdAt: '' }
     }
 
-    return normalizePlainCartItem((payload as BackendCartItem) || {})
+    return normalizePlainCartItem((data as BackendCartItem) || {})
   },
 
-  async removeItem(itemId: string): Promise<void> {
-    await axiosInstance.delete(`/customer/cart/item/${itemId}`)
+  async removeItem(itemId: string, customerId?: string): Promise<void> {
+    await axiosInstance.delete(`/customer/cart/item/${itemId}`, { params: { customerId } })
   },
 
-  async clearCart(_customerId: string): Promise<void> {
-    await axiosInstance.delete('/customer/cart/clear')
+  async clearCart(customerId: string): Promise<void> {
+    await axiosInstance.delete('/customer/cart/clear', { params: { customerId } })
   },
 }

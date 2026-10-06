@@ -6,12 +6,35 @@ import { BookStatus } from '@/enums/book-status.enum'
 import { CustomerStatus } from '@/enums/customer-status.enum'
 import { SellerStatus } from '@/enums/seller-status.enum'
 import { queryKeys } from '@/utils/queryKeys'
+import type { AdminProfilePayload } from '@/api/admin.api'
+import { useAuthStore } from '@/store/auth.store'
 
 export const useAdminDashboard = () =>
   useQuery({
     queryKey: queryKeys.adminDashboard,
     queryFn: adminApi.getDashboardSummary,
   })
+
+export const useAdminProfile = () =>
+  useQuery({
+    queryKey: ['admin', 'profile'],
+    queryFn: adminApi.getProfile,
+  })
+
+export const useUpdateAdminProfile = () => {
+  const queryClient = useQueryClient()
+  const updateUser = useAuthStore((state) => state.updateUser)
+
+  return useMutation({
+    mutationFn: (payload: AdminProfilePayload) => adminApi.updateProfile(payload),
+    onSuccess: (profile) => {
+      updateUser(profile)
+      queryClient.setQueryData(['admin', 'profile'], profile)
+      toast.success('Admin profile updated')
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}
 
 export const useAdminSellers = (params: AdminSellerParams) =>
   useQuery({

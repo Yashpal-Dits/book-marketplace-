@@ -37,7 +37,7 @@ export const DealsPage = () => {
           ) : isError ? (
             <EmptyState
               title="Could not load books"
-              description="Make sure the JSON server is running (npm run server) on port 4000."
+              description="The marketplace API is unavailable. Please try again."
             />
           ) : books.length === 0 ? (
             <EmptyState title="No new books" description="Check back soon for more additions." />

@@ -2,12 +2,14 @@ import { axiosInstance } from './axiosInstance'
 import type { ICustomer, UpdateCustomerProfilePayload } from '@/interfaces'
 
 export const customerApi = {
-  async getProfile(): Promise<ICustomer> {
-    const { data } = await axiosInstance.get<ICustomer>('/customer/profile')
+  async getProfile(customerId?: string): Promise<ICustomer> {
+    const { data } = await axiosInstance.get<ICustomer>('/customer/profile', {
+      params: { customerId },
+    })
     return data
   },
 
-  async updateProfile(payload: UpdateCustomerProfilePayload): Promise<ICustomer> {
+  async updateProfile(payload: UpdateCustomerProfilePayload, customerId?: string): Promise<ICustomer> {
     const { data } = await axiosInstance.patch<ICustomer>('/customer/profile', {
       firstName: payload.firstName.trim(),
       lastName: payload.lastName.trim(),
@@ -17,7 +19,7 @@ export const customerApi = {
       state: payload.state.trim(),
       pincode: payload.pincode.trim(),
       profileImage: payload.profileImage?.trim() || '',
-    })
+    }, { params: { customerId } })
 
     return data
   },

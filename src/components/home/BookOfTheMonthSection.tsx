@@ -23,7 +23,7 @@ export const BookOfTheMonthSection = () => {
         {isLoading ? (
           <Loader />
         ) : isError ? (
-          <EmptyState title="Could not load books" description="Make sure the JSON server is running on port 4000." />
+          <EmptyState title="Could not load books" description="The marketplace API is unavailable. Please try again." />
         ) : books.length === 0 ? (
           <EmptyState title="No books yet" description="Approved books will appear here." />
         ) : (

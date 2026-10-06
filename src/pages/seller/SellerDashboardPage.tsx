@@ -30,7 +30,7 @@ export const SellerDashboardPage = () => {
   const { data, isLoading, isError } = useSellerDashboard()
 
   if (isLoading) return <Loader />
-  if (isError || !data) return <EmptyState title="Could not load seller dashboard" description="Make sure the JSON server is running." />
+  if (isError || !data) return <EmptyState title="Could not load seller dashboard" description="The marketplace API is unavailable. Please try again." />
 
   return (
     <div className="space-y-6">
